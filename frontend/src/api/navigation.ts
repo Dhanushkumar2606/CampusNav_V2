@@ -6,6 +6,7 @@
  * prefix, so the backend sees `/navigation/...` and `/auth/...` directly.
  */
 import type {
+  Building,
   Campus,
   GraphPayload,
   Route,
@@ -52,6 +53,12 @@ export async function listCampuses(): Promise<Campus[]> {
 export async function getGraph(slug: string): Promise<GraphPayload> {
   return unwrap<GraphPayload>(
     await fetch(`/api/navigation/campuses/${encodeURIComponent(slug)}/graph`),
+  );
+}
+
+export async function listBuildings(slug: string): Promise<Building[]> {
+  return unwrap<Building[]>(
+    await fetch(`/api/navigation/campuses/${encodeURIComponent(slug)}/buildings`),
   );
 }
 
