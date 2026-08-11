@@ -1,0 +1,53 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# uv
+backend/.venv/
+backend/uv.lock
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env
+frontend/.env.*
+!.env.example
+
+# Local env + secrets
+.env
+.env.local
+*.local
+
+# SQLite dev databases
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Real seed data (csv files in backend/seed_data/ are placeholder + checked in;
+# add real data later by symlinking or a separate git-ignored location)
+backend/seed_data/private/
+backend/seed_data/*.local.csv

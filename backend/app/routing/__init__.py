@@ -1,0 +1,1 @@
+"""Routing package — A* engine lives here."""

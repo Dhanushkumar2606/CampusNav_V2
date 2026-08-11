@@ -1,0 +1,119 @@
+{
+  "campus": "SRM Institute of Science and Technology, Kattankulathur",
+  "data_provenance": {
+    "node_names_and_floors": "SRM official facilities PDF (webstor.srmist.edu.in ktr-campus-building-area-details.pdf)",
+    "node_coordinates": "Google Places, geocoded (real, verified)",
+    "edges": "ESTIMATED — straight-line distances between nodes, not surveyed walking paths. Topology (which buildings connect to which) is a reasonable guess based on relative position, not ground-truth pathway data."
+  },
+  "nodes": [
+    {
+      "id": "main_gate",
+      "name": "Main Gate (College Main Gate Entrance Circle)",
+      "category": "entrance",
+      "lat": 12.8259119,
+      "lng": 80.0422862
+    },
+    {
+      "id": "univ_building",
+      "name": "University Building (Admin Block, G+15)",
+      "category": "academic",
+      "lat": 12.8235587,
+      "lng": 80.0420044
+    },
+    {
+      "id": "central_library",
+      "name": "SRM Central Library",
+      "category": "library",
+      "lat": 12.8236146,
+      "lng": 80.0424808
+    },
+    {
+      "id": "mba_block",
+      "name": "SRM College of Management (MBA Block)",
+      "category": "academic",
+      "lat": 12.8236295,
+      "lng": 80.0441197
+    },
+    {
+      "id": "tech_park",
+      "name": "Tech Park (CSE/IT/ECE/EEE, G+15)",
+      "category": "academic",
+      "lat": 12.8246444,
+      "lng": 80.0452387
+    },
+    {
+      "id": "biotech_block",
+      "name": "Bio Tech Block (G+6)",
+      "category": "academic",
+      "lat": 12.8247144,
+      "lng": 80.0439714
+    },
+    {
+      "id": "auditorium",
+      "name": "Dr. T.P. Ganesan Auditorium",
+      "category": "landmark",
+      "lat": 12.8247646,
+      "lng": 80.0466801
+    },
+    {
+      "id": "hitech_block",
+      "name": "Hi-Tech Block (Mech/Aero/Mechatronics, G+6)",
+      "category": "academic",
+      "lat": 12.8210424,
+      "lng": 80.038931
+    },
+    {
+      "id": "main_block",
+      "name": "Main Block (G+3)",
+      "category": "academic",
+      "lat": 12.820613,
+      "lng": 80.0385637
+    },
+    {
+      "id": "crc_block",
+      "name": "CRC Block (G+8)",
+      "category": "academic",
+      "lat": 12.8203334,
+      "lng": 80.0378472
+    },
+    {
+      "id": "medical_auditorium",
+      "name": "SRM Medical Auditorium",
+      "category": "landmark",
+      "lat": 12.8206165,
+      "lng": 80.04822
+    },
+    {
+      "id": "boys_hostel",
+      "name": "Boys Hostel, SRM KTR Campus",
+      "category": "hostel",
+      "lat": 12.8205094,
+      "lng": 80.0444271
+    },
+    {
+      "id": "potheri_station",
+      "name": "Potheri Railway Station (campus gate side)",
+      "category": "transit",
+      "lat": 12.821558,
+      "lng": 80.0372494
+    }
+  ],
+  "edges": [
+    {"from": "main_gate",         "to": "univ_building",       "distance_m": 263.4, "walk_time_min": 3.3, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "univ_building",     "to": "central_library",     "distance_m":  52.0, "walk_time_min": 0.7, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "univ_building",     "to": "mba_block",           "distance_m": 229.5, "walk_time_min": 2.9, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "central_library",   "to": "mba_block",           "distance_m": 177.7, "walk_time_min": 2.2, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "mba_block",         "to": "biotech_block",       "distance_m": 121.7, "walk_time_min": 1.5, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "mba_block",         "to": "tech_park",           "distance_m": 165.7, "walk_time_min": 2.1, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "biotech_block",     "to": "tech_park",           "distance_m": 137.6, "walk_time_min": 1.7, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "tech_park",         "to": "auditorium",          "distance_m": 156.8, "walk_time_min": 2.0, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "mba_block",         "to": "boys_hostel",         "distance_m": 348.5, "walk_time_min": 4.4, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "boys_hostel",       "to": "medical_auditorium",  "distance_m": 411.4, "walk_time_min": 5.1, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "univ_building",     "to": "hitech_block",        "distance_m": 435.1, "walk_time_min": 5.4, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "hitech_block",      "to": "main_block",          "distance_m":  62.2, "walk_time_min": 0.8, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "main_block",        "to": "crc_block",           "distance_m":  83.7, "walk_time_min": 1.0, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "crc_block",         "to": "potheri_station",     "distance_m": 150.8, "walk_time_min": 1.9, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "hitech_block",      "to": "potheri_station",     "distance_m": 191.1, "walk_time_min": 2.4, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"},
+    {"from": "boys_hostel",       "to": "hitech_block",        "distance_m": 598.8, "walk_time_min": 7.5, "estimated": true, "note": "straight-line estimate, not a surveyed footpath"}
+  ]
+}
