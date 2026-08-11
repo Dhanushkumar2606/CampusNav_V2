@@ -8,7 +8,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.routing.astar import HeuristicKind
+from app.routing.astar import HeuristicKind, RouteMode
 from app.services.navigation import RouteStatus
 
 
@@ -59,6 +59,13 @@ class PathEdgeOut(BaseModel):
     accessible: bool
     type: str
     walk_time_min: float | None = None
+    has_stairs: bool = False
+    is_restricted: bool = False
+    is_indoor: bool = False
+    is_outdoor: bool = True
+    surface_type: str | None = None
+    slope: float | None = None
+    accessibility_verified: bool = False
 
 
 # ---------------------------------------------------------------------------
@@ -71,6 +78,9 @@ class RouteRequestIn(BaseModel):
     destination_id: UUID
     require_accessible: bool = False
     heuristic: HeuristicKind = HeuristicKind.HAVERSINE
+    mode: RouteMode = RouteMode.SHORTEST
+    avoid_stairs: bool = False
+    alternatives: int = Field(default=0, ge=0, le=3)
 
 
 class RouteStepOut(BaseModel):
@@ -80,6 +90,7 @@ class RouteStepOut(BaseModel):
     distance_m: float
     estimated: bool
     walk_time_min: float | None = None
+    instruction: str | None = None
 
 
 class RouteOut(BaseModel):
@@ -90,9 +101,11 @@ class RouteOut(BaseModel):
     estimated_walk_time_min: float
     step_count: int
     all_estimated: bool
+    summary: str | None = None
 
 
 class RouteResponse(BaseModel):
     status: RouteStatus
     error: str | None = None
     route: RouteOut | None = None
+    alternatives: list[RouteOut] | None = None

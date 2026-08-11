@@ -62,7 +62,10 @@ export async function listBuildings(slug: string): Promise<Building[]> {
   );
 }
 
-export async function postRoute(slug: string, req: RouteRequest): Promise<RouteResponse> {
+export async function postRoute(
+  slug: string,
+  req: RouteRequest,
+): Promise<RouteResponse> {
   const res = await fetch(`/api/navigation/campuses/${encodeURIComponent(slug)}/route`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

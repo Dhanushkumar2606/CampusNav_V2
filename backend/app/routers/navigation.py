@@ -125,6 +125,13 @@ def campus_graph(
             accessible=bool(e.is_accessible),
             type=str(e.edge_type),
             walk_time_min=float(e.walk_time_min) if e.walk_time_min is not None else None,
+            has_stairs=bool(e.has_stairs),
+            is_restricted=bool(e.is_restricted),
+            is_indoor=bool(e.is_indoor),
+            is_outdoor=bool(e.is_outdoor),
+            surface_type=e.surface_type,
+            slope=float(e.slope) if e.slope is not None else None,
+            accessibility_verified=bool(e.accessibility_verified),
         )
         for e in edges
     ]
@@ -195,12 +202,14 @@ def compute_route(
             destination_id=payload.destination_id,
             require_accessible=payload.require_accessible,
             heuristic=payload.heuristic,
+            mode=payload.mode,
+            avoid_stairs=payload.avoid_stairs,
+            alternatives=payload.alternatives,
         ),
     )
 
-    if result.status == RouteStatus.OK and result.route is not None:
-        r = result.route
-        route_out = RouteOut(
+    def _route_out(r: Route) -> RouteOut:
+        return RouteOut(
             source=r.source,
             destination=r.destination,
             steps=[
@@ -211,6 +220,7 @@ def compute_route(
                     distance_m=s.distance_m,
                     estimated=s.estimated,
                     walk_time_min=s.walk_time_min,
+                    instruction=s.instruction,
                 )
                 for s in r.steps
             ],
@@ -218,8 +228,16 @@ def compute_route(
             estimated_walk_time_min=r.estimated_walk_time_min,
             step_count=r.step_count,
             all_estimated=r.all_estimated,
+            summary=r.summary,
         )
-        return RouteResponse(status=result.status, route=route_out)
+
+    if result.status == RouteStatus.OK and result.route is not None:
+        alternatives = [ _route_out(r) for r in (result.alternatives or []) ]
+        return RouteResponse(
+            status=result.status,
+            route=_route_out(result.route),
+            alternatives=alternatives or None,
+        )
 
     # Map status → HTTP code for the standard cases; everything else is 422.
     if result.status in (RouteStatus.UNKNOWN_NODE, RouteStatus.SOURCE_EQUALS_DEST):

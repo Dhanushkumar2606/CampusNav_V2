@@ -1,7 +1,9 @@
 /**
- * Top-of-panel banner that surfaces the "estimated edges" caveat from
- * the campus's data_provenance. Important per memory: SRM KTR's topology
- * is a reasonable guess; route styling reflects this with dashed lines.
+ * Top-of-panel banner that surfaces the two data caveats from the
+ * campus's data_provenance:
+ *   1. Edge distances/topology are estimates, not surveyed footpaths.
+ *   2. Accessibility flags are NOT verified — nothing is claimed to be
+ *      wheelchair-safe without surveyed data.
  */
 import { TriangleAlert } from "lucide-react";
 
@@ -9,13 +11,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function EstimatedBanner() {
   return (
-    <Alert className="border-brand-purple/40 bg-brand-purple/10 text-brand-text">
-      <TriangleAlert className="size-4 text-brand-purple" />
-      <AlertTitle className="text-brand-text">Estimated edges</AlertTitle>
+    <Alert className="border-brand-amber/40 bg-brand-amber/10 text-brand-text">
+      <TriangleAlert className="size-4 text-brand-amber" />
+      <AlertTitle className="text-brand-text">Unverified campus data</AlertTitle>
       <AlertDescription className="text-brand-subtle">
-        Edge distances and topology for this campus are best-effort
-        estimates, not surveyed footpaths. Routes will look reasonable
-        but may not match real walking paths.
+        Distances are estimates, not surveyed footpaths. Accessibility
+        flags are <strong className="text-brand-text">not verified</strong> —
+        routes marked accessible aren't confirmed wheelchair-safe.
       </AlertDescription>
     </Alert>
   );

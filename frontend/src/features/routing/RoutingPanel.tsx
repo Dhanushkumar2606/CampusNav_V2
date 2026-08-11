@@ -3,8 +3,9 @@
  *   - campuses list (fetched once)
  *   - selected campus + its graph (re-fetched on campus change)
  *   - source / destination selection
- *   - accessibility toggle
+ *   - route preferences (mode, avoid stairs, accessibility)
  *   - the route request (calls /navigation/campuses/{slug}/route)
+ *   - alternatives from the response (user picks which to view)
  *
  * State is split: this component owns campus + selection state (so it can
  * re-render its own cards without disturbing the parent), but the
@@ -20,18 +21,26 @@ import {
   postRoute,
   routeErrorMessage,
 } from "@/api/navigation";
-import type { Campus, GraphPayload, Route } from "@/lib/navigation-types";
+import type {
+  Campus,
+  GraphPayload,
+  Route,
+  RouteMode,
+} from "@/lib/navigation-types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { prettyLabel } from "@/lib/brand";
+import { formatDistance, formatMinutes } from "@/lib/format";
 
-import { AccessibilityToggle } from "./AccessibilityToggle";
 import { CampusPicker } from "./CampusPicker";
 import { EstimatedBanner } from "./EstimatedBanner";
 import { LocationPicker } from "./LocationPicker";
+import { NavigationSteps } from "./NavigationSteps";
+import { RoutePreferences } from "./RoutePreferences";
 import { RouteSummary } from "./RouteSummary";
 
 export type RouteStatus = "idle" | "loading" | "ok" | "error";
@@ -72,6 +81,12 @@ export function RoutingPanel({
   const [routeError, setRouteError] = useState<string | null>(null);
   const [campusesError, setCampusesError] = useState<string | null>(null);
   const [graphError, setGraphError] = useState<string | null>(null);
+
+  // Route preferences.
+  const [mode, setMode] = useState<RouteMode>("shortest");
+  const [avoidStairs, setAvoidStairs] = useState(false);
+  const [alternatives, setAlternatives] = useState<Route[]>([]);
+  const [activeAltIndex, setActiveAltIndex] = useState(-1);
 
   // ---- load campuses on mount ------------------------------------------
   useEffect(() => {
@@ -124,15 +139,21 @@ export function RoutingPanel({
     if (!graph || !sourceId || !destinationId) return;
     setRouteStatus("loading");
     setRouteError(null);
+    setAlternatives([]);
+    setActiveAltIndex(-1);
     try {
       const res = await postRoute(graph.campus.slug, {
         source_id: sourceId,
         destination_id: destinationId,
         require_accessible: requireAccessible,
         heuristic: "haversine",
+        mode,
+        avoid_stairs: avoidStairs,
+        alternatives: 3,
       });
       if (res.status === "ok" && res.route) {
         onRouteChange(res.route);
+        setAlternatives(res.alternatives ?? []);
         setRouteStatus("ok");
       } else {
         onRouteChange(null);
@@ -144,7 +165,13 @@ export function RoutingPanel({
       setRouteError(err instanceof Error ? err.message : "Could not compute route");
       setRouteStatus("error");
     }
-  }, [graph, sourceId, destinationId, requireAccessible, onRouteChange]);
+  }, [graph, sourceId, destinationId, requireAccessible, mode, avoidStairs, onRouteChange]);
+
+  const onPickAlternative = (index: number) => {
+    setActiveAltIndex(index);
+    const alt = alternatives[index];
+    if (alt) onRouteChange(alt);
+  };
 
   const canSubmit = !!graph && !!sourceId && !!destinationId && routeStatus !== "loading";
   const sourceNode = useMemo(
@@ -155,6 +182,8 @@ export function RoutingPanel({
     () => graph?.nodes.find((n) => n.id === destinationId) ?? null,
     [graph, destinationId],
   );
+
+  const visibleRoute = activeAltIndex >= 0 ? alternatives[activeAltIndex] : route;
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-y-auto p-4">
@@ -238,9 +267,13 @@ export function RoutingPanel({
 
           <Separator className="bg-brand-muted" />
 
-          <AccessibilityToggle
-            checked={requireAccessible}
-            onChange={onRequireAccessibleChange}
+          <RoutePreferences
+            mode={mode}
+            onModeChange={setMode}
+            avoidStairs={avoidStairs}
+            onAvoidStairsChange={setAvoidStairs}
+            requireAccessible={requireAccessible}
+            onRequireAccessibleChange={onRequireAccessibleChange}
           />
 
           <Button
@@ -268,16 +301,37 @@ export function RoutingPanel({
         </CardContent>
       </Card>
 
-      {/* Route summary (only when there's a route) */}
-      {route ? (
+      {/* Route result */}
+      {route && visibleRoute ? (
         <Card className="border-brand-cyan/40 bg-brand-navy/70">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm uppercase tracking-wider text-brand-cyan">
               <RouteIcon className="size-4" /> Route
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <RouteSummary route={route} />
+          <CardContent className="space-y-4">
+            {/* Alternatives picker */}
+            {alternatives.length > 0 ? (
+              <Tabs
+                value={String(activeAltIndex >= 0 ? activeAltIndex + 1 : 0)}
+                onValueChange={(v) => onPickAlternative(Number(v) - 1)}
+              >
+                <TabsList className="w-full">
+                  <TabsTrigger value="0" className="flex-1">
+                    {formatDistance(route.total_distance_m)} ·{" "}
+                    {formatMinutes(route.estimated_walk_time_min)}
+                  </TabsTrigger>
+                  {alternatives.map((a, i) => (
+                    <TabsTrigger key={i} value={String(i + 1)} className="flex-1">
+                      {formatDistance(a.total_distance_m)}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            ) : null}
+
+            <RouteSummary route={visibleRoute} />
+            <NavigationSteps route={visibleRoute} />
           </CardContent>
         </Card>
       ) : null}

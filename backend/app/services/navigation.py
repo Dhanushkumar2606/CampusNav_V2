@@ -30,9 +30,11 @@ from app.routing.astar import (
     NoPath,
     Route,
     RouteError,
+    RouteMode,
     RouteOptions,
     SourceEqualsDest,
     UnknownNode,
+    find_alternatives,
     find_route,
 )
 
@@ -66,6 +68,7 @@ class NavigationResult:
     status: RouteStatus
     route: Route | None = None
     error: str | None = None
+    alternatives: list[Route] | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -123,6 +126,12 @@ def build_campus_graph(session: Session, campus_id: UUID) -> InMemoryGraph:
                 accessible=bool(e.is_accessible),
                 type=str(e.edge_type),
                 walk_time_min=float(e.walk_time_min) if e.walk_time_min is not None else None,
+                has_stairs=bool(e.has_stairs),
+                is_restricted=bool(e.is_restricted),
+                is_indoor=bool(e.is_indoor),
+                is_outdoor=bool(e.is_outdoor),
+                surface_type=e.surface_type,
+                slope=float(e.slope) if e.slope is not None else None,
             )
         )
 
@@ -145,17 +154,36 @@ class RouteRequest:
     destination_id: UUID
     require_accessible: bool = False
     heuristic: HeuristicKind = HeuristicKind.HAVERSINE
+    mode: RouteMode = RouteMode.SHORTEST
+    avoid_stairs: bool = False
+    alternatives: int = 0
 
 
 def request_route(graph: InMemoryGraph, req: RouteRequest) -> NavigationResult:
-    """Run A* and translate errors into a typed result. Never throws."""
+    """Run A* (+ optional alternatives) and translate errors into a typed
+    result. Never throws."""
     options = RouteOptions(
         require_accessible=req.require_accessible,
         heuristic=req.heuristic,
+        mode=req.mode,
+        avoid_stairs=req.avoid_stairs,
     )
     try:
         route = find_route(graph, req.source_id, req.destination_id, options)
-        return NavigationResult(status=RouteStatus.OK, route=route)
+        alternatives: list[Route] = []
+        if req.alternatives > 0:
+            alternatives = find_alternatives(
+                graph,
+                req.source_id,
+                req.destination_id,
+                min(req.alternatives, 3),
+                options,
+            )
+        return NavigationResult(
+            status=RouteStatus.OK,
+            route=route,
+            alternatives=alternatives or None,
+        )
     except UnknownNode as e:
         return NavigationResult(status=RouteStatus.UNKNOWN_NODE, error=str(e))
     except SourceEqualsDest as e:

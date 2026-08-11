@@ -241,6 +241,16 @@ def load_edges(
         is_estimated = bool(e.get("estimated", True))
         walk_time = e.get("walk_time_min")
         edge_type = e.get("edge_type", "walk")
+        # Accessibility fields default to the honest "unverified" baseline:
+        # usable (accessible=True) but never presented as verified.
+        is_accessible = bool(e.get("is_accessible", True))
+        has_stairs = bool(e.get("has_stairs", False))
+        is_restricted = bool(e.get("is_restricted", False))
+        is_indoor = bool(e.get("is_indoor", False))
+        is_outdoor = bool(e.get("is_outdoor", True))
+        surface_type = e.get("surface_type")
+        slope = e.get("slope")
+        accessibility_verified = bool(e.get("accessibility_verified", False))
 
         existing = session.execute(
             select(PathEdge).where(
@@ -253,13 +263,19 @@ def load_edges(
                 from_node_id=a,
                 to_node_id=b,
                 distance_m=float(e["distance_m"]),
-                has_stairs=False,
+                has_stairs=has_stairs,
                 is_covered=False,
                 bidirectional=True,
                 is_estimated=is_estimated,
-                is_accessible=True,
+                is_accessible=is_accessible,
                 edge_type=str(edge_type),
                 walk_time_min=float(walk_time) if walk_time is not None else None,
+                surface_type=surface_type,
+                slope=float(slope) if slope is not None else None,
+                is_indoor=is_indoor,
+                is_outdoor=is_outdoor,
+                is_restricted=is_restricted,
+                accessibility_verified=accessibility_verified,
             )
             session.add(row)
         else:
@@ -267,6 +283,14 @@ def load_edges(
             existing.is_estimated = is_estimated
             existing.edge_type = str(edge_type)
             existing.walk_time_min = float(walk_time) if walk_time is not None else None
+            existing.is_accessible = is_accessible
+            existing.has_stairs = has_stairs
+            existing.is_restricted = is_restricted
+            existing.is_indoor = is_indoor
+            existing.is_outdoor = is_outdoor
+            existing.surface_type = surface_type
+            existing.slope = float(slope) if slope is not None else None
+            existing.accessibility_verified = accessibility_verified
     session.flush()
 
 

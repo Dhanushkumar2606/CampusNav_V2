@@ -53,6 +53,13 @@ export interface PathEdge {
   accessible: boolean;
   type: string;
   walk_time_min: number | null;
+  has_stairs: boolean;
+  is_restricted: boolean;
+  is_indoor: boolean;
+  is_outdoor: boolean;
+  surface_type: string | null;
+  slope: number | null;
+  accessibility_verified: boolean;
 }
 
 export interface GraphPayload {
@@ -70,6 +77,7 @@ export interface RouteStep {
   distance_m: number;
   estimated: boolean;
   walk_time_min: number | null;
+  instruction: string | null;
 }
 
 export interface Route {
@@ -80,6 +88,7 @@ export interface Route {
   estimated_walk_time_min: number;
   step_count: number;
   all_estimated: boolean;
+  summary: string | null;
 }
 
 export type RouteStatus =
@@ -93,13 +102,19 @@ export interface RouteResponse {
   status: RouteStatus;
   error: string | null;
   route: Route | null;
+  alternatives: Route[] | null;
 }
+
+export type RouteMode = "shortest" | "fastest";
 
 export interface RouteRequest {
   source_id: string;
   destination_id: string;
   require_accessible: boolean;
   heuristic: "haversine" | "euclidean" | "zero";
+  mode: RouteMode;
+  avoid_stairs: boolean;
+  alternatives: number;
 }
 
 export interface User {

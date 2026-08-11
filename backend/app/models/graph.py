@@ -87,13 +87,27 @@ class PathEdge(Base):
     is_estimated: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     # True if the edge avoids stairs/steps (route is ramp/elevator compatible).
     # Defaults to true so the existing dataset is usable until surveyed data
-    # is supplied.
+    # is supplied. Pair with `accessibility_verified` to know whether the
+    # flag came from real data.
     is_accessible: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    # Honesty flag: TRUE only when accessibility fields came from a survey /
+    # verified source. The current seeded dataset is NOT verified.
+    accessibility_verified: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
     # Future-proofing: walk / stairs / ramp / transit / etc.
     edge_type: Mapped[str] = mapped_column(String(16), nullable=False, default="walk")
     # Optional: walk time in minutes, populated when the source dataset
     # supplies it (the SRM KTR JSON does).
     walk_time_min: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # Accessibility / surface model (spec §9). All nullable or defaulted so
+    # un-surveyed data stays honest.
+    surface_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    slope: Mapped[float | None] = mapped_column(Float, nullable=True)  # percent rise
+    path_type: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    is_indoor: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_outdoor: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    is_restricted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     from_node: Mapped[PathNode] = relationship(
         "PathNode", foreign_keys=[from_node_id], back_populates="edges_from"
