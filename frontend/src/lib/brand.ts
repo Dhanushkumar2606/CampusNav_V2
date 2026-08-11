@@ -7,14 +7,17 @@
  * When the palette is swapped, update both this file and the Tailwind config.
  */
 export const brand = {
-  navy: "#0A0E27",
-  deep: "#060920",
-  green: "#39FF14",
-  cyan: "#00E5FF",
-  purple: "#B026FF",
-  muted: "#1A1F3A",
-  text: "#E6EAF2",
-  subtle: "#8A92B2",
+  deep: "#070B16",
+  navy: "#0C1226",
+  surface: "#131B33",
+  muted: "#1C2542",
+  text: "#E7EDF8",
+  subtle: "#94A3C7",
+  green: "#10B981",
+  cyan: "#2DD4BF",
+  purple: "#818CF8",
+  amber: "#F59E0B",
+  danger: "#F87171",
 } as const;
 
 /** Pretty-print a campus node label. e.g. "main_block" -> "Main Block". */

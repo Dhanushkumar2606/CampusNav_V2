@@ -35,6 +35,9 @@ frontend/.vite/
 frontend/.env
 frontend/.env.*
 !.env.example
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
 
 # Local env + secrets
 .env

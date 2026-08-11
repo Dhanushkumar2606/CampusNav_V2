@@ -5,20 +5,20 @@
 @layer base {
   :root {
     /* Dark theme tokens — wired to brand.* tokens so swapping BRANDING.md
-       propagates through shadcn components. */
-    --background: 230 60% 9%;          /* brand.deep */
-    --foreground: 225 25% 93%;         /* brand.text  */
-    --primary: 128 100% 54%;           /* brand.green */
-    --primary-foreground: 230 60% 9%;
-    --secondary: 230 35% 14%;          /* brand.muted */
-    --secondary-foreground: 225 25% 93%;
-    --muted: 230 35% 14%;
-    --muted-foreground: 226 18% 62%;   /* brand.subtle */
-    --accent: 186 100% 50%;            /* brand.cyan  */
-    --accent-foreground: 230 60% 9%;
-    --border: 230 30% 22%;
-    --input: 230 30% 22%;
-    --ring: 128 100% 54%;              /* brand.green */
+       propagates through shadcn components. Premium dark-navy + emerald. */
+    --background: 225 55% 6%;         /* brand.deep  */
+    --foreground: 220 55% 94%;        /* brand.text  */
+    --primary: 160 84% 39%;           /* brand.green (emerald) */
+    --primary-foreground: 225 55% 6%;
+    --secondary: 225 42% 15%;         /* brand.surface */
+    --secondary-foreground: 220 55% 94%;
+    --muted: 225 42% 15%;
+    --muted-foreground: 226 30% 68%;  /* brand.subtle */
+    --accent: 172 66% 50%;            /* brand.cyan (teal) */
+    --accent-foreground: 225 55% 6%;
+    --border: 224 40% 22%;
+    --input: 224 40% 22%;
+    --ring: 160 84% 39%;
     --radius: 0.75rem;
   }
 
@@ -26,21 +26,62 @@
     @apply border-border;
   }
 
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
   body {
-    @apply bg-brand-deep text-brand-text;
+    @apply bg-brand-deep text-brand-text antialiased;
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
       "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   }
+
+  ::selection {
+    background: rgba(16, 185, 129, 0.3);
+  }
+
+  /* Accessible focus rings everywhere. */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring) / 0.7);
+    outline-offset: 2px;
+  }
+
+  /* Slim scrollbars that match the theme. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
 }
 
-/* Subtle neon gradient stripe used on the landing page */
+/* Premium brand gradient — soft emerald → teal → indigo wash. */
 .brand-gradient {
   background-image: linear-gradient(
     120deg,
-    rgba(57, 255, 20, 0.18) 0%,
-    rgba(0, 229, 255, 0.18) 50%,
-    rgba(176, 38, 255, 0.18) 100%
+    rgba(16, 185, 129, 0.16) 0%,
+    rgba(45, 212, 191, 0.14) 45%,
+    rgba(129, 140, 248, 0.12) 100%
   );
+}
+
+/* Skeleton shimmer base (used by Skeleton + card skeletons). */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted) / 0.6) 25%,
+    hsl(var(--muted) / 1) 50%,
+    hsl(var(--muted) / 0.6) 75%
+  );
+  background-size: 800px 100%;
 }
 
 /* MapLibre overrides — match the brand dark theme. */
@@ -50,7 +91,7 @@
   border: 1px solid hsl(var(--border));
   border-radius: var(--radius);
   font-size: 12px;
-  padding: 6px 10px;
+  padding: 8px 12px;
 }
 .maplibregl-popup-tip {
   border-top-color: hsl(var(--background)) !important;
@@ -66,6 +107,7 @@
 .maplibregl-ctrl-group {
   background: hsl(var(--background)) !important;
   border: 1px solid hsl(var(--border)) !important;
+  box-shadow: 0 8px 24px -6px rgba(3, 6, 16, 0.7) !important;
 }
 .maplibregl-ctrl button {
   background-color: transparent !important;
@@ -74,4 +116,16 @@
   background: hsl(var(--background) / 0.7) !important;
   color: hsl(var(--foreground)) !important;
   border-color: hsl(var(--border)) !important;
+}
+
+/* Respect reduced-motion preferences for CSS animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
