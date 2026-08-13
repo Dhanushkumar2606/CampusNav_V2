@@ -14,6 +14,7 @@ import { MapPin } from "lucide-react";
 import { listBuildings } from "@/api/navigation";
 import type { Building, GraphPayload, Route } from "@/lib/navigation-types";
 import { MapCanvas } from "@/features/map/MapCanvas";
+import { MapErrorBoundary } from "@/components/ui/map-error-boundary";
 import { useGraphSources } from "@/features/map/useGraphSources";
 import { useNodeMarkers } from "@/features/map/useNodeMarkers";
 import { useRouteLayer } from "@/features/map/useRouteLayer";
@@ -108,7 +109,8 @@ export function MapView({ graph, onGraphChange }: Props) {
       </aside>
 
       <section className="relative min-h-0">
-        <MapCanvas>
+        <MapErrorBoundary>
+          <MapCanvas>
           {showHint ? (
             <div className="pointer-events-none absolute right-3 top-3 z-10 hidden max-w-xs rounded-md border border-brand-muted/60 bg-brand-navy/80 px-3 py-2 text-xs text-brand-subtle backdrop-blur md:block">
               <div className="mb-1 flex items-center gap-2 font-medium text-brand-text">
@@ -157,7 +159,8 @@ export function MapView({ graph, onGraphChange }: Props) {
               />
             ) : null}
           </BottomSheet>
-        </MapCanvas>
+          </MapCanvas>
+        </MapErrorBoundary>
       </section>
     </div>
   );

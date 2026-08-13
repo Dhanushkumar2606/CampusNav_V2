@@ -21,9 +21,9 @@ export function Landing() {
 
       <div className="relative mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-16">
         <header className="flex items-center gap-3">
-          <div className="size-2.5 rounded-full bg-brand-green shadow-[0_0_12px_2px_rgba(57,255,20,0.6)]" />
+          <div className="size-2.5 rounded-full bg-brand-green shadow-[0_0_12px_2px_rgba(16,185,129,0.6)]" />
           <span className="text-sm uppercase tracking-[0.2em] text-brand-subtle">
-            CampusNav · Phase 2
+            CampusNav · v1.0.0-premium
           </span>
         </header>
 
@@ -36,9 +36,10 @@ export function Landing() {
           </h1>
 
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-brand-subtle">
-            CampusNav V2 is an intent-based campus navigator. Pick your
-            starting point and destination, and the A* router plans the
-            shortest walking path on the campus graph.
+            CampusNav V2 is an intent-based campus navigator. Tell the
+            assistant where you need to go, or pick your starting point and
+            destination — the A* router plans the shortest or fastest walking
+            path on the real campus graph, with honest accessibility.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-3">
@@ -69,9 +70,9 @@ export function Landing() {
 
           <div className="mt-14 grid grid-cols-1 gap-4 md:grid-cols-3">
             {[
-              { label: "Phase 1", value: "Foundation", note: "Schema · Auth · Seed" },
-              { label: "Phase 2", value: "Map + Routing", note: "MapLibre · A*" },
-              { label: "Phase 3", value: "AI Agent", note: "Claude tool use" },
+              { label: "Core", value: "Routing", note: "A* · Modes · Alternatives" },
+              { label: "Smart", value: "Assistant", note: "Rule-based intent" },
+              { label: "Premium", value: "Search + Saved", note: "Fuzzy search · Favorites" },
             ].map((card) => (
               <div
                 key={card.label}
@@ -90,7 +91,7 @@ export function Landing() {
         </section>
 
         <footer className="mt-16 flex items-center justify-between border-t border-brand-muted pt-6 text-xs text-brand-subtle">
-          <span>v0.2.0 · Phase 2 — Map + routing</span>
+          <span>v1.0.0-premium · All phases complete</span>
           <span>
             Backend health: <span className="text-brand-green">/health</span>
           </span>
