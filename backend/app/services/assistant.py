@@ -36,11 +36,19 @@ INTENT_PATTERNS = [
 
 
 def classify_intent(text: str) -> tuple[str, dict[str, str]]:
-    """Return (intent_type, extracted_slots)."""
+    """Return (intent_type, extracted_slots).
+
+    Slots mirror the regex capture groups 1-indexed (``"1"``, ``"2"``, …)
+    plus the raw text under ``"raw"`` — the patterns use positional groups.
+    """
     for pattern, intent in INTENT_PATTERNS:
         m = pattern.search(text)
         if m:
-            return intent, {"raw": text, **m.groupdict()}
+            slots: dict[str, str] = {"raw": text}
+            for i, g in enumerate(m.groups()):
+                if g:
+                    slots[str(i + 1)] = g.strip()
+            return intent, slots
     return "unknown", {"raw": text}
 
 

@@ -18,9 +18,11 @@ import { Chip } from "@/components/ui/chip";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/components/ui/toast";
+import { useAuth } from "@/auth/AuthContext";
 import { cn } from "@/lib/utils";
 import { prettyLabel } from "@/lib/brand";
-import { searchCampus } from "@/api/search";
+import { searchCampus, addFavorite } from "@/api/search";
 import type { SearchResult } from "@/lib/navigation-types";
 
 const RECENT_SEARCHES_KEY = "campusnav:recent-searches";
@@ -37,6 +39,8 @@ const CATEGORIES = [
 export function Explore() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { getToken } = useAuth();
+  const { toast } = useToast();
   const query = params.get("q")?.trim() ?? "";
   const initialCategory = (params.get("category") as typeof CATEGORIES[number]["key"]) ?? "all";
 
@@ -164,18 +168,39 @@ export function Explore() {
   }, []);
 
   const handleResultAction = useCallback(
-    (result: SearchResult, action: "navigate" | "view" | "save") => {
+    async (result: SearchResult, action: "navigate" | "view" | "save") => {
       if (action === "navigate") {
         // Navigate to map view with this building as destination
         navigate(`/map?destination=${result.id}&campus=${result.campus_slug}`);
       } else if (action === "view") {
         setShowBuildingDetail(result);
       } else if (action === "save") {
-        // TODO: wire to favorites API (requires auth)
-        console.log("Save to favorites:", result);
+        const token = getToken();
+        if (!token) {
+          toast({
+            title: "Sign in to save places",
+            description: "Favorites are tied to your account.",
+            tone: "info",
+          });
+          return;
+        }
+        try {
+          await addFavorite(token, {
+            target_type: result.type === "building" ? "building" : "node",
+            target_id: result.id,
+            note: null,
+          });
+          toast({ title: "Saved", description: prettyLabel(result.label), tone: "success" });
+        } catch (err) {
+          toast({
+            title: "Could not save",
+            description: err instanceof Error ? err.message : "Please try again.",
+            tone: "error",
+          });
+        }
       }
     },
-    [navigate],
+    [getToken, navigate, toast],
   );
 
   const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {

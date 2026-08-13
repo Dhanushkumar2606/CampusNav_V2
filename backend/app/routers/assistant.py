@@ -2,14 +2,21 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.db import get_db
+from app.deps import get_current_user
+from app.models.user import User
 from app.services.assistant import assistant_query
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
+
+_DB = Annotated[Session, Depends(get_db)]
+_USER = Annotated[User, Depends(get_current_user)]
 
 
 class AssistantQueryIn(BaseModel):
@@ -29,6 +36,7 @@ class AssistantResponseOut(BaseModel):
 def assistant_query_endpoint(
     payload: AssistantQueryIn,
     db: Session = Depends(get_db),
+    _user: User = Depends(get_current_user),
 ) -> AssistantResponseOut:
     """Rule-based AI assistant — resolves intent and returns structured response."""
     response = assistant_query(

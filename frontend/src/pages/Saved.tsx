@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bookmark, MapPin, Heart, Trash2, ArrowRight } from "lucide-react";
+import { Bookmark, Trash2, ArrowRight } from "lucide-react";
 
 import { useAuth } from "@/auth/AuthContext";
 import { StateWrapper } from "@/components/ui/state-wrapper";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { prettyLabel } from "@/lib/brand";
 import { listFavorites, removeFavorite } from "@/api/search";
 import type { FavoriteOut } from "@/lib/navigation-types";

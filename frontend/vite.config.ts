@@ -12,6 +12,25 @@ export default defineConfig({
   define: {
     __PREMIUM__: JSON.stringify(process.env.PREMIUM === "true"),
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Heavy third-party libs get their own cacheable chunks.
+          maplibre: ["maplibre-gl"],
+          motion: ["framer-motion"],
+          icons: ["lucide-react"],
+          radix: [
+            "@radix-ui/react-checkbox",
+            "@radix-ui/react-label",
+            "@radix-ui/react-select",
+            "@radix-ui/react-separator",
+            "@radix-ui/react-slot",
+          ],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {

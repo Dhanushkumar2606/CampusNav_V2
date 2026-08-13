@@ -4,7 +4,7 @@ AI-native campus navigation. Users state an intent
 ("I have class in 15 minutes, I'm at the library, get me the accessible route")
 and the AI agent resolves location, destination, and route type automatically.
 
-**Current phase: Phase 9 — Accessibility + Docs + Final Report (in progress).**
+**Current phase: Phase 9 — Accessibility + Docs + Final Report (complete — v1.0.0-premium).**
 
 ## Status
 
@@ -15,11 +15,11 @@ and the AI agent resolves location, destination, and route type automatically.
 | 2 | Interactive map (MapLibre) | ✅ Done (`4bff333`) |
 | 3 | Routing engine: modes, alternatives, instructions, honest accessibility | ✅ Done (`9747182`) |
 | 4 | Search, building details, explore, favorites, preferences | ✅ Done |
-| 5 | Rule-based AI assistant (backend + frontend stub) | ✅ Done |
+| 5 | Rule-based AI assistant (backend + chat UI) | ✅ Done |
 | 6 | Mobile UX + premium polish (theme toggle, badge, responsive, state wrappers) | ✅ Done |
-| 7 | Performance (code splitting, manualChunks, lazy routes) | ✅ Configured |
+| 7 | Performance (code splitting, manualChunks, lazy routes) | ✅ Done |
 | 8 | Tests + CI pipeline (backend, frontend, Docker) | ✅ Done |
-| 9 | Accessibility audit, docs, final report | 🔄 In progress |
+| 9 | Accessibility audit, docs, final report, release tag | ✅ Done (`v1.0.0-premium`)
 
 ## Completed work
 
@@ -59,7 +59,7 @@ and the AI agent resolves location, destination, and route type automatically.
 ### Phase 5 — Rule-based AI Assistant (completed)
 - Backend `app/services/assistant.py`: rule-based intent engine over real search/routing (no LLM key required).
 - Backend `app/routers/assistant.py`: `POST /assistant/query` endpoint.
-- Frontend `src/api/assistant.ts` wrapper + `Assistant.tsx` page with floating chat panel, suggested prompts, place/route cards.
+- Frontend `src/api/assistant.ts` wrapper + `Assistant.tsx` chat UI: suggested prompts, message bubbles, route/search result cards, typing indicator, `aria-live` conversation log.
 
 ### Phase 6 — Mobile UX + Premium Polish (completed)
 - `ThemeProvider` + `ThemeToggle` with dark/light mode persistence (localStorage + `prefers-color-scheme`).
@@ -69,23 +69,23 @@ and the AI agent resolves location, destination, and route type automatically.
 - Added `Switch` UI primitive for toggle controls.
 - CSS variables for both themes in `src/index.css`; Tailwind `warning` color added.
 
-### Phase 7 — Performance (configured)
-- Vite `build.rollupOptions.output.manualChunks` for maplibre, UI primitives, assistant modules.
-- `React.lazy` + `Suspense` for heavy routes (Explore, Saved, Profile, Assistant).
-- Bundle size within budget after chunking.
+### Phase 7 — Performance (completed)
+- `React.lazy` + `Suspense` code-splits every page (Landing → MapViewHost chunks of 2.7–28 kB).
+- `manualChunks` isolates maplibre (single heavy, cached), framer-motion, lucide icons, and the Radix primitives.
+- Main entry bundle reduced from ~1.3 MB to ~61 kB gzip 21 kB; the only chunk over 500 kB is maplibre itself, cached independently.
 
 ### Phase 8 — Tests + CI Pipeline (completed)
-- Backend: 45 tests passing (health, auth, routing, discovery, A*).
+- Backend: 53 tests passing (health, auth, routing, discovery, assistant, A*).
 - Frontend: TypeScript build passes, ESLint clean.
 - GitHub Actions workflow (`.github/workflows/ci.yml`): backend tests → frontend lint/typecheck/build → Docker build + health check.
 - Docker multi-stage build (Node 20 → Python 3.12) with `PREMIUM` build arg.
 - `docker-compose.yml` for local dev/prod with hot-reload.
 
-### Phase 9 — Accessibility + Docs + Final Report (in progress)
-- [ ] A11y audit (keyboard nav, ARIA, color contrast, reduced motion).
-- [ ] API docs (OpenAPI) + user-facing docs.
-- [ ] Final report summarizing all phases.
-- [ ] Tag `v1.0.0-premium` release.
+### Phase 9 — Accessibility + Docs + Final Report (completed)
+- A11y audit & fixes: skip-to-content link, `main` landmark, ARIA pass (tabs, switch, listbox, dialog, live regions), keyboard nav audit, focus rings, `prefers-reduced-motion` (CSS + framer-motion).
+- Docs: `docs/API.md` (full API reference), `docs/USER_GUIDE.md` (user guide), `docs/FINAL_REPORT.md` (phase-by-phase report). OpenAPI served at `/docs`.
+- Explore search results now save to `/favorites` (was a stub).
+- Tagged `v1.0.0-premium` with a GitHub release.
 
 ## Guardrails (all phases)
 
@@ -113,7 +113,7 @@ CampusNav_V2/
 │   │   └── config.py      # settings + PREMIUM flag
 │   ├── migrations/        # alembic (0004 accessibility, 0005 favorites/preferences)
 │   ├── seed_data/         # CSV seed (SRM Kattankulathur, honest/estimated)
-│   └── tests/             # 45 tests (health, auth, routing, discovery, A*)
+│   └── tests/             # 53 tests (health, auth, routing, discovery, assistant, A*)
 └── frontend/              # Vite + React + TS + Tailwind + MapLibre + framer-motion
     ├── src/
     │   ├── components/ui/       # skeleton, chip, toast, bottom-sheet, switch, ...
@@ -128,6 +128,12 @@ CampusNav_V2/
     ├── tailwind.config.ts
     └── tsconfig.json
 ```
+
+## Docs
+
+- [API reference](docs/API.md) — every endpoint, auth, request/response shapes
+- [User guide](docs/USER_GUIDE.md) — how to use the app
+- [Final report](docs/FINAL_REPORT.md) — phase-by-phase summary
 
 ## Quickstart
 
