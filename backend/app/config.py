@@ -35,6 +35,8 @@ class Settings(BaseSettings):
         alias="CORS_ORIGINS",
     )
 
+    premium: bool = Field(default=False, alias="PREMIUM")
+
     @field_validator("cors_origins")
     @classmethod
     def _strip_cors(cls, v: str) -> str:
@@ -51,6 +53,10 @@ class Settings(BaseSettings):
     @property
     def is_sqlite(self) -> bool:
         return self.database_url.startswith("sqlite")
+
+    @property
+    def is_premium(self) -> bool:
+        return self.premium
 
 
 @lru_cache

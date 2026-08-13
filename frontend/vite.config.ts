@@ -9,6 +9,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    __PREMIUM__: JSON.stringify(process.env.PREMIUM === "true"),
+  },
   server: {
     port: 5173,
     proxy: {

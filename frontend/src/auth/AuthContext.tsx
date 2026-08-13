@@ -17,6 +17,7 @@ export interface AuthValue {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  getToken: () => string | null;
 }
 
 const TOKEN_KEY = "campusnav.token";
@@ -70,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthValue>(
-    () => ({ status, user, token, login, logout }),
+    () => ({ status, user, token, login, logout, getToken: () => token }),
     [status, user, token, login, logout],
   );
 

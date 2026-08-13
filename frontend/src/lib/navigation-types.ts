@@ -131,3 +131,101 @@ export interface TokenResponse {
   token_type: "bearer";
   expires_in: number;
 }
+
+/* ----- Discovery / Search ----- */
+
+export interface SearchResult {
+  id: string;
+  label: string;
+  type: "building" | "node" | "poi";
+  category: string;
+  lat: number;
+  lng: number;
+  campus_id: string;
+  campus_slug: string;
+  campus_name: string;
+  building_id: string | null;
+  subtitle: string | null;
+  score: number;
+}
+
+export interface CategoryOut {
+  key: string;
+  label: string;
+  count: number;
+}
+
+export interface EntranceOut {
+  id: string;
+  label: string;
+  lat: number;
+  lng: number;
+  is_accessible: boolean;
+  has_stairs: boolean;
+}
+
+export interface FloorOut {
+  id: string;
+  level: number;
+  label: string;
+  rooms_count: number;
+}
+
+export interface BuildingDetailOut {
+  id: string;
+  campus_id: string;
+  name: string;
+  code: string;
+  num_floors: number;
+  has_elevator: boolean;
+  is_accessible: boolean;
+  lat: number | null;
+  lng: number | null;
+  entrances: EntranceOut[];
+  floors: FloorOut[];
+  connecting_nodes: Record<string, unknown>[];
+}
+
+/* ----- Favorites ----- */
+
+export interface FavoriteIn {
+  target_type: "building" | "node";
+  target_id: string;
+  note: string | null;
+}
+
+export interface FavoriteOut {
+  id: string;
+  target_type: string;
+  target_id: string;
+  note: string | null;
+  created_at: string;
+  label: string | null;
+  category: string | null;
+}
+
+/* ----- Preferences ----- */
+
+export interface PreferencesIn {
+  units?: "metric" | "imperial";
+  default_mode?: "shortest" | "fastest";
+  default_avoid_stairs?: boolean;
+  default_require_accessible?: boolean;
+  theme?: "dark" | "light";
+}
+
+export interface PreferencesOut {
+  units: "metric" | "imperial";
+  default_mode: "shortest" | "fastest";
+  default_avoid_stairs: boolean;
+  default_require_accessible: boolean;
+  theme: "dark" | "light";
+}
+
+/* ----- Assistant ----- */
+
+export interface AssistantResponseOut {
+  kind: string;
+  text: string;
+  data: Record<string, unknown> | null;
+}

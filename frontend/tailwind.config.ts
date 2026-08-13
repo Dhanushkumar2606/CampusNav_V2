@@ -21,6 +21,7 @@ const config: Config = {
           cyan: "#2DD4BF",
           purple: "#818CF8",
           amber: "#F59E0B",
+          warning: "#F59E0B",
           danger: "#F87171",
         },
         // shadcn CSS variable bridge so the button (and any future

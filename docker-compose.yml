@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: campusnav
+      POSTGRES_PASSWORD: campusnav
+      POSTGRES_DB: campusnav
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campusnav -d campusnav"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://campusnav:campusnav@db:5432/campusnav
+      PREMIUM: "true"
+      APP_ENV: development
+      JWT_SECRET: dev-secret-change-me
+      CORS_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app/frontend
+    command: npm run dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
+    environment:
+      - PREMIUM=true
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

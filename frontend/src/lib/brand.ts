@@ -28,3 +28,6 @@ export function prettyLabel(label: string): string {
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
 }
+
+/** True when the PREMIUM build flag is enabled (via Vite define). */
+export const isPremium = Boolean(__PREMIUM__);

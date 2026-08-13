@@ -22,6 +22,24 @@
     --radius: 0.75rem;
   }
 
+  .light {
+    /* Light theme tokens — inverse of dark for premium feel. */
+    --background: 220 55% 94%;        /* brand.text  */
+    --foreground: 225 55% 6%;         /* brand.deep  */
+    --primary: 160 84% 39%;           /* brand.green (emerald) */
+    --primary-foreground: 220 55% 94%;
+    --secondary: 220 55% 94%;         /* brand.text */
+    --secondary-foreground: 225 55% 6%;
+    --muted: 220 55% 80%;
+    --muted-foreground: 225 42% 30%;
+    --accent: 172 66% 50%;            /* brand.cyan (teal) */
+    --accent-foreground: 220 55% 94%;
+    --border: 224 40% 70%;
+    --input: 224 40% 70%;
+    --ring: 160 84% 39%;
+    --radius: 0.75rem;
+  }
+
   * {
     @apply border-border;
   }
@@ -33,7 +51,7 @@
   }
 
   body {
-    @apply bg-brand-deep text-brand-text antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
       "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   }

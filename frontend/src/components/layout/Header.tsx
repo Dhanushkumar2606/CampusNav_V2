@@ -6,6 +6,8 @@ import { useAuth } from "@/auth/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { PremiumBadge } from "@/components/ui/premium-badge";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 /**
  * Shell header — brand mark, campus search (drives /explore), user chip.
@@ -39,6 +41,7 @@ export function Header() {
       >
         <span className="size-2.5 rounded-full bg-brand-green shadow-glow" aria-hidden />
         <span className="text-sm font-semibold tracking-wide text-brand-text">CampusNav</span>
+        <PremiumBadge />
       </button>
 
       {/* Campus search */}
@@ -57,6 +60,7 @@ export function Header() {
       </form>
 
       <div className="ml-2 flex items-center gap-2">
+        <ThemeToggle />
         {status === "authenticated" && user ? (
           <div className="hidden items-center gap-2 sm:flex">
             <span className="flex size-8 items-center justify-center rounded-full bg-brand-surface text-xs font-semibold text-brand-cyan" aria-hidden>

@@ -1,0 +1,35 @@
+# Frontend
+frontend/node_modules
+frontend/dist
+frontend/.vite
+
+# Backend
+backend/.venv
+backend/__pycache__
+backend/*.pyc
+backend/.pytest_cache
+backend/tests/__pycache__
+backend/tests/*.pyc
+
+# Database
+*.db
+*.sqlite
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
