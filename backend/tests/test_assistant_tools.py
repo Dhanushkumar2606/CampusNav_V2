@@ -148,6 +148,18 @@ def test_campus_info_intent(client: TestClient) -> None:
     assert info["building_count"] >= 1
 
 
+def test_ambiguous_phrase_never_answers_for_wrong_building(client: TestClient) -> None:
+    """No "CSE Block" exists — a weak fuzzy tie must NOT be answered as one."""
+    res = _query(client, "Tell me about the CSE Block")
+    assert res["kind"] in ("search", "info"), res
+    if res["kind"] == "search":
+        labels = [str(r["label"]) for r in res["data"]["results"]]
+        # The real CSE home (Tech Park) outranks every generic "Block".
+        assert any("CSE" in l or "cse" in l for l in labels), labels
+    else:
+        assert "couldn't find" in res["text"].lower()
+
+
 def test_categories_intent(client: TestClient) -> None:
     res = _query(client, "What's on campus?")
     assert res["kind"] == "info", res

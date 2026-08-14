@@ -9,6 +9,7 @@ scale (no external search dependency).
 
 from __future__ import annotations
 
+import math
 import re
 from dataclasses import dataclass
 from uuid import UUID
@@ -271,6 +272,20 @@ def search(
         ).scalar_one_or_none()
 
     boost_targets = {_CATEGORY_BOOSTS[t] for t in _tokens(q) if t in _CATEGORY_BOOSTS}
+    q_tokens = sorted(_tokens(q))
+
+    # Document-frequency weights per query token: a token found in few
+    # candidates (e.g. "cse" in "Tech Park (CSE/IT/ECE/EEE, G+15)") carries
+    # more intent than one found everywhere (e.g. "block"). Used only to
+    # break relevance ties — scores themselves stay untouched.
+    df = {t: 0 for t in q_tokens}
+    if q_tokens:
+        for c in _candidates(session, campus):
+            h_tokens = _tokens(c.haystack)
+            for t in q_tokens:
+                if any(ht.startswith(t) for ht in h_tokens):
+                    df[t] += 1
+    idf = {t: 1.0 / (1.0 + math.log(1.0 + d)) for t, d in df.items()}
 
     scored: list[tuple[float, _Candidate]] = []
     for c in _candidates(session, campus):
@@ -284,12 +299,21 @@ def search(
             score += 40.0 * max(0.0, 1.0 - dist / 1500.0)
         scored.append((score, c))
 
-    # Relevance first; ties break toward richer result types (a building
-    # outranks its entrance node, which outranks rooms/POIs).
+    # Relevance first; ties break toward rarer query-token matches (see
+    # `idf`), then richer result types (a building outranks its entrance
+    # node, which outranks rooms/POIs), then alphabetical label.
     _type_priority = {"building": 0, "poi": 1, "node": 2, "room": 3}
     scored.sort(
         key=lambda pair: (
             -pair[0],
+            -sum(
+                idf[t]
+                for t in q_tokens
+                if any(
+                    ht.startswith(t)
+                    for ht in _tokens(pair[1].haystack)
+                )
+            ),
             _type_priority.get(pair[1].type, 9),
             pair[1].label,
         )

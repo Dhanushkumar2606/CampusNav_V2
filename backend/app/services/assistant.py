@@ -9,8 +9,10 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.models.campus import Building
 from app.services.discovery import find_campus
 from app.services.navigation import nearest_node
 from app.services.tools import (
@@ -66,13 +68,62 @@ class AssistantResponse:
     tool_calls: list[dict[str, Any]] = field(default_factory=list)
 
 
+_STRONG_SCORE = 60.0
+_ARTICLE_RE = re.compile(r"^(the|a|an)\s+", re.IGNORECASE)
+
+
 def _first_result(session: Session, query: str, campus_slug: str | None) -> dict[str, Any] | None:
-    """Best search hit for a destination phrase, or None."""
-    results = run_search_campus(session, {"query": query, "campus": campus_slug or "", "limit": 5})
+    """Best search hit for a destination phrase, or None.
+
+    Leading articles ("the library") are stripped before the search — they
+    are noise tokens, not part of the intended phrase. Only a strong match
+    (relevance >= 60: exact, prefix, or whole-phrase substring) counts as
+    THE destination. Weak fuzzy ties (e.g. "cse block" scoring 35 against
+    every "Block" building) return None so callers fall back to showing the
+    real candidate list instead of guessing.
+    """
+    phrase = _ARTICLE_RE.sub("", query.strip())
+    if not phrase:
+        return None
+    results = run_search_campus(session, {"query": phrase, "campus": campus_slug or "", "limit": 5})
     for r in results.get("results", []):
-        if r["type"] in ("building", "node", "room"):
+        if r["type"] in ("building", "node", "room") and r.get("score", 0) >= _STRONG_SCORE:
             return r
     return None
+
+
+def _building_for_node(session: Session, hit: dict[str, Any]) -> dict[str, Any] | None:
+    """Resolve an entrance-node hit to its building (by code == node label).
+
+    Node hits carry `slug` = the node label; buildings carry the same code.
+    Returns a search-shaped dict or None when no building matches.
+    """
+    code = hit.get("slug")
+    if not code:
+        return None
+    b = session.execute(
+        select(Building).where(func.lower(Building.code) == code.lower())
+    ).scalar_one_or_none()
+    if b is None or b.centroid is None:
+        return None
+    pt = re.search(r"POINT\s*\(\s*(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s*\)", b.centroid, re.IGNORECASE)
+    if pt is None:
+        return None
+    return {
+        "id": str(b.id),
+        "label": b.name,
+        "type": "building",
+        "category": "building",
+        "lat": float(pt.group(2)),
+        "lng": float(pt.group(1)),
+        "campus_id": str(b.campus_id),
+        "campus_slug": b.campus.slug if b.campus else "",
+        "campus_name": b.campus.name if b.campus else "",
+        "building_id": str(b.id),
+        "subtitle": f"{b.num_floors} floor(s)",
+        "score": hit.get("score", 0),
+        "slug": b.code.lower(),
+    }
 
 
 def _snap_user_location(session: Session, campus_slug: str | None, lat: float, lng: float) -> dict[str, Any] | None:
@@ -242,12 +293,41 @@ def assistant_query(
         target = slots.get("1", "").strip()
         hit = _first_result(session, target, campus_slug)
         if hit is None:
+            # No strong match — show the closest real candidates instead of
+            # confidently answering for a wrong building.
+            weak = call(
+                "search_campus",
+                {"query": target, "campus": campus_slug or "", "limit": 5},
+            )
+            near = [
+                r for r in weak.get("results", []) if r["type"] in ("building", "node", "room")
+            ]
+            if near:
+                return AssistantResponse(
+                    kind="search",
+                    text=f"I couldn't find exactly “{target}” on campus — closest matches:",
+                    data={"results": near},
+                    tool_calls=calls,
+                )
             return AssistantResponse(
                 kind="info",
                 text=f"I couldn't find “{target}” on campus.",
                 tool_calls=calls,
             )
-        if hit["type"] == "building":
+        if hit["type"] == "building" or (
+            hit["type"] == "node" and hit.get("category") == "entrance"
+        ):
+            if hit["type"] == "node":
+                resolved = _building_for_node(session, hit)
+                if resolved is not None:
+                    hit = resolved
+            if hit["type"] != "building":
+                return AssistantResponse(
+                    kind="search",
+                    text=f"“{hit['label']}” is a {hit['category'] or 'point'} on campus.",
+                    data={"results": [hit]},
+                    tool_calls=calls,
+                )
             detail = call("get_building_details", {"building_id": hit["id"]})
             if "error" in detail:
                 return AssistantResponse(
