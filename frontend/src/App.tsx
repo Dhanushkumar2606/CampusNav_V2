@@ -11,6 +11,7 @@ import { lazyNamed } from "@/lib/lazy-named";
 // Heavy pages are code-split; each loads on first visit and stays cached.
 const Landing = lazyNamed(() => import("@/pages/Landing"), "Landing");
 const Login = lazyNamed(() => import("@/pages/Login"), "Login");
+const Register = lazyNamed(() => import("@/pages/Register"), "Register");
 const MapViewHost = lazyNamed(() => import("@/pages/MapViewHost"), "MapViewHost");
 const Explore = lazyNamed(() => import("@/pages/Explore"), "Explore");
 const Assistant = lazyNamed(() => import("@/pages/Assistant"), "Assistant");
@@ -26,6 +27,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route
                 element={
                   <RequireAuth>

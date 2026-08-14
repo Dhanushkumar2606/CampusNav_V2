@@ -29,6 +29,8 @@ Architecture: **FastAPI + SQLAlchemy + Alembic + A\*** backend,
 | 7 | Performance: code splitting, manualChunks, lazy routes | ✅ |
 | 8 | Tests + CI pipeline (backend, frontend, Docker) | ✅ |
 | 9 | Accessibility audit, docs, final report, v1.0.0-premium release | ✅ |
+| S1 | Post-release stabilization: CSS-var design tokens, SearchableSelect, focus-trap sheets, StateWrapper upgrades, saved-prefs on map | ✅ |
+| S2 | Campus hub: `featured`/centroid catalog (migration `0007`), `/campuses/near` + `/campuses/{slug}/stats`, Explore hub UI (featured-first cards + stats + near-me), map auto-detect (URL → last-used → GPS → featured), multi-file seed loader | ✅ |
 
 ## 3. Engineering highlights
 
@@ -56,6 +58,22 @@ token fraction), entrance-node deduplication, unique gates/transit searchable.
 Intent patterns (class-with-time, navigate-to, find, where-is, how-to-get-to)
 → structured `{kind, text, data}` responses; frontend renders route cards and
 search results as tappable actions. No API key required.
+
+### Campus hub + auto-detect (S2)
+- Migration `0007` adds `featured` + `center_lat`/`center_lng` catalog
+  metadata to `campuses`; the seed loader derives the centroid from node
+  coordinates when the payload omits it.
+- `GET /navigation/campuses/near` ranks campuses by **honest** haversine
+  distance (`distance_m` is reported, never invented) and
+  `GET /navigation/campuses/{slug}/stats` exposes cheap counts without
+  loading graphs.
+- Explore home renders featured-first campus cards with live stats and a
+  "near me" geo-ranking row (`src/features/explore/CampusHub.tsx`).
+- Map boots via URL param → last-used campus (localStorage) → one-shot GPS
+  auto-detect → featured fallback; the auto-detect cannot override an
+  explicit pin.
+- Seed loader accepts directories of campus JSONs (D4), unlocking multiple
+  real campuses in one dataset.
 
 ### Performance (Phase 7)
 - `manualChunks` splitting maplibre / UI primitives / assistant modules.
@@ -90,10 +108,10 @@ Audit performed across all pages and components:
 
 ## 5. API surface
 
-24 endpoints across 8 routers: health, auth, navigation (campuses/graph/
-buildings/route), discovery (search/categories/building detail), favorites,
-preferences, assistant, admin. OpenAPI docs auto-served at `/docs` and
-`/redoc`. Full reference: [API.md](./API.md).
+26 endpoints across 8 routers: health, auth, navigation (campuses/near/stats/
+graph/buildings/nearest-node/route), discovery (search/categories/building
+detail), favorites, preferences, assistant, admin. OpenAPI docs auto-served
+at `/docs` and `/redoc`. Full reference: [API.md](./API.md).
 
 ## 6. Operational notes
 
@@ -107,15 +125,19 @@ preferences, assistant, admin. OpenAPI docs auto-served at `/docs` and
 ## 7. Known limitations
 
 - Accessibility data unverified (surfaced honestly in UI).
-- Single campus seeded (SRM Kattankulathur); multi-campus is designed in
-  (`campus_slug` everywhere) but unseeded.
+- One campus seeded (SRM Kattankulathur). Multi-campus is designed in —
+  `campus_slug` everywhere, the loader accepts a directory of campus JSONs,
+  and the catalog/geo-ranking API (S2) is live — but a second real dataset
+  hasn't been sourced yet.
 - Assistant is rule-based; an LLM backend can be swapped into
   `app/services/assistant.py` without changing the API contract.
 - 3D / AR / indoor / panorama extension directories are placeholders.
 
 ## 8. Metrics
 
-- Backend: 8 routers, 53 tests passing.
-- Frontend: 5 pages, ~25 UI components, chunked bundle.
+- Backend: 8 routers, **92 tests passing** (health, auth, routing options,
+  discovery, assistant, A\*, edge geometry, GPS snapping, campus catalog).
+- Frontend: 5 pages, ~30 UI components, chunked bundle; `tsc -b` + ESLint + build clean.
 - CI: 3 stages green per push.
-- Seed: 8 buildings, 13 path nodes, 16 path edges — all estimated/unverified, honest.
+- Seed: 8 buildings, 13 path nodes, 16 path edges — 14 surveyed via OpenStreetMap
+  footways, 2 straight-line estimates; accessibility unverified, honest.

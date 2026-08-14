@@ -1,11 +1,13 @@
 """Navigation HTTP router: catalog + route POST.
 
 Endpoints:
-  GET  /navigation/campuses
-  GET  /navigation/campuses/{slug}/graph         — nodes + edges for the campus
-  GET  /navigation/campuses/{slug}/nearest-node  — GPS-fix snapping to the graph
-  GET  /navigation/campuses/{slug}/buildings     — building centroids for the map
-  POST /navigation/campuses/{slug}/route         — A* route request
+  GET  /navigation/campuses                     — catalog list
+  GET  /navigation/campuses/near                — camps ranked by distance from a point
+  GET  /navigation/campuses/{slug}/stats        — cheap catalog counts (Explore hub)
+  GET  /navigation/campuses/{slug}/graph        — nodes + edges for the campus
+  GET  /navigation/campuses/{slug}/nearest-node — GPS-fix snapping to the graph
+  GET  /navigation/campuses/{slug}/buildings    — building centroids for the map
+  POST /navigation/campuses/{slug}/route        — A* route request
 
 The router uses `app.services.navigation` for all DB + A* logic so the A*
 implementation stays decoupled from FastAPI.
@@ -22,7 +24,9 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.schemas.navigation import (
     BuildingOut,
+    CampusNearOut,
     CampusOut,
+    CampusStatsOut,
     NearestNodeOut,
     PathEdgeOut,
     PathNodeOut,
@@ -35,6 +39,8 @@ from app.services.navigation import (
     RouteRequest,
     RouteStatus,
     build_campus_graph,
+    campus_stats as service_campus_stats,
+    campuses_near as service_campuses_near,
     get_campus_by_slug,
     list_campus_edges,
     list_campus_nodes,
@@ -52,6 +58,10 @@ router = APIRouter(prefix="/navigation", tags=["navigation"])
 
 
 _WKT_RE = re.compile(r"POINT\s*\(\s*(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s*\)", re.IGNORECASE)
+_LINESTRING_RE = re.compile(
+    r"LINESTRING\s*\(\s*(.*?)\s*\)", re.IGNORECASE | re.DOTALL
+)
+_COORD_PAIR_RE = re.compile(r"(-?\d+\.?\d*)\s+(-?\d+\.?\d*)")
 
 
 def _parse_lng_lat(wkt: str) -> tuple[float, float]:
@@ -61,12 +71,61 @@ def _parse_lng_lat(wkt: str) -> tuple[float, float]:
     return float(m.group(1)), float(m.group(2))
 
 
+def _parse_linestring(wkt: str | None) -> list[list[float]] | None:
+    """WKT LINESTRING(lng lat, ...) -> [[lng, lat], ...], or None."""
+    if not wkt:
+        return None
+    m = _LINESTRING_RE.search(wkt)
+    if not m:
+        return None
+    pts: list[list[float]] = []
+    for pair in _COORD_PAIR_RE.finditer(m.group(1)):
+        pts.append([float(pair.group(1)), float(pair.group(2))])
+    return pts if len(pts) >= 2 else None
+
+
 # --- endpoints -------------------------------------------------------------
 
 
 @router.get("/campuses", response_model=list[CampusOut])
 def campuses(db: Session = Depends(get_db)) -> list[CampusOut]:
     return [CampusOut.model_validate(c) for c in list_campuses(db)]
+
+
+@router.get("/campuses/near", response_model=list[CampusNearOut])
+def campuses_near(
+    lat: Annotated[float, Query(ge=-90, le=90)],
+    lng: Annotated[float, Query(ge=-180, le=180)],
+    limit: Annotated[int, Query(ge=1, le=25)] = 10,
+    radius_m: Annotated[float, Query(ge=0)] = 200_000,
+    db: Session = Depends(get_db),
+) -> list[CampusNearOut]:
+    """Campuses ranked by distance from a point, nearest first.
+
+    Only campuses with a catalog centroid participate; `distance_m` is the
+    honest haversine distance in meters.
+    """
+    return [
+        CampusNearOut.model_validate({**CampusOut.model_validate(c).model_dump(), "distance_m": d})
+        for c, d in service_campuses_near(db, lat, lng, limit=limit, radius_m=radius_m)
+    ]
+
+
+@router.get("/campuses/{slug}/stats", response_model=CampusStatsOut)
+def campus_stats(
+    slug: Annotated[str, Path(min_length=1, max_length=64)],
+    db: Session = Depends(get_db),
+) -> CampusStatsOut:
+    """Cheap catalog counts for one campus (Explore hub cards)."""
+    campus = get_campus_by_slug(db, slug)
+    if campus is None:
+        raise HTTPException(status_code=404, detail=f"campus not found: {slug}")
+
+    return CampusStatsOut(
+        campus_id=campus.id,
+        campus_slug=campus.slug,
+        **service_campus_stats(db, campus.id),
+    )
 
 
 @router.get(
@@ -101,14 +160,17 @@ def campus_graph(
     buildings_db = db.execute(
         _select(Building).where(Building.campus_id == campus.id)
     ).scalars().all()
-    building_by_code = {b.code: b for b in buildings_db}
+    # Codes are uppercase in the catalog but node labels are lowercase in
+    # the graph — compare case-insensitively so every building pairs with
+    # its entrance node.
+    building_by_code = {b.code.casefold(): b for b in buildings_db}
 
     out_nodes: list[PathNodeOut] = []
     for n in nodes:
         lng, lat = _parse_lng_lat(n.location)
         building_id = None
-        if n.label in building_by_code:
-            building_id = building_by_code[n.label].id
+        if n.label.casefold() in building_by_code:
+            building_id = building_by_code[n.label.casefold()].id
         out_nodes.append(
             PathNodeOut(
                 id=n.id,
@@ -138,6 +200,7 @@ def campus_graph(
             surface_type=e.surface_type,
             slope=float(e.slope) if e.slope is not None else None,
             accessibility_verified=bool(e.accessibility_verified),
+            geometry=_parse_linestring(e.geometry),
         )
         for e in edges
     ]
@@ -259,6 +322,7 @@ def compute_route(
                     estimated=s.estimated,
                     walk_time_min=s.walk_time_min,
                     instruction=s.instruction,
+                    geometry=s.geometry,
                 )
                 for s in r.steps
             ],

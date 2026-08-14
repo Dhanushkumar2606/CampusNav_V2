@@ -9,15 +9,35 @@ import type { GraphPayload } from "@/lib/navigation-types";
 import { brand } from "@/lib/brand";
 import { useMap } from "./MapContext";
 
-function makeMarkerElement(color: string): HTMLDivElement {
+/**
+ * Classic teardrop map pin (rotated -45° square with one square corner
+ * rounded), a dark core with a colored rim, anchored at its tip so the
+ * point sits exactly on the node.
+ */
+function makeMarkerElement(kind: "source" | "destination"): HTMLDivElement {
+  const color = kind === "source" ? brand.cyan : brand.green;
   const el = document.createElement("div");
-  el.style.width = "20px";
-  el.style.height = "20px";
-  el.style.borderRadius = "999px";
-  el.style.backgroundColor = color;
-  el.style.border = `3px solid ${brand.deep}`;
-  el.style.boxShadow = `0 0 12px ${color}, 0 2px 4px rgba(0,0,0,0.6)`;
+  el.style.position = "relative";
+  el.style.width = "22px";
+  el.style.height = "22px";
+  el.style.borderRadius = "50% 50% 50% 0";
+  el.style.transform = "rotate(-45deg)";
+  el.style.background = color;
+  el.style.border = `2px solid ${brand.deep}`;
+  el.style.boxShadow = "0 2px 6px rgba(0,0,0,0.55)";
   el.style.cursor = "pointer";
+
+  const core = document.createElement("div");
+  core.style.position = "absolute";
+  core.style.left = "7px";
+  core.style.top = "7px";
+  core.style.width = "8px";
+  core.style.height = "8px";
+  core.style.borderRadius = "999px";
+  core.style.background = brand.deep;
+  core.style.border = `1px solid ${color}`;
+  core.style.transform = "rotate(45deg)";
+  el.appendChild(core);
   return el;
 }
 
@@ -37,7 +57,10 @@ export function useNodeMarkers(
     if (sourceId) {
       const n = byId.get(sourceId);
       if (n) {
-        const m = new maplibregl.Marker({ element: makeMarkerElement(brand.cyan) })
+        const m = new maplibregl.Marker({
+          element: makeMarkerElement("source"),
+          anchor: "bottom",
+        })
           .setLngLat([n.lng, n.lat])
           .setPopup(new maplibregl.Popup({ offset: 18 }).setText(`Source: ${n.label}`))
           .addTo(map);
@@ -47,7 +70,10 @@ export function useNodeMarkers(
     if (destinationId) {
       const n = byId.get(destinationId);
       if (n) {
-        const m = new maplibregl.Marker({ element: makeMarkerElement(brand.green) })
+        const m = new maplibregl.Marker({
+          element: makeMarkerElement("destination"),
+          anchor: "bottom",
+        })
           .setLngLat([n.lng, n.lat])
           .setPopup(new maplibregl.Popup({ offset: 18 }).setText(`Destination: ${n.label}`))
           .addTo(map);

@@ -1,0 +1,8026 @@
+{
+ "campus": "VIT Chennai",
+ "previously": "Vellore Institute of Technology - Chennai (Main Campus)",
+ "slug": "vit-chennai",
+ "featured": false,
+ "center": {
+  "lat": 12.840641,
+  "lng": 80.1534283
+ },
+ "official_address": "Kelambakkam - Vandalur Rd, Melakottaiyur, Chennai, Tamil Nadu 600127, India",
+ "area_acres": 192,
+ "note": "Coordinates sourced from Google Places (crowd-sourced accuracy, not an official survey). AB4/AB5, specific gate numbers, and men's hostel blocks could not be confirmed with distinct map pins \u2014 see 'missing_or_unconfirmed' at the end.",
+ "data_provenance": {
+  "official_address": "Kelambakkam - Vandalur Rd, Melakottaiyur, Chennai, Tamil Nadu 600127, India",
+  "area_acres": "192",
+  "node_names_and_coordinates": "Google Places (crowd-sourced accuracy, not an official survey)",
+  "edges": "routing graph rebuilt from the OpenStreetMap walkable network (243 edges: junction-to-junction ways with full geometry, plus short entrance connectors). Distances measured along the shapes.",
+  "campus_overview_note": "Coordinates sourced from Google Places (crowd-sourced accuracy, not an official survey). AB4/AB5, specific gate numbers, and men's hostel blocks could not be confirmed with distinct map pins.",
+  "missing_or_unconfirmed": "AB4/AB5; men's hostel blocks; named gates (Gate 1/2/3); Mahatma Gandhi Auditorium (2500 seats); department labs and room-level plans",
+  "recommended_next_step": "Survey corridors with a GPS logger / Google My Maps export to replace the estimated junction network with real walkways",
+  "graph": "junction nodes where walkable ways meet/split (Overpass), split nodes at the nearest network point to each entrance, straight estimated connectors from entrances to the network."
+ },
+ "nodes": [
+  {
+   "id": "campus_main",
+   "name": "VIT Chennai (Main Campus Pin)",
+   "category": "campus_center",
+   "lat": 12.840641,
+   "lng": 80.1534283
+  },
+  {
+   "id": "AB1",
+   "name": "Academic Block 1",
+   "category": "academic",
+   "lat": 12.8437812,
+   "lng": 80.1534121
+  },
+  {
+   "id": "AB2",
+   "name": "Academic Block 2",
+   "category": "academic",
+   "lat": 12.8428395,
+   "lng": 80.1564399
+  },
+  {
+   "id": "AB3",
+   "name": "Academic Block 3",
+   "category": "academic",
+   "lat": 12.8436337,
+   "lng": 80.1545203
+  },
+  {
+   "id": "admin_mba_block",
+   "name": "Administrative / MBA Block",
+   "category": "admin",
+   "lat": 12.840751,
+   "lng": 80.1539342
+  },
+  {
+   "id": "library",
+   "name": "VIT University Library",
+   "category": "library",
+   "lat": 12.8410892,
+   "lng": 80.153996
+  },
+  {
+   "id": "guest_house",
+   "name": "VIT Chennai Guest House",
+   "category": "accommodation",
+   "lat": 12.8408849,
+   "lng": 80.1532193
+  },
+  {
+   "id": "health_centre",
+   "name": "VITC Health Centre",
+   "category": "medical",
+   "lat": 12.8415756,
+   "lng": 80.1565491
+  },
+  {
+   "id": "jj_womens_hostel",
+   "name": "JJ Women's Hostel",
+   "category": "hostel",
+   "lat": 12.8389715,
+   "lng": 80.1572645
+  },
+  {
+   "id": "ab1_amphitheatre",
+   "name": "AB1 Amphitheatre",
+   "category": "recreation",
+   "lat": 12.8436576,
+   "lng": 80.153255
+  },
+  {
+   "id": "cricket_ground",
+   "name": "Cricket Ground",
+   "category": "sports",
+   "lat": 12.8422248,
+   "lng": 80.1548972
+  },
+  {
+   "id": "basketball_court",
+   "name": "Basketball Court",
+   "category": "sports",
+   "lat": 12.8424884,
+   "lng": 80.1532813
+  },
+  {
+   "id": "tennis_court",
+   "name": "Tennis Court",
+   "category": "sports",
+   "lat": 12.8429471,
+   "lng": 80.1530851
+  },
+  {
+   "id": "swimming_pool",
+   "name": "Swimming Pool",
+   "category": "sports",
+   "lat": 12.8409343,
+   "lng": 80.1564918
+  },
+  {
+   "id": "gymnasium",
+   "name": "VIT Gymnasium (also houses Gym Khaana food court + Domino's)",
+   "category": "sports",
+   "lat": 12.8436759,
+   "lng": 80.1525911
+  },
+  {
+   "id": "georgia_food_court",
+   "name": "Georgia Food Court (North Square)",
+   "category": "food",
+   "lat": 12.8441674,
+   "lng": 80.1540748
+  },
+  {
+   "id": "gazebo_food_court",
+   "name": "Gazebo Food Court",
+   "category": "food",
+   "lat": 12.841614,
+   "lng": 80.1545313
+  },
+  {
+   "id": "dominos",
+   "name": "Domino's Pizza VIT Chennai",
+   "category": "food",
+   "lat": 12.8438141,
+   "lng": 80.1526785
+  },
+  {
+   "id": "car_parking",
+   "name": "Car Parking (North side)",
+   "category": "parking",
+   "lat": 12.8450533,
+   "lng": 80.1530607
+  },
+  {
+   "id": "axis_bank_atm",
+   "name": "Axis Bank ATM (opposite campus)",
+   "category": "bank",
+   "lat": 12.840641,
+   "lng": 80.150853
+  },
+  {
+   "id": "junction_1",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.169506,
+   "lat": 12.838258
+  },
+  {
+   "id": "junction_2",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.161046,
+   "lat": 12.842242
+  },
+  {
+   "id": "junction_3",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159435,
+   "lat": 12.842571
+  },
+  {
+   "id": "junction_4",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.158668,
+   "lat": 12.842455
+  },
+  {
+   "id": "junction_5",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.158438,
+   "lat": 12.842031
+  },
+  {
+   "id": "junction_6",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.157885,
+   "lat": 12.841139
+  },
+  {
+   "id": "junction_7",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.157826,
+   "lat": 12.841062
+  },
+  {
+   "id": "junction_8",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.157393,
+   "lat": 12.840508
+  },
+  {
+   "id": "junction_9",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.157249,
+   "lat": 12.840324
+  },
+  {
+   "id": "junction_10",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.156828,
+   "lat": 12.83977
+  },
+  {
+   "id": "junction_11",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15594,
+   "lat": 12.838475
+  },
+  {
+   "id": "junction_12",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.155766,
+   "lat": 12.838221
+  },
+  {
+   "id": "junction_13",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154918,
+   "lat": 12.837328
+  },
+  {
+   "id": "junction_14",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154333,
+   "lat": 12.83642
+  },
+  {
+   "id": "junction_15",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154018,
+   "lat": 12.835963
+  },
+  {
+   "id": "junction_16",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.151278,
+   "lat": 12.833206
+  },
+  {
+   "id": "junction_17",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.129197,
+   "lat": 12.828464
+  },
+  {
+   "id": "junction_18",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152109,
+   "lat": 12.84448
+  },
+  {
+   "id": "junction_19",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152505,
+   "lat": 12.844145
+  },
+  {
+   "id": "junction_20",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152825,
+   "lat": 12.843899
+  },
+  {
+   "id": "junction_21",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152795,
+   "lat": 12.843783
+  },
+  {
+   "id": "junction_22",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152722,
+   "lat": 12.843378
+  },
+  {
+   "id": "junction_23",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153596,
+   "lat": 12.841738
+  },
+  {
+   "id": "junction_24",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153203,
+   "lat": 12.844287
+  },
+  {
+   "id": "junction_25",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.1534,
+   "lat": 12.844436
+  },
+  {
+   "id": "junction_26",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15449,
+   "lat": 12.844578
+  },
+  {
+   "id": "junction_27",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.155583,
+   "lat": 12.844051
+  },
+  {
+   "id": "junction_28",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.155721,
+   "lat": 12.844025
+  },
+  {
+   "id": "junction_29",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154575,
+   "lat": 12.840702
+  },
+  {
+   "id": "junction_30",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154663,
+   "lat": 12.839957
+  },
+  {
+   "id": "junction_31",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154578,
+   "lat": 12.839479
+  },
+  {
+   "id": "junction_32",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154387,
+   "lat": 12.838777
+  },
+  {
+   "id": "junction_33",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154363,
+   "lat": 12.841466
+  },
+  {
+   "id": "junction_34",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154422,
+   "lat": 12.841431
+  },
+  {
+   "id": "junction_35",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154472,
+   "lat": 12.841401
+  },
+  {
+   "id": "junction_36",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.155211,
+   "lat": 12.841363
+  },
+  {
+   "id": "junction_37",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.156085,
+   "lat": 12.841974
+  },
+  {
+   "id": "junction_38",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153796,
+   "lat": 12.840867
+  },
+  {
+   "id": "junction_39",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15395,
+   "lat": 12.840838
+  },
+  {
+   "id": "junction_40",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154219,
+   "lat": 12.840788
+  },
+  {
+   "id": "junction_41",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153741,
+   "lat": 12.841702
+  },
+  {
+   "id": "junction_42",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153554,
+   "lat": 12.842549
+  },
+  {
+   "id": "junction_43",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153412,
+   "lat": 12.843047
+  },
+  {
+   "id": "junction_44",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153339,
+   "lat": 12.843287
+  },
+  {
+   "id": "junction_45",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.150044,
+   "lat": 12.840654
+  },
+  {
+   "id": "junction_46",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.150612,
+   "lat": 12.840643
+  },
+  {
+   "id": "junction_47",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.150851,
+   "lat": 12.840652
+  },
+  {
+   "id": "junction_48",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.151303,
+   "lat": 12.841858
+  },
+  {
+   "id": "junction_49",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.148876,
+   "lat": 12.840161
+  },
+  {
+   "id": "junction_50",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.14982,
+   "lat": 12.840012
+  },
+  {
+   "id": "junction_51",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.150253,
+   "lat": 12.839434
+  },
+  {
+   "id": "junction_52",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.150272,
+   "lat": 12.842941
+  },
+  {
+   "id": "junction_53",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.149784,
+   "lat": 12.841341
+  },
+  {
+   "id": "junction_54",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.149787,
+   "lat": 12.840836
+  },
+  {
+   "id": "junction_55",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.149819,
+   "lat": 12.839193
+  },
+  {
+   "id": "junction_56",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.147447,
+   "lat": 12.84086
+  },
+  {
+   "id": "junction_57",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.150121,
+   "lat": 12.839183
+  },
+  {
+   "id": "junction_58",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.146417,
+   "lat": 12.836788
+  },
+  {
+   "id": "junction_59",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152459,
+   "lat": 12.835937
+  },
+  {
+   "id": "junction_60",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153524,
+   "lat": 12.836802
+  },
+  {
+   "id": "junction_61",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152858,
+   "lat": 12.836985
+  },
+  {
+   "id": "junction_62",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153071,
+   "lat": 12.836254
+  },
+  {
+   "id": "junction_63",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152521,
+   "lat": 12.83666
+  },
+  {
+   "id": "junction_64",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.160162,
+   "lat": 12.842885
+  },
+  {
+   "id": "junction_65",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.161173,
+   "lat": 12.842657
+  },
+  {
+   "id": "junction_66",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153798,
+   "lat": 12.843353
+  },
+  {
+   "id": "junction_67",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153149,
+   "lat": 12.843353
+  },
+  {
+   "id": "junction_68",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.1544,
+   "lat": 12.837167
+  },
+  {
+   "id": "junction_69",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154504,
+   "lat": 12.837926
+  },
+  {
+   "id": "junction_70",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.156228,
+   "lat": 12.842003
+  },
+  {
+   "id": "junction_71",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.156785,
+   "lat": 12.842773
+  },
+  {
+   "id": "junction_72",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.157763,
+   "lat": 12.842265
+  },
+  {
+   "id": "junction_73",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.151578,
+   "lat": 12.836163
+  },
+  {
+   "id": "junction_74",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15793,
+   "lat": 12.837287
+  },
+  {
+   "id": "junction_75",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159885,
+   "lat": 12.83719
+  },
+  {
+   "id": "junction_76",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15986,
+   "lat": 12.836953
+  },
+  {
+   "id": "junction_77",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159256,
+   "lat": 12.837001
+  },
+  {
+   "id": "junction_78",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15844,
+   "lat": 12.837059
+  },
+  {
+   "id": "junction_79",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.157884,
+   "lat": 12.837099
+  },
+  {
+   "id": "junction_80",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.160067,
+   "lat": 12.838546
+  },
+  {
+   "id": "junction_81",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159562,
+   "lat": 12.838628
+  },
+  {
+   "id": "junction_82",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.158684,
+   "lat": 12.838757
+  },
+  {
+   "id": "junction_83",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.158281,
+   "lat": 12.838808
+  },
+  {
+   "id": "junction_84",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.160192,
+   "lat": 12.838955
+  },
+  {
+   "id": "junction_85",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.1597,
+   "lat": 12.839064
+  },
+  {
+   "id": "junction_86",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.158493,
+   "lat": 12.839231
+  },
+  {
+   "id": "junction_87",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.158754,
+   "lat": 12.839909
+  },
+  {
+   "id": "junction_88",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159873,
+   "lat": 12.839663
+  },
+  {
+   "id": "junction_89",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.157767,
+   "lat": 12.836604
+  },
+  {
+   "id": "junction_90",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159235,
+   "lat": 12.836667
+  },
+  {
+   "id": "junction_91",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159908,
+   "lat": 12.837538
+  },
+  {
+   "id": "junction_92",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159937,
+   "lat": 12.837946
+  },
+  {
+   "id": "junction_93",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.160413,
+   "lat": 12.839898
+  },
+  {
+   "id": "junction_94",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.160555,
+   "lat": 12.840304
+  },
+  {
+   "id": "junction_95",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.160724,
+   "lat": 12.840667
+  },
+  {
+   "id": "junction_96",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.160858,
+   "lat": 12.840982
+  },
+  {
+   "id": "junction_97",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.160933,
+   "lat": 12.841363
+  },
+  {
+   "id": "junction_98",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.160957,
+   "lat": 12.841752
+  },
+  {
+   "id": "junction_99",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.157816,
+   "lat": 12.836849
+  },
+  {
+   "id": "junction_100",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.158429,
+   "lat": 12.836815
+  },
+  {
+   "id": "junction_101",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.158939,
+   "lat": 12.836787
+  },
+  {
+   "id": "junction_102",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.158531,
+   "lat": 12.83821
+  },
+  {
+   "id": "junction_103",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159277,
+   "lat": 12.837575
+  },
+  {
+   "id": "junction_104",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153163,
+   "lat": 12.836339
+  },
+  {
+   "id": "junction_105",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154182,
+   "lat": 12.838118
+  },
+  {
+   "id": "junction_106",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15479,
+   "lat": 12.837755
+  },
+  {
+   "id": "junction_107",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15633,
+   "lat": 12.838286
+  },
+  {
+   "id": "junction_108",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.156254,
+   "lat": 12.837975
+  },
+  {
+   "id": "junction_109",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.157608,
+   "lat": 12.839283
+  },
+  {
+   "id": "junction_110",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.157966,
+   "lat": 12.843358
+  },
+  {
+   "id": "junction_111",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15862,
+   "lat": 12.845069
+  },
+  {
+   "id": "junction_112",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.158586,
+   "lat": 12.84543
+  },
+  {
+   "id": "junction_113",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.156605,
+   "lat": 12.843504
+  },
+  {
+   "id": "junction_114",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.156989,
+   "lat": 12.843343
+  },
+  {
+   "id": "junction_115",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152672,
+   "lat": 12.845149
+  },
+  {
+   "id": "junction_116",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152939,
+   "lat": 12.844943
+  },
+  {
+   "id": "junction_117",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15402,
+   "lat": 12.841709
+  },
+  {
+   "id": "junction_118",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154031,
+   "lat": 12.841632
+  },
+  {
+   "id": "junction_119",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154204,
+   "lat": 12.841592
+  },
+  {
+   "id": "junction_120",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.161242,
+   "lat": 12.842983
+  },
+  {
+   "id": "junction_121",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.161549,
+   "lat": 12.843783
+  },
+  {
+   "id": "junction_122",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.164244,
+   "lat": 12.847175
+  },
+  {
+   "id": "junction_123",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159852,
+   "lat": 12.843761
+  },
+  {
+   "id": "junction_124",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159778,
+   "lat": 12.843442
+  },
+  {
+   "id": "junction_125",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159641,
+   "lat": 12.841267
+  },
+  {
+   "id": "junction_126",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159541,
+   "lat": 12.840944
+  },
+  {
+   "id": "junction_127",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159427,
+   "lat": 12.840576
+  },
+  {
+   "id": "junction_128",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159748,
+   "lat": 12.841613
+  },
+  {
+   "id": "junction_129",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.158911,
+   "lat": 12.8407
+  },
+  {
+   "id": "junction_130",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159986,
+   "lat": 12.840018
+  },
+  {
+   "id": "junction_131",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.156461,
+   "lat": 12.84184
+  },
+  {
+   "id": "junction_132",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15915,
+   "lat": 12.841804
+  },
+  {
+   "id": "junction_133",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154852,
+   "lat": 12.839955
+  },
+  {
+   "id": "junction_134",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.155129,
+   "lat": 12.840604
+  },
+  {
+   "id": "junction_135",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153466,
+   "lat": 12.840957
+  },
+  {
+   "id": "junction_136",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153692,
+   "lat": 12.840892
+  },
+  {
+   "id": "junction_137",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153157,
+   "lat": 12.840737
+  },
+  {
+   "id": "junction_138",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153241,
+   "lat": 12.840819
+  },
+  {
+   "id": "junction_139",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153006,
+   "lat": 12.840617
+  },
+  {
+   "id": "junction_140",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153264,
+   "lat": 12.840848
+  },
+  {
+   "id": "junction_141",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153396,
+   "lat": 12.841008
+  },
+  {
+   "id": "junction_142",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153837,
+   "lat": 12.841116
+  },
+  {
+   "id": "junction_143",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153302,
+   "lat": 12.840734
+  },
+  {
+   "id": "junction_144",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153247,
+   "lat": 12.840658
+  },
+  {
+   "id": "junction_145",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152393,
+   "lat": 12.843414
+  },
+  {
+   "id": "junction_146",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15132,
+   "lat": 12.84351
+  },
+  {
+   "id": "junction_147",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152436,
+   "lat": 12.8437
+  },
+  {
+   "id": "junction_148",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153979,
+   "lat": 12.84353
+  },
+  {
+   "id": "junction_149",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154038,
+   "lat": 12.843586
+  },
+  {
+   "id": "junction_150",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154163,
+   "lat": 12.843812
+  },
+  {
+   "id": "junction_151",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153936,
+   "lat": 12.844014
+  },
+  {
+   "id": "junction_152",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15332,
+   "lat": 12.844186
+  },
+  {
+   "id": "junction_153",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.156319,
+   "lat": 12.842897
+  },
+  {
+   "id": "junction_154",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154888,
+   "lat": 12.843225
+  },
+  {
+   "id": "junction_155",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154363,
+   "lat": 12.843382
+  },
+  {
+   "id": "junction_156",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.15469,
+   "lat": 12.843178
+  },
+  {
+   "id": "junction_157",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.154554,
+   "lat": 12.842936
+  },
+  {
+   "id": "junction_158",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.155293,
+   "lat": 12.841089
+  },
+  {
+   "id": "junction_159",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.155254,
+   "lat": 12.841221
+  },
+  {
+   "id": "junction_160",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.156132,
+   "lat": 12.840929
+  },
+  {
+   "id": "junction_161",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.156264,
+   "lat": 12.840987
+  },
+  {
+   "id": "junction_162",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.156408,
+   "lat": 12.841608
+  },
+  {
+   "id": "junction_163",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.155767,
+   "lat": 12.84116
+  },
+  {
+   "id": "junction_164",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.156139,
+   "lat": 12.840988
+  },
+  {
+   "id": "junction_165",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.155862,
+   "lat": 12.841149
+  },
+  {
+   "id": "junction_166",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153104,
+   "lat": 12.84039
+  },
+  {
+   "id": "junction_167",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152933,
+   "lat": 12.840368
+  },
+  {
+   "id": "junction_168",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152877,
+   "lat": 12.840436
+  },
+  {
+   "id": "junction_169",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.153138,
+   "lat": 12.840516
+  },
+  {
+   "id": "junction_170",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152736,
+   "lat": 12.840324
+  },
+  {
+   "id": "junction_171",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.152814,
+   "lat": 12.840236
+  },
+  {
+   "id": "junction_172",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.160332,
+   "lat": 12.844635
+  },
+  {
+   "id": "junction_173",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159997,
+   "lat": 12.844465
+  },
+  {
+   "id": "junction_174",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159228,
+   "lat": 12.843865
+  },
+  {
+   "id": "junction_175",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159685,
+   "lat": 12.844469
+  },
+  {
+   "id": "junction_176",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.159037,
+   "lat": 12.843943
+  },
+  {
+   "id": "junction_177",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.158468,
+   "lat": 12.840796
+  },
+  {
+   "id": "junction_178",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.157527,
+   "lat": 12.839132
+  },
+  {
+   "id": "junction_179",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.157818,
+   "lat": 12.839635
+  },
+  {
+   "id": "junction_180",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.157584,
+   "lat": 12.841207
+  },
+  {
+   "id": "junction_181",
+   "name": "Walkway junction",
+   "category": "junction",
+   "lng": 80.158031,
+   "lat": 12.841639
+  }
+ ],
+ "edges": [
+  {
+   "from": "junction_1",
+   "to": "junction_2",
+   "distance_m": 1250.0,
+   "walk_time_min": 16.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1695058,
+     12.8382581
+    ],
+    [
+     80.1692297,
+     12.838519
+    ],
+    [
+     80.1691743,
+     12.8385661
+    ],
+    [
+     80.1691249,
+     12.8385805
+    ],
+    [
+     80.1690937,
+     12.8385895
+    ],
+    [
+     80.1680897,
+     12.8386109
+    ],
+    [
+     80.167751,
+     12.8386657
+    ],
+    [
+     80.1666782,
+     12.8386976
+    ],
+    [
+     80.1649593,
+     12.8388067
+    ],
+    [
+     80.1638521,
+     12.8388661
+    ],
+    [
+     80.1637938,
+     12.838871
+    ],
+    [
+     80.1637522,
+     12.8388798
+    ],
+    [
+     80.1637187,
+     12.8389112
+    ],
+    [
+     80.163707,
+     12.8389485
+    ],
+    [
+     80.1637274,
+     12.8391399
+    ],
+    [
+     80.1638505,
+     12.8405893
+    ],
+    [
+     80.1638781,
+     12.8409817
+    ],
+    [
+     80.1638675,
+     12.8410336
+    ],
+    [
+     80.1638232,
+     12.8410755
+    ],
+    [
+     80.1637602,
+     12.8410925
+    ],
+    [
+     80.1631969,
+     12.8411938
+    ],
+    [
+     80.1631044,
+     12.8412323
+    ],
+    [
+     80.1630574,
+     12.8412873
+    ],
+    [
+     80.1628992,
+     12.8418691
+    ],
+    [
+     80.1628529,
+     12.8419254
+    ],
+    [
+     80.1628214,
+     12.8419345
+    ],
+    [
+     80.1610457,
+     12.8422419
+    ]
+   ]
+  },
+  {
+   "from": "junction_2",
+   "to": "junction_3",
+   "distance_m": 178.5,
+   "walk_time_min": 2.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1610457,
+     12.8422419
+    ],
+    [
+     80.1601914,
+     12.8423864
+    ],
+    [
+     80.1594353,
+     12.8425707
+    ]
+   ]
+  },
+  {
+   "from": "junction_3",
+   "to": "junction_4",
+   "distance_m": 84.2,
+   "walk_time_min": 1.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1594353,
+     12.8425707
+    ],
+    [
+     80.1586682,
+     12.8424546
+    ]
+   ]
+  },
+  {
+   "from": "junction_4",
+   "to": "junction_5",
+   "distance_m": 53.3,
+   "walk_time_min": 0.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1586682,
+     12.8424546
+    ],
+    [
+     80.1584376,
+     12.8420315
+    ]
+   ]
+  },
+  {
+   "from": "junction_5",
+   "to": "junction_6",
+   "distance_m": 116.1,
+   "walk_time_min": 1.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1584376,
+     12.8420315
+    ],
+    [
+     80.1581436,
+     12.8415083
+    ],
+    [
+     80.1579183,
+     12.841184
+    ],
+    [
+     80.1578853,
+     12.8411387
+    ]
+   ]
+  },
+  {
+   "from": "junction_6",
+   "to": "junction_7",
+   "distance_m": 10.7,
+   "walk_time_min": 0.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1578853,
+     12.8411387
+    ],
+    [
+     80.1578707,
+     12.8411187
+    ],
+    [
+     80.157826,
+     12.8410615
+    ]
+   ]
+  },
+  {
+   "from": "junction_7",
+   "to": "junction_8",
+   "distance_m": 77.5,
+   "walk_time_min": 1.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.157826,
+     12.8410615
+    ],
+    [
+     80.1573927,
+     12.8405077
+    ]
+   ]
+  },
+  {
+   "from": "junction_8",
+   "to": "junction_9",
+   "distance_m": 25.8,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1573927,
+     12.8405077
+    ],
+    [
+     80.1572486,
+     12.8403235
+    ]
+   ]
+  },
+  {
+   "from": "junction_9",
+   "to": "junction_10",
+   "distance_m": 76.6,
+   "walk_time_min": 1.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1572486,
+     12.8403235
+    ],
+    [
+     80.1571571,
+     12.8402065
+    ],
+    [
+     80.1568277,
+     12.8397701
+    ]
+   ]
+  },
+  {
+   "from": "junction_10",
+   "to": "junction_11",
+   "distance_m": 173.2,
+   "walk_time_min": 2.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1568277,
+     12.8397701
+    ],
+    [
+     80.1561876,
+     12.8388365
+    ],
+    [
+     80.15594,
+     12.8384753
+    ]
+   ]
+  },
+  {
+   "from": "junction_11",
+   "to": "junction_12",
+   "distance_m": 34.0,
+   "walk_time_min": 0.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15594,
+     12.8384753
+    ],
+    [
+     80.1557657,
+     12.8382211
+    ]
+   ]
+  },
+  {
+   "from": "junction_12",
+   "to": "junction_13",
+   "distance_m": 139.8,
+   "walk_time_min": 1.9,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1557657,
+     12.8382211
+    ],
+    [
+     80.1553085,
+     12.8375529
+    ],
+    [
+     80.1552251,
+     12.8374503
+    ],
+    [
+     80.1549183,
+     12.8373279
+    ]
+   ]
+  },
+  {
+   "from": "junction_13",
+   "to": "junction_14",
+   "distance_m": 119.2,
+   "walk_time_min": 1.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1549183,
+     12.8373279
+    ],
+    [
+     80.1543333,
+     12.8364199
+    ]
+   ]
+  },
+  {
+   "from": "junction_14",
+   "to": "junction_15",
+   "distance_m": 61.2,
+   "walk_time_min": 0.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1543333,
+     12.8364199
+    ],
+    [
+     80.1540184,
+     12.8359628
+    ]
+   ]
+  },
+  {
+   "from": "junction_15",
+   "to": "junction_16",
+   "distance_m": 431.6,
+   "walk_time_min": 5.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1540184,
+     12.8359628
+    ],
+    [
+     80.1538936,
+     12.835793
+    ],
+    [
+     80.1534135,
+     12.8350913
+    ],
+    [
+     80.1526606,
+     12.8342201
+    ],
+    [
+     80.1524141,
+     12.8339972
+    ],
+    [
+     80.1514086,
+     12.833311
+    ],
+    [
+     80.1512784,
+     12.8332056
+    ]
+   ]
+  },
+  {
+   "from": "junction_16",
+   "to": "junction_17",
+   "distance_m": 3019.0,
+   "walk_time_min": 40.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1512784,
+     12.8332056
+    ],
+    [
+     80.1510975,
+     12.8328521
+    ],
+    [
+     80.1510143,
+     12.8327317
+    ],
+    [
+     80.1509325,
+     12.8326794
+    ],
+    [
+     80.1504551,
+     12.8325225
+    ],
+    [
+     80.1502593,
+     12.8324192
+    ],
+    [
+     80.1500367,
+     12.8322793
+    ],
+    [
+     80.1495431,
+     12.8318243
+    ],
+    [
+     80.1491985,
+     12.8313692
+    ],
+    [
+     80.1490118,
+     12.8311244
+    ],
+    [
+     80.1465431,
+     12.8278883
+    ],
+    [
+     80.1455802,
+     12.826599
+    ],
+    [
+     80.1455064,
+     12.8265755
+    ],
+    [
+     80.1454112,
+     12.826582
+    ],
+    [
+     80.1449136,
+     12.8267703
+    ],
+    [
+     80.144337,
+     12.8269848
+    ],
+    [
+     80.1435591,
+     12.8272084
+    ],
+    [
+     80.1435028,
+     12.8272031
+    ],
+    [
+     80.1434518,
+     12.8271652
+    ],
+    [
+     80.1434062,
+     12.8271155
+    ],
+    [
+     80.142982,
+     12.8261111
+    ],
+    [
+     80.1427799,
+     12.8256326
+    ],
+    [
+     80.1426995,
+     12.8255503
+    ],
+    [
+     80.1425725,
+     12.8254554
+    ],
+    [
+     80.1422529,
+     12.8252508
+    ],
+    [
+     80.1418734,
+     12.8250449
+    ],
+    [
+     80.1417815,
+     12.8250037
+    ],
+    [
+     80.1415944,
+     12.8249997
+    ],
+    [
+     80.1407924,
+     12.8250795
+    ],
+    [
+     80.1406658,
+     12.8251282
+    ],
+    [
+     80.140588,
+     12.825171
+    ],
+    [
+     80.1404357,
+     12.825273
+    ],
+    [
+     80.140311,
+     12.825311
+    ],
+    [
+     80.1401608,
+     12.8253567
+    ],
+    [
+     80.1370078,
+     12.825868
+    ],
+    [
+     80.1355098,
+     12.8261818
+    ],
+    [
+     80.1348339,
+     12.826293
+    ],
+    [
+     80.1339112,
+     12.8264107
+    ],
+    [
+     80.1336591,
+     12.8264774
+    ],
+    [
+     80.1335666,
+     12.826516
+    ],
+    [
+     80.1334673,
+     12.826582
+    ],
+    [
+     80.1333627,
+     12.8266421
+    ],
+    [
+     80.1332688,
+     12.826684
+    ],
+    [
+     80.133179,
+     12.8267088
+    ],
+    [
+     80.132896,
+     12.8267598
+    ],
+    [
+     80.1327941,
+     12.8268291
+    ],
+    [
+     80.1327552,
+     12.8269063
+    ],
+    [
+     80.1327512,
+     12.8269887
+    ],
+    [
+     80.1327699,
+     12.8273744
+    ],
+    [
+     80.1327538,
+     12.8274529
+    ],
+    [
+     80.1327203,
+     12.8275117
+    ],
+    [
+     80.1326278,
+     12.8276046
+    ],
+    [
+     80.1324387,
+     12.8277419
+    ],
+    [
+     80.1321423,
+     12.8278922
+    ],
+    [
+     80.132024,
+     12.8279318
+    ],
+    [
+     80.1319626,
+     12.8279524
+    ],
+    [
+     80.1315643,
+     12.8280727
+    ],
+    [
+     80.1314255,
+     12.8280877
+    ],
+    [
+     80.1313417,
+     12.8280858
+    ],
+    [
+     80.1312612,
+     12.8280675
+    ],
+    [
+     80.1311472,
+     12.8280622
+    ],
+    [
+     80.1310131,
+     12.8280622
+    ],
+    [
+     80.1308063,
+     12.8281106
+    ],
+    [
+     80.1306926,
+     12.8281446
+    ],
+    [
+     80.1291972,
+     12.8284637
+    ]
+   ]
+  },
+  {
+   "from": "junction_18",
+   "to": "junction_19",
+   "distance_m": 56.8,
+   "walk_time_min": 0.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1521091,
+     12.8444802
+    ],
+    [
+     80.1521664,
+     12.8444317
+    ],
+    [
+     80.152505,
+     12.8441455
+    ]
+   ]
+  },
+  {
+   "from": "junction_19",
+   "to": "junction_20",
+   "distance_m": 44.2,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.152505,
+     12.8441455
+    ],
+    [
+     80.1528252,
+     12.843899
+    ]
+   ]
+  },
+  {
+   "from": "junction_20",
+   "to": "junction_21",
+   "distance_m": 13.3,
+   "walk_time_min": 0.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1528252,
+     12.843899
+    ],
+    [
+     80.1527947522492,
+     12.843783463598985
+    ]
+   ]
+  },
+  {
+   "from": "junction_21",
+   "to": "junction_22",
+   "distance_m": 45.9,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1527947522492,
+     12.843783463598985
+    ],
+    [
+     80.1527551,
+     12.843633
+    ],
+    [
+     80.1527219,
+     12.8433777
+    ]
+   ]
+  },
+  {
+   "from": "junction_22",
+   "to": "junction_23",
+   "distance_m": 228.1,
+   "walk_time_min": 3.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1527219,
+     12.8433777
+    ],
+    [
+     80.1527153,
+     12.8432919
+    ],
+    [
+     80.1526885,
+     12.8427322
+    ],
+    [
+     80.1527001,
+     12.8425828
+    ],
+    [
+     80.1527367,
+     12.8424394
+    ],
+    [
+     80.152962,
+     12.8421465
+    ],
+    [
+     80.1531583,
+     12.8420098
+    ],
+    [
+     80.1532249,
+     12.8419634
+    ],
+    [
+     80.1534053,
+     12.8418525
+    ],
+    [
+     80.1534717,
+     12.8418117
+    ],
+    [
+     80.1535964,
+     12.8417385
+    ]
+   ]
+  },
+  {
+   "from": "junction_20",
+   "to": "junction_24",
+   "distance_m": 59.7,
+   "walk_time_min": 0.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1528252,
+     12.843899
+    ],
+    [
+     80.1529592,
+     12.8440638
+    ],
+    [
+     80.1531455,
+     12.8442412
+    ],
+    [
+     80.1532029,
+     12.8442871
+    ]
+   ]
+  },
+  {
+   "from": "junction_24",
+   "to": "junction_25",
+   "distance_m": 27.0,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1532029,
+     12.8442871
+    ],
+    [
+     80.1533996,
+     12.8444361
+    ]
+   ]
+  },
+  {
+   "from": "junction_25",
+   "to": "junction_26",
+   "distance_m": 120.1,
+   "walk_time_min": 1.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1533996,
+     12.8444361
+    ],
+    [
+     80.1535873,
+     12.8444586
+    ],
+    [
+     80.1538595,
+     12.8444803
+    ],
+    [
+     80.1539829,
+     12.8445291
+    ],
+    [
+     80.154217,
+     12.8445792
+    ],
+    [
+     80.15449,
+     12.8445784
+    ]
+   ]
+  },
+  {
+   "from": "junction_26",
+   "to": "junction_27",
+   "distance_m": 134.4,
+   "walk_time_min": 1.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15449,
+     12.8445784
+    ],
+    [
+     80.1547931,
+     12.8445369
+    ],
+    [
+     80.1555831,
+     12.8440513
+    ]
+   ]
+  },
+  {
+   "from": "junction_27",
+   "to": "junction_28",
+   "distance_m": 15.3,
+   "walk_time_min": 0.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1555831,
+     12.8440513
+    ],
+    [
+     80.1557212,
+     12.844025
+    ]
+   ]
+  },
+  {
+   "from": "junction_29",
+   "to": "junction_30",
+   "distance_m": 84.4,
+   "walk_time_min": 1.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1545748,
+     12.8407021
+    ],
+    [
+     80.1546278,
+     12.8405275
+    ],
+    [
+     80.1546703,
+     12.8403652
+    ],
+    [
+     80.1546822,
+     12.8401425
+    ],
+    [
+     80.1546626,
+     12.8399569
+    ]
+   ]
+  },
+  {
+   "from": "junction_30",
+   "to": "junction_31",
+   "distance_m": 54.0,
+   "walk_time_min": 0.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1546626,
+     12.8399569
+    ],
+    [
+     80.1546485,
+     12.8398239
+    ],
+    [
+     80.1546174,
+     12.8396707
+    ],
+    [
+     80.1545784,
+     12.8394786
+    ]
+   ]
+  },
+  {
+   "from": "junction_31",
+   "to": "junction_32",
+   "distance_m": 80.8,
+   "walk_time_min": 1.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1545784,
+     12.8394786
+    ],
+    [
+     80.154548,
+     12.839329
+    ],
+    [
+     80.1544333,
+     12.8389293
+    ],
+    [
+     80.1543872,
+     12.8387767
+    ]
+   ]
+  },
+  {
+   "from": "junction_33",
+   "to": "junction_34",
+   "distance_m": 7.5,
+   "walk_time_min": 0.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1543629,
+     12.8414662
+    ],
+    [
+     80.15442195985418,
+     12.841430926637548
+    ]
+   ]
+  },
+  {
+   "from": "junction_34",
+   "to": "junction_35",
+   "distance_m": 6.3,
+   "walk_time_min": 0.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15442195985418,
+     12.841430926637548
+    ],
+    [
+     80.1544719,
+     12.8414011
+    ]
+   ]
+  },
+  {
+   "from": "junction_35",
+   "to": "junction_36",
+   "distance_m": 83.7,
+   "walk_time_min": 1.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1544719,
+     12.8414011
+    ],
+    [
+     80.1547298,
+     12.8413132
+    ],
+    [
+     80.1549157,
+     12.8412789
+    ],
+    [
+     80.1550985,
+     12.841313
+    ],
+    [
+     80.1552107,
+     12.8413626
+    ]
+   ]
+  },
+  {
+   "from": "junction_36",
+   "to": "junction_37",
+   "distance_m": 117.2,
+   "walk_time_min": 1.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1552107,
+     12.8413626
+    ],
+    [
+     80.1556616,
+     12.8416214
+    ],
+    [
+     80.1559369,
+     12.8418348
+    ],
+    [
+     80.1560847,
+     12.8419744
+    ]
+   ]
+  },
+  {
+   "from": "junction_38",
+   "to": "junction_39",
+   "distance_m": 17.1,
+   "walk_time_min": 0.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.153796,
+     12.8408672
+    ],
+    [
+     80.15395047805875,
+     12.840838442922207
+    ]
+   ]
+  },
+  {
+   "from": "junction_39",
+   "to": "junction_40",
+   "distance_m": 29.7,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15395047805875,
+     12.840838442922207
+    ],
+    [
+     80.1542193,
+     12.8407884
+    ]
+   ]
+  },
+  {
+   "from": "junction_40",
+   "to": "junction_29",
+   "distance_m": 40.6,
+   "walk_time_min": 0.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1542193,
+     12.8407884
+    ],
+    [
+     80.1544134,
+     12.8407793
+    ],
+    [
+     80.1545748,
+     12.8407021
+    ]
+   ]
+  },
+  {
+   "from": "junction_41",
+   "to": "junction_42",
+   "distance_m": 96.3,
+   "walk_time_min": 1.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1537409,
+     12.8417017
+    ],
+    [
+     80.15355434163578,
+     12.842548550191218
+    ]
+   ]
+  },
+  {
+   "from": "junction_42",
+   "to": "junction_43",
+   "distance_m": 57.5,
+   "walk_time_min": 0.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15355434163578,
+     12.842548550191218
+    ],
+    [
+     80.1535286,
+     12.8426654
+    ],
+    [
+     80.15341222441079,
+     12.843046890849719
+    ]
+   ]
+  },
+  {
+   "from": "junction_43",
+   "to": "junction_44",
+   "distance_m": 27.8,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15341222441079,
+     12.843046890849719
+    ],
+    [
+     80.1533391,
+     12.8432866
+    ]
+   ]
+  },
+  {
+   "from": "junction_45",
+   "to": "junction_46",
+   "distance_m": 61.7,
+   "walk_time_min": 0.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1500436,
+     12.8406536
+    ],
+    [
+     80.1505576,
+     12.8406405
+    ],
+    [
+     80.150612,
+     12.8406434
+    ]
+   ]
+  },
+  {
+   "from": "junction_46",
+   "to": "junction_47",
+   "distance_m": 26.0,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.150612,
+     12.8406434
+    ],
+    [
+     80.1508236,
+     12.8406463
+    ],
+    [
+     80.15085075421507,
+     12.840651896516052
+    ]
+   ]
+  },
+  {
+   "from": "junction_47",
+   "to": "junction_48",
+   "distance_m": 153.0,
+   "walk_time_min": 2.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15085075421507,
+     12.840651896516052
+    ],
+    [
+     80.150958,
+     12.840674
+    ],
+    [
+     80.1510253,
+     12.8410294
+    ],
+    [
+     80.1510701,
+     12.8412843
+    ],
+    [
+     80.1511344,
+     12.8415509
+    ],
+    [
+     80.1512106,
+     12.8418175
+    ],
+    [
+     80.1513027,
+     12.8418577
+    ]
+   ]
+  },
+  {
+   "from": "junction_49",
+   "to": "junction_50",
+   "distance_m": 147.4,
+   "walk_time_min": 2.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1488763,
+     12.8401608
+    ],
+    [
+     80.1488742,
+     12.8398147
+    ],
+    [
+     80.1493679,
+     12.8398065
+    ],
+    [
+     80.1494966,
+     12.839839
+    ],
+    [
+     80.1496893,
+     12.8399861
+    ],
+    [
+     80.1498197,
+     12.840012
+    ]
+   ]
+  },
+  {
+   "from": "junction_50",
+   "to": "junction_51",
+   "distance_m": 105.0,
+   "walk_time_min": 1.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1498197,
+     12.840012
+    ],
+    [
+     80.1499403,
+     12.839938
+    ],
+    [
+     80.1502362,
+     12.8399497
+    ],
+    [
+     80.1502586,
+     12.8397195
+    ],
+    [
+     80.1502526,
+     12.839434
+    ]
+   ]
+  },
+  {
+   "from": "junction_52",
+   "to": "junction_53",
+   "distance_m": 198.4,
+   "walk_time_min": 2.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1502721,
+     12.8429414
+    ],
+    [
+     80.1501723,
+     12.8428614
+    ],
+    [
+     80.1500049,
+     12.8427041
+    ],
+    [
+     80.1498645,
+     12.8425613
+    ],
+    [
+     80.1497808,
+     12.842302
+    ],
+    [
+     80.1497629,
+     12.8419815
+    ],
+    [
+     80.1497838,
+     12.8414192
+    ],
+    [
+     80.1497838,
+     12.8413406
+    ]
+   ]
+  },
+  {
+   "from": "junction_53",
+   "to": "junction_54",
+   "distance_m": 56.1,
+   "walk_time_min": 0.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1497838,
+     12.8413406
+    ],
+    [
+     80.1497868,
+     12.8408365
+    ]
+   ]
+  },
+  {
+   "from": "junction_54",
+   "to": "junction_50",
+   "distance_m": 91.7,
+   "walk_time_min": 1.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1497868,
+     12.8408365
+    ],
+    [
+     80.1498197,
+     12.840012
+    ]
+   ]
+  },
+  {
+   "from": "junction_50",
+   "to": "junction_55",
+   "distance_m": 91.1,
+   "walk_time_min": 1.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1498197,
+     12.840012
+    ],
+    [
+     80.1498107,
+     12.8394672
+    ],
+    [
+     80.1498194,
+     12.8391926
+    ]
+   ]
+  },
+  {
+   "from": "junction_56",
+   "to": "junction_54",
+   "distance_m": 253.7,
+   "walk_time_min": 3.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.147447,
+     12.8408598
+    ],
+    [
+     80.1497868,
+     12.8408365
+    ]
+   ]
+  },
+  {
+   "from": "junction_57",
+   "to": "junction_55",
+   "distance_m": 32.7,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1501212,
+     12.8391834
+    ],
+    [
+     80.1498194,
+     12.8391926
+    ]
+   ]
+  },
+  {
+   "from": "junction_55",
+   "to": "junction_56",
+   "distance_m": 453.1,
+   "walk_time_min": 6.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1498194,
+     12.8391926
+    ],
+    [
+     80.1482919,
+     12.8391847
+    ],
+    [
+     80.1481779,
+     12.8392566
+    ],
+    [
+     80.1481095,
+     12.8394122
+    ],
+    [
+     80.1479687,
+     12.8394619
+    ],
+    [
+     80.1473947,
+     12.839441
+    ],
+    [
+     80.1472566,
+     12.8395024
+    ],
+    [
+     80.1472163,
+     12.8396437
+    ],
+    [
+     80.1472139,
+     12.8405102
+    ],
+    [
+     80.147447,
+     12.8408598
+    ]
+   ]
+  },
+  {
+   "from": "junction_56",
+   "to": "junction_53",
+   "distance_m": 280.6,
+   "walk_time_min": 3.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.147447,
+     12.8408598
+    ],
+    [
+     80.1477608,
+     12.8413173
+    ],
+    [
+     80.148212,
+     12.8413435
+    ],
+    [
+     80.1497838,
+     12.8413406
+    ]
+   ]
+  },
+  {
+   "from": "junction_53",
+   "to": "junction_46",
+   "distance_m": 166.1,
+   "walk_time_min": 2.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1497838,
+     12.8413406
+    ],
+    [
+     80.1505249,
+     12.841361
+    ],
+    [
+     80.1505847,
+     12.8413551
+    ],
+    [
+     80.150612,
+     12.8406434
+    ]
+   ]
+  },
+  {
+   "from": "junction_46",
+   "to": "junction_57",
+   "distance_m": 188.8,
+   "walk_time_min": 2.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.150612,
+     12.8406434
+    ],
+    [
+     80.1506145,
+     12.8405772
+    ],
+    [
+     80.1506145,
+     12.8400324
+    ],
+    [
+     80.1505458,
+     12.8399304
+    ],
+    [
+     80.1505476,
+     12.839526
+    ],
+    [
+     80.1505302,
+     12.839458
+    ],
+    [
+     80.1504135,
+     12.8393848
+    ],
+    [
+     80.1502982,
+     12.8393233
+    ],
+    [
+     80.1501976,
+     12.8392161
+    ],
+    [
+     80.1501212,
+     12.8391834
+    ]
+   ]
+  },
+  {
+   "from": "junction_58",
+   "to": "junction_16",
+   "distance_m": 745.7,
+   "walk_time_min": 9.9,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1464165,
+     12.8367883
+    ],
+    [
+     80.1466775,
+     12.8368177
+    ],
+    [
+     80.1470282,
+     12.8368054
+    ],
+    [
+     80.1475945,
+     12.8367106
+    ],
+    [
+     80.148034,
+     12.8366488
+    ],
+    [
+     80.1484313,
+     12.8364964
+    ],
+    [
+     80.1486722,
+     12.8363645
+    ],
+    [
+     80.1488666,
+     12.8362203
+    ],
+    [
+     80.1490187,
+     12.8361956
+    ],
+    [
+     80.1491455,
+     12.8361214
+    ],
+    [
+     80.1492822,
+     12.8359968
+    ],
+    [
+     80.1493657,
+     12.8358649
+    ],
+    [
+     80.1494344,
+     12.8355765
+    ],
+    [
+     80.149502,
+     12.8353941
+    ],
+    [
+     80.1495992,
+     12.835117
+    ],
+    [
+     80.1497249,
+     12.8347637
+    ],
+    [
+     80.1498242,
+     12.8345834
+    ],
+    [
+     80.1498844,
+     12.8344464
+    ],
+    [
+     80.149969,
+     12.8343239
+    ],
+    [
+     80.1500366,
+     12.8341374
+    ],
+    [
+     80.1504233,
+     12.8335348
+    ],
+    [
+     80.1505374,
+     12.8333638
+    ],
+    [
+     80.1507022,
+     12.8332319
+    ],
+    [
+     80.1509135,
+     12.8331536
+    ],
+    [
+     80.1512784,
+     12.8332056
+    ]
+   ]
+  },
+  {
+   "from": "junction_16",
+   "to": "junction_59",
+   "distance_m": 339.0,
+   "walk_time_min": 4.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1512784,
+     12.8332056
+    ],
+    [
+     80.1513704,
+     12.833447
+    ],
+    [
+     80.1516028,
+     12.833756
+    ],
+    [
+     80.1516916,
+     12.8339373
+    ],
+    [
+     80.1518437,
+     12.834271
+    ],
+    [
+     80.1519113,
+     12.83444
+    ],
+    [
+     80.1518479,
+     12.8346089
+    ],
+    [
+     80.1518902,
+     12.8347614
+    ],
+    [
+     80.1520804,
+     12.8351034
+    ],
+    [
+     80.1521691,
+     12.8352888
+    ],
+    [
+     80.1521987,
+     12.8355731
+    ],
+    [
+     80.1524587,
+     12.8359367
+    ]
+   ]
+  },
+  {
+   "from": "junction_60",
+   "to": "junction_61",
+   "distance_m": 76.2,
+   "walk_time_min": 1.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1535242,
+     12.8368018
+    ],
+    [
+     80.1534062,
+     12.8368788
+    ],
+    [
+     80.1532613,
+     12.8369265
+    ],
+    [
+     80.1530615,
+     12.8369664
+    ],
+    [
+     80.1528583,
+     12.8369854
+    ]
+   ]
+  },
+  {
+   "from": "junction_62",
+   "to": "junction_63",
+   "distance_m": 74.8,
+   "walk_time_min": 1.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1530712,
+     12.836254
+    ],
+    [
+     80.1528946,
+     12.8363898
+    ],
+    [
+     80.1527497,
+     12.8364937
+    ],
+    [
+     80.1526324,
+     12.8365794
+    ],
+    [
+     80.1525211,
+     12.8366598
+    ]
+   ]
+  },
+  {
+   "from": "junction_60",
+   "to": "junction_14",
+   "distance_m": 98.4,
+   "walk_time_min": 1.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1535242,
+     12.8368018
+    ],
+    [
+     80.1535841,
+     12.8367361
+    ],
+    [
+     80.1537066,
+     12.8366661
+    ],
+    [
+     80.1539322,
+     12.8365729
+    ],
+    [
+     80.1541309,
+     12.8364942
+    ],
+    [
+     80.1543333,
+     12.8364199
+    ]
+   ]
+  },
+  {
+   "from": "junction_3",
+   "to": "junction_64",
+   "distance_m": 129.6,
+   "walk_time_min": 1.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1594353,
+     12.8425707
+    ],
+    [
+     80.159586,
+     12.8430969
+    ],
+    [
+     80.1596121,
+     12.8431146
+    ],
+    [
+     80.1596531,
+     12.8431139
+    ],
+    [
+     80.1596812,
+     12.8431048
+    ],
+    [
+     80.1599461,
+     12.8429623
+    ],
+    [
+     80.1601124,
+     12.8428969
+    ],
+    [
+     80.160162,
+     12.8428851
+    ]
+   ]
+  },
+  {
+   "from": "junction_64",
+   "to": "junction_65",
+   "distance_m": 112.5,
+   "walk_time_min": 1.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.160162,
+     12.8428851
+    ],
+    [
+     80.1611727,
+     12.8426574
+    ]
+   ]
+  },
+  {
+   "from": "junction_66",
+   "to": "junction_44",
+   "distance_m": 52.6,
+   "walk_time_min": 0.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1537985,
+     12.8433526
+    ],
+    [
+     80.1537136,
+     12.8433011
+    ],
+    [
+     80.1535893,
+     12.8432657
+    ],
+    [
+     80.153527,
+     12.843252
+    ],
+    [
+     80.1534763,
+     12.8432557
+    ],
+    [
+     80.1533391,
+     12.8432866
+    ]
+   ]
+  },
+  {
+   "from": "junction_44",
+   "to": "junction_67",
+   "distance_m": 21.9,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1533391,
+     12.8432866
+    ],
+    [
+     80.15314870645547,
+     12.84335305108025
+    ]
+   ]
+  },
+  {
+   "from": "junction_67",
+   "to": "junction_22",
+   "distance_m": 46.4,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15314870645547,
+     12.84335305108025
+    ],
+    [
+     80.1531351,
+     12.8433578
+    ],
+    [
+     80.1530778,
+     12.8433562
+    ],
+    [
+     80.1530172,
+     12.8433617
+    ],
+    [
+     80.1527219,
+     12.8433777
+    ]
+   ]
+  },
+  {
+   "from": "junction_68",
+   "to": "junction_69",
+   "distance_m": 111.3,
+   "walk_time_min": 1.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1543999,
+     12.8371671
+    ],
+    [
+     80.1546481,
+     12.8375444
+    ],
+    [
+     80.1546927,
+     12.8376072
+    ],
+    [
+     80.1546936,
+     12.8376385
+    ],
+    [
+     80.154691,
+     12.8376751
+    ],
+    [
+     80.1546655,
+     12.8377065
+    ],
+    [
+     80.1546259,
+     12.8377261
+    ],
+    [
+     80.1545853,
+     12.8377438
+    ],
+    [
+     80.1545461,
+     12.8377585
+    ],
+    [
+     80.1544932,
+     12.8377771
+    ],
+    [
+     80.1544569,
+     12.8377987
+    ],
+    [
+     80.1544462,
+     12.8378183
+    ],
+    [
+     80.1544543,
+     12.8378464
+    ],
+    [
+     80.1544677,
+     12.837866
+    ],
+    [
+     80.1545039,
+     12.8379258
+    ]
+   ]
+  },
+  {
+   "from": "junction_37",
+   "to": "junction_70",
+   "distance_m": 15.8,
+   "walk_time_min": 0.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1560847,
+     12.8419744
+    ],
+    [
+     80.1562278,
+     12.8420032
+    ]
+   ]
+  },
+  {
+   "from": "junction_70",
+   "to": "junction_71",
+   "distance_m": 106.9,
+   "walk_time_min": 1.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1562278,
+     12.8420032
+    ],
+    [
+     80.1563297,
+     12.842077
+    ],
+    [
+     80.1564172,
+     12.8421618
+    ],
+    [
+     80.1565678,
+     12.8423098
+    ],
+    [
+     80.1567288,
+     12.8426637
+    ],
+    [
+     80.1567846,
+     12.8427726
+    ]
+   ]
+  },
+  {
+   "from": "junction_71",
+   "to": "junction_72",
+   "distance_m": 120.1,
+   "walk_time_min": 1.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1567846,
+     12.8427726
+    ],
+    [
+     80.1569813,
+     12.8426716
+    ],
+    [
+     80.1575891,
+     12.8423529
+    ],
+    [
+     80.1577625,
+     12.842265
+    ]
+   ]
+  },
+  {
+   "from": "junction_59",
+   "to": "junction_73",
+   "distance_m": 98.7,
+   "walk_time_min": 1.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1524587,
+     12.8359367
+    ],
+    [
+     80.1515779,
+     12.8361626
+    ]
+   ]
+  },
+  {
+   "from": "junction_74",
+   "to": "junction_75",
+   "distance_m": 212.2,
+   "walk_time_min": 2.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1579297,
+     12.8372872
+    ],
+    [
+     80.1589421,
+     12.8372441
+    ],
+    [
+     80.1592572,
+     12.8372281
+    ],
+    [
+     80.1598845,
+     12.8371902
+    ]
+   ]
+  },
+  {
+   "from": "junction_76",
+   "to": "junction_77",
+   "distance_m": 65.8,
+   "walk_time_min": 0.9,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1598604,
+     12.8369527
+    ],
+    [
+     80.1592555,
+     12.8370005
+    ]
+   ]
+  },
+  {
+   "from": "junction_77",
+   "to": "junction_78",
+   "distance_m": 88.7,
+   "walk_time_min": 1.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1592555,
+     12.8370005
+    ],
+    [
+     80.159143,
+     12.8370084
+    ],
+    [
+     80.1584398,
+     12.8370589
+    ]
+   ]
+  },
+  {
+   "from": "junction_78",
+   "to": "junction_79",
+   "distance_m": 60.5,
+   "walk_time_min": 0.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1584398,
+     12.8370589
+    ],
+    [
+     80.1578836,
+     12.8370989
+    ]
+   ]
+  },
+  {
+   "from": "junction_80",
+   "to": "junction_81",
+   "distance_m": 55.5,
+   "walk_time_min": 0.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1600673,
+     12.8385455
+    ],
+    [
+     80.1595624,
+     12.838628
+    ]
+   ]
+  },
+  {
+   "from": "junction_81",
+   "to": "junction_82",
+   "distance_m": 96.3,
+   "walk_time_min": 1.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1595624,
+     12.838628
+    ],
+    [
+     80.1594048,
+     12.8386538
+    ],
+    [
+     80.1586837,
+     12.8387573
+    ]
+   ]
+  },
+  {
+   "from": "junction_82",
+   "to": "junction_83",
+   "distance_m": 44.0,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1586837,
+     12.8387573
+    ],
+    [
+     80.1582813,
+     12.8388081
+    ]
+   ]
+  },
+  {
+   "from": "junction_84",
+   "to": "junction_85",
+   "distance_m": 54.8,
+   "walk_time_min": 0.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1601925,
+     12.8389546
+    ],
+    [
+     80.1596996,
+     12.8390636
+    ]
+   ]
+  },
+  {
+   "from": "junction_85",
+   "to": "junction_86",
+   "distance_m": 132.3,
+   "walk_time_min": 1.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1596996,
+     12.8390636
+    ],
+    [
+     80.1590054,
+     12.8391343
+    ],
+    [
+     80.1584926,
+     12.8392306
+    ]
+   ]
+  },
+  {
+   "from": "junction_8",
+   "to": "junction_87",
+   "distance_m": 164.7,
+   "walk_time_min": 2.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1573927,
+     12.8405077
+    ],
+    [
+     80.15819,
+     12.8400546
+    ],
+    [
+     80.15851,
+     12.8399114
+    ],
+    [
+     80.1587538,
+     12.8399091
+    ]
+   ]
+  },
+  {
+   "from": "junction_87",
+   "to": "junction_88",
+   "distance_m": 124.5,
+   "walk_time_min": 1.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1587538,
+     12.8399091
+    ],
+    [
+     80.1593214,
+     12.8398033
+    ],
+    [
+     80.1595487,
+     12.8397483
+    ],
+    [
+     80.1597646,
+     12.8396914
+    ],
+    [
+     80.1598307,
+     12.8396751
+    ],
+    [
+     80.1598732,
+     12.8396629
+    ]
+   ]
+  },
+  {
+   "from": "junction_88",
+   "to": "junction_85",
+   "distance_m": 69.3,
+   "walk_time_min": 0.9,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1598732,
+     12.8396629
+    ],
+    [
+     80.1598569,
+     12.8395879
+    ],
+    [
+     80.1597629,
+     12.8392885
+    ],
+    [
+     80.1596996,
+     12.8390636
+    ]
+   ]
+  },
+  {
+   "from": "junction_89",
+   "to": "junction_90",
+   "distance_m": 166.4,
+   "walk_time_min": 2.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1577674,
+     12.8366035
+    ],
+    [
+     80.1589311,
+     12.8365481
+    ],
+    [
+     80.1589728,
+     12.8365555
+    ],
+    [
+     80.1589975,
+     12.8365777
+    ],
+    [
+     80.1590126,
+     12.8366165
+    ],
+    [
+     80.1590278,
+     12.8366516
+    ],
+    [
+     80.1590544,
+     12.8366683
+    ],
+    [
+     80.1591511,
+     12.836672
+    ],
+    [
+     80.1592347,
+     12.8366673
+    ]
+   ]
+  },
+  {
+   "from": "junction_90",
+   "to": "junction_76",
+   "distance_m": 95.6,
+   "walk_time_min": 1.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1592347,
+     12.8366673
+    ],
+    [
+     80.1597466,
+     12.8366387
+    ],
+    [
+     80.1597865,
+     12.8366461
+    ],
+    [
+     80.159813,
+     12.8366757
+    ],
+    [
+     80.159832,
+     12.8367459
+    ],
+    [
+     80.1598604,
+     12.8369527
+    ]
+   ]
+  },
+  {
+   "from": "junction_76",
+   "to": "junction_75",
+   "distance_m": 26.5,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1598604,
+     12.8369527
+    ],
+    [
+     80.1598662,
+     12.8370192
+    ],
+    [
+     80.1598845,
+     12.8371902
+    ]
+   ]
+  },
+  {
+   "from": "junction_75",
+   "to": "junction_91",
+   "distance_m": 38.7,
+   "walk_time_min": 0.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1598845,
+     12.8371902
+    ],
+    [
+     80.1599084,
+     12.8375379
+    ]
+   ]
+  },
+  {
+   "from": "junction_91",
+   "to": "junction_92",
+   "distance_m": 45.5,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1599084,
+     12.8375379
+    ],
+    [
+     80.1599365,
+     12.8379461
+    ]
+   ]
+  },
+  {
+   "from": "junction_92",
+   "to": "junction_80",
+   "distance_m": 68.1,
+   "walk_time_min": 0.9,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1599365,
+     12.8379461
+    ],
+    [
+     80.1600673,
+     12.8385455
+    ]
+   ]
+  },
+  {
+   "from": "junction_80",
+   "to": "junction_84",
+   "distance_m": 47.5,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1600673,
+     12.8385455
+    ],
+    [
+     80.1601925,
+     12.8389546
+    ]
+   ]
+  },
+  {
+   "from": "junction_84",
+   "to": "junction_93",
+   "distance_m": 107.6,
+   "walk_time_min": 1.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1601925,
+     12.8389546
+    ],
+    [
+     80.1602853,
+     12.8393456
+    ],
+    [
+     80.1603366,
+     12.8395629
+    ],
+    [
+     80.1604132,
+     12.8398983
+    ]
+   ]
+  },
+  {
+   "from": "junction_93",
+   "to": "junction_94",
+   "distance_m": 47.7,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1604132,
+     12.8398983
+    ],
+    [
+     80.1605547,
+     12.8403043
+    ]
+   ]
+  },
+  {
+   "from": "junction_94",
+   "to": "junction_95",
+   "distance_m": 44.3,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1605547,
+     12.8403043
+    ],
+    [
+     80.1607243,
+     12.8406672
+    ]
+   ]
+  },
+  {
+   "from": "junction_95",
+   "to": "junction_96",
+   "distance_m": 37.9,
+   "walk_time_min": 0.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1607243,
+     12.8406672
+    ],
+    [
+     80.160747,
+     12.8407157
+    ],
+    [
+     80.1608581,
+     12.8409821
+    ]
+   ]
+  },
+  {
+   "from": "junction_96",
+   "to": "junction_97",
+   "distance_m": 43.3,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1608581,
+     12.8409821
+    ],
+    [
+     80.1608874,
+     12.8410522
+    ],
+    [
+     80.1609255,
+     12.8413126
+    ],
+    [
+     80.1609329,
+     12.8413629
+    ]
+   ]
+  },
+  {
+   "from": "junction_97",
+   "to": "junction_98",
+   "distance_m": 43.4,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1609329,
+     12.8413629
+    ],
+    [
+     80.1609575,
+     12.8417523
+    ]
+   ]
+  },
+  {
+   "from": "junction_99",
+   "to": "junction_100",
+   "distance_m": 66.6,
+   "walk_time_min": 0.9,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1578159,
+     12.8368495
+    ],
+    [
+     80.1584288,
+     12.8368152
+    ]
+   ]
+  },
+  {
+   "from": "junction_100",
+   "to": "junction_101",
+   "distance_m": 55.4,
+   "walk_time_min": 0.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1584288,
+     12.8368152
+    ],
+    [
+     80.1589387,
+     12.8367866
+    ]
+   ]
+  },
+  {
+   "from": "junction_78",
+   "to": "junction_100",
+   "distance_m": 27.1,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1584398,
+     12.8370589
+    ],
+    [
+     80.1584288,
+     12.8368152
+    ]
+   ]
+  },
+  {
+   "from": "junction_77",
+   "to": "junction_90",
+   "distance_m": 37.1,
+   "walk_time_min": 0.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1592555,
+     12.8370005
+    ],
+    [
+     80.1592347,
+     12.8366673
+    ]
+   ]
+  },
+  {
+   "from": "junction_82",
+   "to": "junction_102",
+   "distance_m": 63.1,
+   "walk_time_min": 0.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1586837,
+     12.8387573
+    ],
+    [
+     80.1585311,
+     12.8382101
+    ]
+   ]
+  },
+  {
+   "from": "junction_81",
+   "to": "junction_92",
+   "distance_m": 130.0,
+   "walk_time_min": 1.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1595624,
+     12.838628
+    ],
+    [
+     80.159419,
+     12.8380924
+    ],
+    [
+     80.1594163,
+     12.8380296
+    ],
+    [
+     80.1594243,
+     12.8379852
+    ],
+    [
+     80.1594485,
+     12.8379643
+    ],
+    [
+     80.1595343,
+     12.8379616
+    ],
+    [
+     80.1599365,
+     12.8379461
+    ]
+   ]
+  },
+  {
+   "from": "junction_103",
+   "to": "junction_91",
+   "distance_m": 68.6,
+   "walk_time_min": 0.9,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1592768,
+     12.8375746
+    ],
+    [
+     80.1599084,
+     12.8375379
+    ]
+   ]
+  },
+  {
+   "from": "junction_104",
+   "to": "junction_15",
+   "distance_m": 101.8,
+   "walk_time_min": 1.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1531628,
+     12.8363395
+    ],
+    [
+     80.1537193,
+     12.8360903
+    ],
+    [
+     80.1539024,
+     12.8360132
+    ],
+    [
+     80.1540184,
+     12.8359628
+    ]
+   ]
+  },
+  {
+   "from": "junction_105",
+   "to": "junction_69",
+   "distance_m": 40.9,
+   "walk_time_min": 0.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.154182,
+     12.8381184
+    ],
+    [
+     80.1545039,
+     12.8379258
+    ]
+   ]
+  },
+  {
+   "from": "junction_69",
+   "to": "junction_106",
+   "distance_m": 36.3,
+   "walk_time_min": 0.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1545039,
+     12.8379258
+    ],
+    [
+     80.1547895,
+     12.8377549
+    ]
+   ]
+  },
+  {
+   "from": "junction_11",
+   "to": "junction_107",
+   "distance_m": 47.3,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15594,
+     12.8384753
+    ],
+    [
+     80.1563305,
+     12.8382864
+    ]
+   ]
+  },
+  {
+   "from": "junction_12",
+   "to": "junction_108",
+   "distance_m": 59.6,
+   "walk_time_min": 0.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1557657,
+     12.8382211
+    ],
+    [
+     80.156254,
+     12.8379752
+    ]
+   ]
+  },
+  {
+   "from": "junction_10",
+   "to": "junction_109",
+   "distance_m": 100.4,
+   "walk_time_min": 1.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1568277,
+     12.8397701
+    ],
+    [
+     80.1576078,
+     12.8392833
+    ]
+   ]
+  },
+  {
+   "from": "junction_110",
+   "to": "junction_111",
+   "distance_m": 204.0,
+   "walk_time_min": 2.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1579658,
+     12.8433582
+    ],
+    [
+     80.158151,
+     12.8437506
+    ],
+    [
+     80.1582422,
+     12.8439659
+    ],
+    [
+     80.158357,
+     12.844217
+    ],
+    [
+     80.1583869,
+     12.8442759
+    ],
+    [
+     80.1583944,
+     12.8443522
+    ],
+    [
+     80.1584115,
+     12.8445014
+    ],
+    [
+     80.1586197,
+     12.8450688
+    ]
+   ]
+  },
+  {
+   "from": "junction_111",
+   "to": "junction_112",
+   "distance_m": 40.3,
+   "walk_time_min": 0.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1586197,
+     12.8450688
+    ],
+    [
+     80.1585864,
+     12.8454301
+    ]
+   ]
+  },
+  {
+   "from": "junction_28",
+   "to": "junction_113",
+   "distance_m": 114.4,
+   "walk_time_min": 1.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1557212,
+     12.844025
+    ],
+    [
+     80.156046,
+     12.8439406
+    ],
+    [
+     80.1561632,
+     12.8438537
+    ],
+    [
+     80.1564198,
+     12.8436181
+    ],
+    [
+     80.1566055,
+     12.8435037
+    ]
+   ]
+  },
+  {
+   "from": "junction_113",
+   "to": "junction_114",
+   "distance_m": 45.4,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1566055,
+     12.8435037
+    ],
+    [
+     80.1566748,
+     12.8434889
+    ],
+    [
+     80.1569204,
+     12.8433758
+    ],
+    [
+     80.1569886,
+     12.8433433
+    ]
+   ]
+  },
+  {
+   "from": "junction_114",
+   "to": "junction_71",
+   "distance_m": 69.3,
+   "walk_time_min": 0.9,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1569886,
+     12.8433433
+    ],
+    [
+     80.1570106,
+     12.8432955
+    ],
+    [
+     80.1570063,
+     12.8432362
+    ],
+    [
+     80.1567846,
+     12.8427726
+    ]
+   ]
+  },
+  {
+   "from": "junction_115",
+   "to": "junction_116",
+   "distance_m": 37.7,
+   "walk_time_min": 0.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1526719,
+     12.8451491
+    ],
+    [
+     80.1528098,
+     12.845086
+    ],
+    [
+     80.15293938834785,
+     12.84494320673574
+    ]
+   ]
+  },
+  {
+   "from": "junction_116",
+   "to": "junction_25",
+   "distance_m": 75.3,
+   "walk_time_min": 1.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15293938834785,
+     12.84494320673574
+    ],
+    [
+     80.1533996,
+     12.8444361
+    ]
+   ]
+  },
+  {
+   "from": "junction_23",
+   "to": "junction_41",
+   "distance_m": 16.2,
+   "walk_time_min": 0.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1535964,
+     12.8417385
+    ],
+    [
+     80.1537409,
+     12.8417017
+    ]
+   ]
+  },
+  {
+   "from": "junction_41",
+   "to": "junction_117",
+   "distance_m": 30.3,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1537409,
+     12.8417017
+    ],
+    [
+     80.1540203,
+     12.8417088
+    ]
+   ]
+  },
+  {
+   "from": "junction_118",
+   "to": "junction_117",
+   "distance_m": 8.7,
+   "walk_time_min": 0.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1540305,
+     12.8416321
+    ],
+    [
+     80.1540186,
+     12.8416696
+    ],
+    [
+     80.1540203,
+     12.8417088
+    ]
+   ]
+  },
+  {
+   "from": "junction_117",
+   "to": "junction_119",
+   "distance_m": 48.7,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1540203,
+     12.8417088
+    ],
+    [
+     80.154034,
+     12.8417426
+    ],
+    [
+     80.154058,
+     12.8417705
+    ],
+    [
+     80.1540897,
+     12.8417897
+    ],
+    [
+     80.1541259,
+     12.8417981
+    ],
+    [
+     80.1541631,
+     12.841795
+    ],
+    [
+     80.1541974,
+     12.8417807
+    ],
+    [
+     80.1542253,
+     12.8417566
+    ],
+    [
+     80.154244,
+     12.8417252
+    ],
+    [
+     80.1542517,
+     12.8416896
+    ],
+    [
+     80.1542474,
+     12.8416534
+    ],
+    [
+     80.1542039,
+     12.8415921
+    ]
+   ]
+  },
+  {
+   "from": "junction_119",
+   "to": "junction_118",
+   "distance_m": 21.8,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1542039,
+     12.8415921
+    ],
+    [
+     80.1541678,
+     12.8415747
+    ],
+    [
+     80.1541277,
+     12.8415703
+    ],
+    [
+     80.1540886,
+     12.8415793
+    ],
+    [
+     80.1540548,
+     12.8416008
+    ],
+    [
+     80.1540305,
+     12.8416321
+    ]
+   ]
+  },
+  {
+   "from": "junction_3",
+   "to": "junction_98",
+   "distance_m": 229.4,
+   "walk_time_min": 3.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1594353,
+     12.8425707
+    ],
+    [
+     80.1593158,
+     12.842217
+    ],
+    [
+     80.1593238,
+     12.8421901
+    ],
+    [
+     80.1593359,
+     12.8421633
+    ],
+    [
+     80.1600861,
+     12.8419679
+    ],
+    [
+     80.1609575,
+     12.8417523
+    ]
+   ]
+  },
+  {
+   "from": "junction_98",
+   "to": "junction_2",
+   "distance_m": 55.3,
+   "walk_time_min": 0.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1609575,
+     12.8417523
+    ],
+    [
+     80.1610457,
+     12.8422419
+    ]
+   ]
+  },
+  {
+   "from": "junction_2",
+   "to": "junction_65",
+   "distance_m": 48.2,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1610457,
+     12.8422419
+    ],
+    [
+     80.1611727,
+     12.8426574
+    ]
+   ]
+  },
+  {
+   "from": "junction_65",
+   "to": "junction_120",
+   "distance_m": 37.0,
+   "walk_time_min": 0.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1611727,
+     12.8426574
+    ],
+    [
+     80.161242,
+     12.8429832
+    ]
+   ]
+  },
+  {
+   "from": "junction_120",
+   "to": "junction_121",
+   "distance_m": 95.2,
+   "walk_time_min": 1.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.161242,
+     12.8429832
+    ],
+    [
+     80.1613806,
+     12.8434406
+    ],
+    [
+     80.161422,
+     12.8435305
+    ],
+    [
+     80.1615487,
+     12.8437827
+    ]
+   ]
+  },
+  {
+   "from": "junction_121",
+   "to": "junction_122",
+   "distance_m": 644.2,
+   "walk_time_min": 8.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1615487,
+     12.8437827
+    ],
+    [
+     80.1616962,
+     12.8440593
+    ],
+    [
+     80.1619479,
+     12.8444745
+    ],
+    [
+     80.16201,
+     12.8445771
+    ],
+    [
+     80.1621227,
+     12.8447105
+    ],
+    [
+     80.1622179,
+     12.8447954
+    ],
+    [
+     80.1623708,
+     12.844887
+    ],
+    [
+     80.1628254,
+     12.8450661
+    ],
+    [
+     80.1631151,
+     12.8451354
+    ],
+    [
+     80.1634625,
+     12.8452505
+    ],
+    [
+     80.1635972,
+     12.8453326
+    ],
+    [
+     80.1637092,
+     12.8454008
+    ],
+    [
+     80.1640798,
+     12.8456754
+    ],
+    [
+     80.1644522,
+     12.8459513
+    ],
+    [
+     80.1648116,
+     12.846239
+    ],
+    [
+     80.1648934,
+     12.8463423
+    ],
+    [
+     80.1649725,
+     12.8465332
+    ],
+    [
+     80.1650557,
+     12.8469477
+    ],
+    [
+     80.1650637,
+     12.8469921
+    ],
+    [
+     80.1650446,
+     12.8470156
+    ],
+    [
+     80.1650232,
+     12.847031
+    ],
+    [
+     80.1646976,
+     12.8470912
+    ],
+    [
+     80.1643684,
+     12.8471521
+    ],
+    [
+     80.1642437,
+     12.8471752
+    ]
+   ]
+  },
+  {
+   "from": "junction_123",
+   "to": "junction_120",
+   "distance_m": 173.7,
+   "walk_time_min": 2.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1598524,
+     12.8437615
+    ],
+    [
+     80.161242,
+     12.8429832
+    ]
+   ]
+  },
+  {
+   "from": "junction_124",
+   "to": "junction_64",
+   "distance_m": 109.5,
+   "walk_time_min": 1.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1597784,
+     12.8434421
+    ],
+    [
+     80.1603551,
+     12.8431368
+    ],
+    [
+     80.1603685,
+     12.8431198
+    ],
+    [
+     80.1603726,
+     12.8431015
+    ],
+    [
+     80.1603706,
+     12.8430819
+    ],
+    [
+     80.1603585,
+     12.8430584
+    ],
+    [
+     80.1603021,
+     12.8430113
+    ],
+    [
+     80.160162,
+     12.8428851
+    ]
+   ]
+  },
+  {
+   "from": "junction_125",
+   "to": "junction_96",
+   "distance_m": 135.7,
+   "walk_time_min": 1.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1596406,
+     12.8412671
+    ],
+    [
+     80.1608581,
+     12.8409821
+    ]
+   ]
+  },
+  {
+   "from": "junction_126",
+   "to": "junction_95",
+   "distance_m": 132.0,
+   "walk_time_min": 1.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1595405,
+     12.8409436
+    ],
+    [
+     80.1607243,
+     12.8406672
+    ]
+   ]
+  },
+  {
+   "from": "junction_127",
+   "to": "junction_126",
+   "distance_m": 42.7,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1594268,
+     12.8405759
+    ],
+    [
+     80.1595405,
+     12.8409436
+    ]
+   ]
+  },
+  {
+   "from": "junction_126",
+   "to": "junction_125",
+   "distance_m": 37.6,
+   "walk_time_min": 0.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1595405,
+     12.8409436
+    ],
+    [
+     80.1596406,
+     12.8412671
+    ]
+   ]
+  },
+  {
+   "from": "junction_125",
+   "to": "junction_128",
+   "distance_m": 40.2,
+   "walk_time_min": 0.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1596406,
+     12.8412671
+    ],
+    [
+     80.1597476,
+     12.8416129
+    ]
+   ]
+  },
+  {
+   "from": "junction_129",
+   "to": "junction_127",
+   "distance_m": 57.6,
+   "walk_time_min": 0.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1589107,
+     12.8407002
+    ],
+    [
+     80.1594268,
+     12.8405759
+    ]
+   ]
+  },
+  {
+   "from": "junction_127",
+   "to": "junction_94",
+   "distance_m": 126.0,
+   "walk_time_min": 1.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1594268,
+     12.8405759
+    ],
+    [
+     80.1605547,
+     12.8403043
+    ]
+   ]
+  },
+  {
+   "from": "junction_87",
+   "to": "junction_130",
+   "distance_m": 167.7,
+   "walk_time_min": 2.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1587538,
+     12.8399091
+    ],
+    [
+     80.1588437,
+     12.8402491
+    ],
+    [
+     80.1588692,
+     12.8402726
+    ],
+    [
+     80.1589268,
+     12.8402818
+    ],
+    [
+     80.1599863,
+     12.8400176
+    ]
+   ]
+  },
+  {
+   "from": "junction_88",
+   "to": "junction_130",
+   "distance_m": 41.3,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1598732,
+     12.8396629
+    ],
+    [
+     80.1599863,
+     12.8400176
+    ]
+   ]
+  },
+  {
+   "from": "junction_130",
+   "to": "junction_93",
+   "distance_m": 48.1,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1599863,
+     12.8400176
+    ],
+    [
+     80.1604132,
+     12.8398983
+    ]
+   ]
+  },
+  {
+   "from": "junction_70",
+   "to": "junction_131",
+   "distance_m": 31.6,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1562278,
+     12.8420032
+    ],
+    [
+     80.1563185,
+     12.8419105
+    ],
+    [
+     80.1564613,
+     12.84184
+    ]
+   ]
+  },
+  {
+   "from": "junction_131",
+   "to": "junction_72",
+   "distance_m": 202.9,
+   "walk_time_min": 2.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1564613,
+     12.84184
+    ],
+    [
+     80.1573028,
+     12.841505
+    ],
+    [
+     80.1573437,
+     12.841486
+    ],
+    [
+     80.1573772,
+     12.8414945
+    ],
+    [
+     80.1574181,
+     12.8415318
+    ],
+    [
+     80.1576963,
+     12.842124
+    ],
+    [
+     80.1577625,
+     12.842265
+    ]
+   ]
+  },
+  {
+   "from": "junction_72",
+   "to": "junction_110",
+   "distance_m": 153.8,
+   "walk_time_min": 2.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1577625,
+     12.842265
+    ],
+    [
+     80.1582577,
+     12.8431863
+    ],
+    [
+     80.1582556,
+     12.8432085
+    ],
+    [
+     80.1582451,
+     12.8432183
+    ],
+    [
+     80.1579658,
+     12.8433582
+    ]
+   ]
+  },
+  {
+   "from": "junction_110",
+   "to": "junction_114",
+   "distance_m": 126.0,
+   "walk_time_min": 1.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1579658,
+     12.8433582
+    ],
+    [
+     80.1575718,
+     12.8435374
+    ],
+    [
+     80.1575343,
+     12.8435358
+    ],
+    [
+     80.1574999,
+     12.8435202
+    ],
+    [
+     80.1574823,
+     12.8435005
+    ],
+    [
+     80.157385,
+     12.8433205
+    ],
+    [
+     80.1573484,
+     12.8432945
+    ],
+    [
+     80.1573195,
+     12.8432896
+    ],
+    [
+     80.1572903,
+     12.8432985
+    ],
+    [
+     80.1570809,
+     12.8433532
+    ],
+    [
+     80.1570343,
+     12.8433571
+    ],
+    [
+     80.1569886,
+     12.8433433
+    ]
+   ]
+  },
+  {
+   "from": "junction_132",
+   "to": "junction_128",
+   "distance_m": 68.2,
+   "walk_time_min": 0.9,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1591502,
+     12.8418038
+    ],
+    [
+     80.1597476,
+     12.8416129
+    ]
+   ]
+  },
+  {
+   "from": "junction_128",
+   "to": "junction_97",
+   "distance_m": 131.5,
+   "walk_time_min": 1.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1597476,
+     12.8416129
+    ],
+    [
+     80.1609329,
+     12.8413629
+    ]
+   ]
+  },
+  {
+   "from": "junction_29",
+   "to": "junction_33",
+   "distance_m": 88.1,
+   "walk_time_min": 1.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1545748,
+     12.8407021
+    ],
+    [
+     80.1545427,
+     12.8408285
+    ],
+    [
+     80.1544589,
+     12.8411519
+    ],
+    [
+     80.1544073,
+     12.8413526
+    ],
+    [
+     80.1543629,
+     12.8414662
+    ]
+   ]
+  },
+  {
+   "from": "junction_35",
+   "to": "junction_29",
+   "distance_m": 82.6,
+   "walk_time_min": 1.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1544719,
+     12.8414011
+    ],
+    [
+     80.1546313,
+     12.8407982
+    ],
+    [
+     80.1546323,
+     12.8407678
+    ],
+    [
+     80.1546246,
+     12.8407427
+    ],
+    [
+     80.1545748,
+     12.8407021
+    ]
+   ]
+  },
+  {
+   "from": "junction_38",
+   "to": "junction_40",
+   "distance_m": 142.7,
+   "walk_time_min": 1.9,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.153796,
+     12.8408672
+    ],
+    [
+     80.1537303,
+     12.8404698
+    ],
+    [
+     80.1537575,
+     12.8404149
+    ],
+    [
+     80.1538538,
+     12.8403644
+    ],
+    [
+     80.1539385,
+     12.8403419
+    ],
+    [
+     80.154055,
+     12.8403326
+    ],
+    [
+     80.1540951,
+     12.8403436
+    ],
+    [
+     80.1541169,
+     12.8403614
+    ],
+    [
+     80.1541372,
+     12.8403803
+    ],
+    [
+     80.154154,
+     12.8404071
+    ],
+    [
+     80.1542193,
+     12.8407884
+    ]
+   ]
+  },
+  {
+   "from": "junction_30",
+   "to": "junction_133",
+   "distance_m": 20.5,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1546626,
+     12.8399569
+    ],
+    [
+     80.1547467,
+     12.8399598
+    ],
+    [
+     80.1548515,
+     12.8399551
+    ]
+   ]
+  },
+  {
+   "from": "junction_133",
+   "to": "junction_134",
+   "distance_m": 78.4,
+   "walk_time_min": 1.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1548515,
+     12.8399551
+    ],
+    [
+     80.1548627,
+     12.8400186
+    ],
+    [
+     80.1551288,
+     12.8406044
+    ]
+   ]
+  },
+  {
+   "from": "junction_59",
+   "to": "junction_62",
+   "distance_m": 78.1,
+   "walk_time_min": 1.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1524587,
+     12.8359367
+    ],
+    [
+     80.1525284,
+     12.8359396
+    ],
+    [
+     80.152625,
+     12.8359416
+    ],
+    [
+     80.1526857,
+     12.8359579
+    ],
+    [
+     80.1527343,
+     12.835987
+    ],
+    [
+     80.1528074,
+     12.8360511
+    ],
+    [
+     80.1530712,
+     12.836254
+    ]
+   ]
+  },
+  {
+   "from": "junction_62",
+   "to": "junction_104",
+   "distance_m": 13.7,
+   "walk_time_min": 0.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1530712,
+     12.836254
+    ],
+    [
+     80.1531628,
+     12.8363395
+    ]
+   ]
+  },
+  {
+   "from": "junction_104",
+   "to": "junction_60",
+   "distance_m": 65.0,
+   "walk_time_min": 0.9,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1531628,
+     12.8363395
+    ],
+    [
+     80.1532868,
+     12.8364512
+    ],
+    [
+     80.1535242,
+     12.8368018
+    ]
+   ]
+  },
+  {
+   "from": "junction_60",
+   "to": "junction_68",
+   "distance_m": 103.9,
+   "walk_time_min": 1.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1535242,
+     12.8368018
+    ],
+    [
+     80.1535805,
+     12.8368481
+    ],
+    [
+     80.1537187,
+     12.8369239
+    ],
+    [
+     80.1538233,
+     12.8369749
+    ],
+    [
+     80.1540291,
+     12.8370514
+    ],
+    [
+     80.1543999,
+     12.8371671
+    ]
+   ]
+  },
+  {
+   "from": "junction_68",
+   "to": "junction_13",
+   "distance_m": 59.0,
+   "walk_time_min": 0.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1543999,
+     12.8371671
+    ],
+    [
+     80.1547339,
+     12.8372796
+    ],
+    [
+     80.1549183,
+     12.8373279
+    ]
+   ]
+  },
+  {
+   "from": "junction_135",
+   "to": "junction_136",
+   "distance_m": 25.5,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1534662,
+     12.8409566
+    ],
+    [
+     80.1536921,
+     12.840892
+    ]
+   ]
+  },
+  {
+   "from": "junction_137",
+   "to": "junction_138",
+   "distance_m": 12.8,
+   "walk_time_min": 0.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1531569,
+     12.8407375
+    ],
+    [
+     80.1532406,
+     12.8408192
+    ]
+   ]
+  },
+  {
+   "from": "junction_139",
+   "to": "junction_137",
+   "distance_m": 21.1,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1530063,
+     12.8406169
+    ],
+    [
+     80.1531569,
+     12.8407375
+    ]
+   ]
+  },
+  {
+   "from": "junction_138",
+   "to": "junction_140",
+   "distance_m": 4.1,
+   "walk_time_min": 0.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1532406,
+     12.8408192
+    ],
+    [
+     80.15326423595441,
+     12.8408479246721
+    ]
+   ]
+  },
+  {
+   "from": "junction_140",
+   "to": "junction_141",
+   "distance_m": 22.9,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15326423595441,
+     12.8408479246721
+    ],
+    [
+     80.1533962,
+     12.8410083
+    ]
+   ]
+  },
+  {
+   "from": "junction_141",
+   "to": "junction_23",
+   "distance_m": 86.3,
+   "walk_time_min": 1.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1533962,
+     12.8410083
+    ],
+    [
+     80.153486,
+     12.8411526
+    ],
+    [
+     80.1535544,
+     12.841316
+    ],
+    [
+     80.1535691,
+     12.8414795
+    ],
+    [
+     80.1535569,
+     12.8416363
+    ],
+    [
+     80.1535785,
+     12.8416933
+    ],
+    [
+     80.1535964,
+     12.8417385
+    ]
+   ]
+  },
+  {
+   "from": "junction_40",
+   "to": "junction_142",
+   "distance_m": 111.2,
+   "walk_time_min": 1.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1542193,
+     12.8407884
+    ],
+    [
+     80.1542935,
+     12.8411597
+    ],
+    [
+     80.1542886,
+     12.8411944
+    ],
+    [
+     80.1542613,
+     12.8412171
+    ],
+    [
+     80.1539078,
+     12.8412857
+    ],
+    [
+     80.1538791,
+     12.8412786
+    ],
+    [
+     80.1538606,
+     12.8412568
+    ],
+    [
+     80.15383717664251,
+     12.841115534673753
+    ]
+   ]
+  },
+  {
+   "from": "junction_142",
+   "to": "junction_38",
+   "distance_m": 28.0,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15383717664251,
+     12.841115534673753
+    ],
+    [
+     80.153796,
+     12.8408672
+    ]
+   ]
+  },
+  {
+   "from": "junction_136",
+   "to": "junction_38",
+   "distance_m": 11.6,
+   "walk_time_min": 0.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1536921,
+     12.840892
+    ],
+    [
+     80.1537458,
+     12.8408785
+    ],
+    [
+     80.153796,
+     12.8408672
+    ]
+   ]
+  },
+  {
+   "from": "junction_23",
+   "to": "junction_135",
+   "distance_m": 92.2,
+   "walk_time_min": 1.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1535964,
+     12.8417385
+    ],
+    [
+     80.1536402,
+     12.8416338
+    ],
+    [
+     80.15365,
+     12.8415398
+    ],
+    [
+     80.153646,
+     12.8413463
+    ],
+    [
+     80.1535825,
+     12.8411709
+    ],
+    [
+     80.1534662,
+     12.8409566
+    ]
+   ]
+  },
+  {
+   "from": "junction_33",
+   "to": "junction_119",
+   "distance_m": 22.2,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1543629,
+     12.8414662
+    ],
+    [
+     80.1542039,
+     12.8415921
+    ]
+   ]
+  },
+  {
+   "from": "junction_141",
+   "to": "junction_135",
+   "distance_m": 9.5,
+   "walk_time_min": 0.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1533962,
+     12.8410083
+    ],
+    [
+     80.1534662,
+     12.8409566
+    ]
+   ]
+  },
+  {
+   "from": "junction_135",
+   "to": "junction_143",
+   "distance_m": 30.5,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1534662,
+     12.8409566
+    ],
+    [
+     80.15330232339494,
+     12.840733560275545
+    ]
+   ]
+  },
+  {
+   "from": "junction_143",
+   "to": "junction_144",
+   "distance_m": 10.3,
+   "walk_time_min": 0.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15330232339494,
+     12.840733560275545
+    ],
+    [
+     80.1532471,
+     12.8406584
+    ]
+   ]
+  },
+  {
+   "from": "junction_22",
+   "to": "junction_145",
+   "distance_m": 35.9,
+   "walk_time_min": 0.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1527219,
+     12.8433777
+    ],
+    [
+     80.1523925,
+     12.8434135
+    ]
+   ]
+  },
+  {
+   "from": "junction_145",
+   "to": "junction_146",
+   "distance_m": 116.8,
+   "walk_time_min": 1.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1523925,
+     12.8434135
+    ],
+    [
+     80.152174,
+     12.8434278
+    ],
+    [
+     80.1513202,
+     12.8435099
+    ]
+   ]
+  },
+  {
+   "from": "junction_145",
+   "to": "junction_147",
+   "distance_m": 32.2,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1523925,
+     12.8434135
+    ],
+    [
+     80.15243648001797,
+     12.843699663316908
+    ]
+   ]
+  },
+  {
+   "from": "junction_147",
+   "to": "junction_19",
+   "distance_m": 50.1,
+   "walk_time_min": 0.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15243648001797,
+     12.843699663316908
+    ],
+    [
+     80.152505,
+     12.8441455
+    ]
+   ]
+  },
+  {
+   "from": "junction_148",
+   "to": "junction_149",
+   "distance_m": 8.9,
+   "walk_time_min": 0.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1539793,
+     12.84353
+    ],
+    [
+     80.1540379,
+     12.8435858
+    ]
+   ]
+  },
+  {
+   "from": "junction_149",
+   "to": "junction_150",
+   "distance_m": 28.6,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1540379,
+     12.8435858
+    ],
+    [
+     80.1541167,
+     12.8437362
+    ],
+    [
+     80.1541629,
+     12.8438118
+    ]
+   ]
+  },
+  {
+   "from": "junction_150",
+   "to": "junction_151",
+   "distance_m": 33.3,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1541629,
+     12.8438118
+    ],
+    [
+     80.1539448,
+     12.8440056
+    ],
+    [
+     80.15393570257353,
+     12.844013840648287
+    ]
+   ]
+  },
+  {
+   "from": "junction_151",
+   "to": "junction_152",
+   "distance_m": 83.5,
+   "walk_time_min": 1.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15393570257353,
+     12.844013840648287
+    ],
+    [
+     80.1537112,
+     12.8442172
+    ],
+    [
+     80.1536645,
+     12.844294
+    ],
+    [
+     80.1536208,
+     12.844308
+    ],
+    [
+     80.1533199,
+     12.8441861
+    ]
+   ]
+  },
+  {
+   "from": "junction_152",
+   "to": "junction_24",
+   "distance_m": 17.4,
+   "walk_time_min": 0.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1533199,
+     12.8441861
+    ],
+    [
+     80.1533061,
+     12.8441858
+    ],
+    [
+     80.1532761,
+     12.8442095
+    ],
+    [
+     80.1532029,
+     12.8442871
+    ]
+   ]
+  },
+  {
+   "from": "junction_37",
+   "to": "junction_153",
+   "distance_m": 110.8,
+   "walk_time_min": 1.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1560847,
+     12.8419744
+    ],
+    [
+     80.1560443,
+     12.8421722
+    ],
+    [
+     80.156024,
+     12.8422347
+    ],
+    [
+     80.1560178,
+     12.8422646
+    ],
+    [
+     80.1560232,
+     12.8423048
+    ],
+    [
+     80.1562073,
+     12.8426606
+    ],
+    [
+     80.15631880757526,
+     12.84289669250804
+    ]
+   ]
+  },
+  {
+   "from": "junction_153",
+   "to": "junction_113",
+   "distance_m": 74.3,
+   "walk_time_min": 1.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15631880757526,
+     12.84289669250804
+    ],
+    [
+     80.1566055,
+     12.8435037
+    ]
+   ]
+  },
+  {
+   "from": "junction_27",
+   "to": "junction_154",
+   "distance_m": 123.9,
+   "walk_time_min": 1.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1555831,
+     12.8440513
+    ],
+    [
+     80.1555798,
+     12.8439622
+    ],
+    [
+     80.1551908,
+     12.8433923
+    ],
+    [
+     80.1550484,
+     12.8432968
+    ],
+    [
+     80.1548885,
+     12.8432246
+    ]
+   ]
+  },
+  {
+   "from": "junction_149",
+   "to": "junction_155",
+   "distance_m": 41.9,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1540379,
+     12.8435858
+    ],
+    [
+     80.15436323495074,
+     12.843382434464756
+    ]
+   ]
+  },
+  {
+   "from": "junction_155",
+   "to": "junction_156",
+   "distance_m": 42.1,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15436323495074,
+     12.843382434464756
+    ],
+    [
+     80.1546898,
+     12.8431783
+    ]
+   ]
+  },
+  {
+   "from": "junction_156",
+   "to": "junction_154",
+   "distance_m": 22.1,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1546898,
+     12.8431783
+    ],
+    [
+     80.1548885,
+     12.8432246
+    ]
+   ]
+  },
+  {
+   "from": "junction_157",
+   "to": "junction_156",
+   "distance_m": 30.7,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.154554,
+     12.8429357
+    ],
+    [
+     80.1546898,
+     12.8431783
+    ]
+   ]
+  },
+  {
+   "from": "junction_26",
+   "to": "junction_150",
+   "distance_m": 92.9,
+   "walk_time_min": 1.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15449,
+     12.8445784
+    ],
+    [
+     80.1544428,
+     12.8443873
+    ],
+    [
+     80.1543802,
+     12.8442019
+    ],
+    [
+     80.1541629,
+     12.8438118
+    ]
+   ]
+  },
+  {
+   "from": "junction_134",
+   "to": "junction_158",
+   "distance_m": 56.8,
+   "walk_time_min": 0.8,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1551288,
+     12.8406044
+    ],
+    [
+     80.1552299,
+     12.840924
+    ],
+    [
+     80.1552933,
+     12.8410891
+    ]
+   ]
+  },
+  {
+   "from": "junction_158",
+   "to": "junction_159",
+   "distance_m": 15.2,
+   "walk_time_min": 0.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1552933,
+     12.8410891
+    ],
+    [
+     80.1552536,
+     12.8412206
+    ]
+   ]
+  },
+  {
+   "from": "junction_159",
+   "to": "junction_36",
+   "distance_m": 16.5,
+   "walk_time_min": 0.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1552536,
+     12.8412206
+    ],
+    [
+     80.1552107,
+     12.8413626
+    ]
+   ]
+  },
+  {
+   "from": "junction_158",
+   "to": "junction_160",
+   "distance_m": 92.7,
+   "walk_time_min": 1.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1552933,
+     12.8410891
+    ],
+    [
+     80.1559407,
+     12.8409653
+    ],
+    [
+     80.1561321,
+     12.840929
+    ]
+   ]
+  },
+  {
+   "from": "junction_160",
+   "to": "junction_161",
+   "distance_m": 21.6,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1561321,
+     12.840929
+    ],
+    [
+     80.1562453,
+     12.8409075
+    ],
+    [
+     80.15626374415417,
+     12.840987125804505
+    ]
+   ]
+  },
+  {
+   "from": "junction_161",
+   "to": "junction_162",
+   "distance_m": 70.8,
+   "walk_time_min": 0.9,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15626374415417,
+     12.840987125804505
+    ],
+    [
+     80.15640764534608,
+     12.841608365903754
+    ]
+   ]
+  },
+  {
+   "from": "junction_162",
+   "to": "junction_131",
+   "distance_m": 26.4,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.15640764534608,
+     12.841608365903754
+    ],
+    [
+     80.1564613,
+     12.84184
+    ]
+   ]
+  },
+  {
+   "from": "junction_159",
+   "to": "junction_163",
+   "distance_m": 56.1,
+   "walk_time_min": 0.7,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1552536,
+     12.8412206
+    ],
+    [
+     80.1557674,
+     12.8411602
+    ]
+   ]
+  },
+  {
+   "from": "junction_160",
+   "to": "junction_164",
+   "distance_m": 6.7,
+   "walk_time_min": 0.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1561321,
+     12.840929
+    ],
+    [
+     80.1561393,
+     12.8409884
+    ]
+   ]
+  },
+  {
+   "from": "junction_18",
+   "to": "junction_115",
+   "distance_m": 103.8,
+   "walk_time_min": 1.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1521091,
+     12.8444802
+    ],
+    [
+     80.1520929,
+     12.8445398
+    ],
+    [
+     80.152092,
+     12.8446498
+    ],
+    [
+     80.1525799,
+     12.845116
+    ],
+    [
+     80.1526719,
+     12.8451491
+    ]
+   ]
+  },
+  {
+   "from": "junction_163",
+   "to": "junction_165",
+   "distance_m": 10.3,
+   "walk_time_min": 0.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1557674,
+     12.8411602
+    ],
+    [
+     80.1558616,
+     12.8411493
+    ]
+   ]
+  },
+  {
+   "from": "junction_5",
+   "to": "junction_132",
+   "distance_m": 81.3,
+   "walk_time_min": 1.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1584376,
+     12.8420315
+    ],
+    [
+     80.1591502,
+     12.8418038
+    ]
+   ]
+  },
+  {
+   "from": "junction_166",
+   "to": "junction_167",
+   "distance_m": 20.1,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1531045,
+     12.8403901
+    ],
+    [
+     80.1530672,
+     12.8403631
+    ],
+    [
+     80.1530229,
+     12.8403498
+    ],
+    [
+     80.1529765,
+     12.8403516
+    ],
+    [
+     80.1529334,
+     12.8403679
+    ]
+   ]
+  },
+  {
+   "from": "junction_167",
+   "to": "junction_168",
+   "distance_m": 9.8,
+   "walk_time_min": 0.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1529334,
+     12.8403679
+    ],
+    [
+     80.1528984,
+     12.8403982
+    ],
+    [
+     80.1528774,
+     12.8404356
+    ]
+   ]
+  },
+  {
+   "from": "junction_168",
+   "to": "junction_139",
+   "distance_m": 28.8,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1528774,
+     12.8404356
+    ],
+    [
+     80.1528677,
+     12.8404779
+    ],
+    [
+     80.1528732,
+     12.8405207
+    ],
+    [
+     80.1528924,
+     12.8405596
+    ],
+    [
+     80.1529232,
+     12.8405905
+    ],
+    [
+     80.1529626,
+     12.8406103
+    ],
+    [
+     80.1530063,
+     12.8406169
+    ]
+   ]
+  },
+  {
+   "from": "junction_139",
+   "to": "junction_169",
+   "distance_m": 19.4,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1530063,
+     12.8406169
+    ],
+    [
+     80.1530499,
+     12.8406096
+    ],
+    [
+     80.1530889,
+     12.8405892
+    ],
+    [
+     80.1531192,
+     12.8405577
+    ],
+    [
+     80.1531383,
+     12.8405165
+    ]
+   ]
+  },
+  {
+   "from": "junction_169",
+   "to": "junction_166",
+   "distance_m": 15.1,
+   "walk_time_min": 0.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1531383,
+     12.8405165
+    ],
+    [
+     80.1531422,
+     12.8404714
+    ],
+    [
+     80.1531305,
+     12.8404276
+    ],
+    [
+     80.1531045,
+     12.8403901
+    ]
+   ]
+  },
+  {
+   "from": "junction_144",
+   "to": "junction_169",
+   "distance_m": 19.7,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1532471,
+     12.8406584
+    ],
+    [
+     80.1531383,
+     12.8405165
+    ]
+   ]
+  },
+  {
+   "from": "junction_170",
+   "to": "junction_168",
+   "distance_m": 19.8,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1527359,
+     12.8403238
+    ],
+    [
+     80.1528048,
+     12.8403828
+    ],
+    [
+     80.1528774,
+     12.8404356
+    ]
+   ]
+  },
+  {
+   "from": "junction_167",
+   "to": "junction_171",
+   "distance_m": 19.6,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1529334,
+     12.8403679
+    ],
+    [
+     80.1528947,
+     12.8403171
+    ],
+    [
+     80.1528137,
+     12.8402364
+    ]
+   ]
+  },
+  {
+   "from": "junction_111",
+   "to": "junction_172",
+   "distance_m": 197.6,
+   "walk_time_min": 2.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1586197,
+     12.8450688
+    ],
+    [
+     80.1592391,
+     12.8451193
+    ],
+    [
+     80.160332,
+     12.8446346
+    ]
+   ]
+  },
+  {
+   "from": "junction_133",
+   "to": "junction_31",
+   "distance_m": 233.1,
+   "walk_time_min": 3.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1548515,
+     12.8399551
+    ],
+    [
+     80.1554664,
+     12.8397831
+    ],
+    [
+     80.1555688,
+     12.8395295
+    ],
+    [
+     80.1553816,
+     12.8392311
+    ],
+    [
+     80.1553703,
+     12.8392302
+    ],
+    [
+     80.1551878,
+     12.8392585
+    ],
+    [
+     80.1550874,
+     12.8393366
+    ],
+    [
+     80.1550267,
+     12.8394037
+    ],
+    [
+     80.1548918,
+     12.8394355
+    ],
+    [
+     80.1545784,
+     12.8394786
+    ]
+   ]
+  },
+  {
+   "from": "junction_66",
+   "to": "junction_148",
+   "distance_m": 27.8,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1537985,
+     12.8433526
+    ],
+    [
+     80.1539793,
+     12.84353
+    ]
+   ]
+  },
+  {
+   "from": "junction_121",
+   "to": "junction_173",
+   "distance_m": 184.6,
+   "walk_time_min": 2.5,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1615487,
+     12.8437827
+    ],
+    [
+     80.1604265,
+     12.8442756
+    ],
+    [
+     80.1599965,
+     12.8444645
+    ]
+   ]
+  },
+  {
+   "from": "junction_4",
+   "to": "junction_174",
+   "distance_m": 169.0,
+   "walk_time_min": 2.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1586682,
+     12.8424546
+    ],
+    [
+     80.1589686,
+     12.8430851
+    ],
+    [
+     80.1590966,
+     12.843473
+    ],
+    [
+     80.1591648,
+     12.8437675
+    ],
+    [
+     80.1592282,
+     12.8438649
+    ]
+   ]
+  },
+  {
+   "from": "junction_174",
+   "to": "junction_175",
+   "distance_m": 84.1,
+   "walk_time_min": 1.1,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1592282,
+     12.8438649
+    ],
+    [
+     80.1595006,
+     12.8441637
+    ],
+    [
+     80.1595886,
+     12.8442693
+    ],
+    [
+     80.1596846,
+     12.8444688
+    ]
+   ]
+  },
+  {
+   "from": "junction_174",
+   "to": "junction_176",
+   "distance_m": 22.5,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1592282,
+     12.8438649
+    ],
+    [
+     80.1590367,
+     12.8439433
+    ]
+   ]
+  },
+  {
+   "from": "junction_6",
+   "to": "junction_177",
+   "distance_m": 74.2,
+   "walk_time_min": 1.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1578853,
+     12.8411387
+    ],
+    [
+     80.1580885,
+     12.8410527
+    ],
+    [
+     80.1582436,
+     12.8409676
+    ],
+    [
+     80.1583846,
+     12.840866
+    ],
+    [
+     80.1584677,
+     12.8407959
+    ]
+   ]
+  },
+  {
+   "from": "junction_178",
+   "to": "junction_109",
+   "distance_m": 18.9,
+   "walk_time_min": 0.3,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.157527,
+     12.8391325
+    ],
+    [
+     80.1576078,
+     12.8392833
+    ]
+   ]
+  },
+  {
+   "from": "junction_109",
+   "to": "junction_179",
+   "distance_m": 45.3,
+   "walk_time_min": 0.6,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1576078,
+     12.8392833
+    ],
+    [
+     80.1578184,
+     12.8396354
+    ]
+   ]
+  },
+  {
+   "from": "junction_7",
+   "to": "junction_180",
+   "distance_m": 30.9,
+   "walk_time_min": 0.4,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.157826,
+     12.8410615
+    ],
+    [
+     80.1575836,
+     12.8412069
+    ]
+   ]
+  },
+  {
+   "from": "junction_180",
+   "to": "junction_181",
+   "distance_m": 86.7,
+   "walk_time_min": 1.2,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1575836,
+     12.8412069
+    ],
+    [
+     80.1578222,
+     12.8417155
+    ],
+    [
+     80.1578771,
+     12.841713
+    ],
+    [
+     80.1580307,
+     12.841639
+    ]
+   ]
+  },
+  {
+   "from": "junction_180",
+   "to": "junction_9",
+   "distance_m": 150.4,
+   "walk_time_min": 2.0,
+   "estimated": false,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "walkway network from OpenStreetMap",
+   "geometry": [
+    [
+     80.1575836,
+     12.8412069
+    ],
+    [
+     80.1574113,
+     12.8412858
+    ],
+    [
+     80.1573548,
+     12.8412555
+    ],
+    [
+     80.1570326,
+     12.8404656
+    ],
+    [
+     80.1572486,
+     12.8403235
+    ]
+   ]
+  },
+  {
+   "from": "junction_52",
+   "to": "junction_146",
+   "distance_m": 130.0,
+   "walk_time_min": 1.7,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "link between disconnected OSM network fragments (estimated straight)",
+   "geometry": [
+    [
+     80.150272,
+     12.842941
+    ],
+    [
+     80.15132,
+     12.84351
+    ]
+   ]
+  },
+  {
+   "from": "junction_47",
+   "to": "junction_170",
+   "distance_m": 207.6,
+   "walk_time_min": 2.8,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "link between disconnected OSM network fragments (estimated straight)",
+   "geometry": [
+    [
+     80.150851,
+     12.840652
+    ],
+    [
+     80.152736,
+     12.840324
+    ]
+   ]
+  },
+  {
+   "from": "junction_57",
+   "to": "junction_73",
+   "distance_m": 371.1,
+   "walk_time_min": 4.9,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "link between disconnected OSM network fragments (estimated straight)",
+   "geometry": [
+    [
+     80.150121,
+     12.839183
+    ],
+    [
+     80.151578,
+     12.836163
+    ]
+   ]
+  },
+  {
+   "from": "junction_51",
+   "to": "junction_61",
+   "distance_m": 392.3,
+   "walk_time_min": 5.2,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "link between disconnected OSM network fragments (estimated straight)",
+   "geometry": [
+    [
+     80.150253,
+     12.839434
+    ],
+    [
+     80.152858,
+     12.836985
+    ]
+   ]
+  },
+  {
+   "from": "junction_172",
+   "to": "junction_173",
+   "distance_m": 40.9,
+   "walk_time_min": 0.5,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "link between disconnected OSM network fragments (estimated straight)",
+   "geometry": [
+    [
+     80.160332,
+     12.844635
+    ],
+    [
+     80.159997,
+     12.844465
+    ]
+   ]
+  },
+  {
+   "from": "junction_72",
+   "to": "junction_181",
+   "distance_m": 75.4,
+   "walk_time_min": 1.0,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "link between disconnected OSM network fragments (estimated straight)",
+   "geometry": [
+    [
+     80.157763,
+     12.842265
+    ],
+    [
+     80.158031,
+     12.841639
+    ]
+   ]
+  },
+  {
+   "from": "campus_main",
+   "to": "junction_143",
+   "distance_m": 17.1,
+   "walk_time_min": 0.2,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "AB1",
+   "to": "junction_152",
+   "distance_m": 46.1,
+   "walk_time_min": 0.6,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "AB2",
+   "to": "junction_153",
+   "distance_m": 14.6,
+   "walk_time_min": 0.2,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "AB3",
+   "to": "junction_155",
+   "distance_m": 32.7,
+   "walk_time_min": 0.4,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "admin_mba_block",
+   "to": "junction_39",
+   "distance_m": 9.9,
+   "walk_time_min": 0.1,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "library",
+   "to": "junction_142",
+   "distance_m": 17.5,
+   "walk_time_min": 0.2,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "guest_house",
+   "to": "junction_140",
+   "distance_m": 6.4,
+   "walk_time_min": 0.1,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "health_centre",
+   "to": "junction_162",
+   "distance_m": 15.8,
+   "walk_time_min": 0.2,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "jj_womens_hostel",
+   "to": "junction_178",
+   "distance_m": 33.6,
+   "walk_time_min": 0.4,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "ab1_amphitheatre",
+   "to": "junction_67",
+   "distance_m": 35.8,
+   "walk_time_min": 0.5,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "cricket_ground",
+   "to": "junction_157",
+   "distance_m": 87.4,
+   "walk_time_min": 1.2,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "basketball_court",
+   "to": "junction_42",
+   "distance_m": 30.3,
+   "walk_time_min": 0.4,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "tennis_court",
+   "to": "junction_43",
+   "distance_m": 37.2,
+   "walk_time_min": 0.5,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "swimming_pool",
+   "to": "junction_161",
+   "distance_m": 25.4,
+   "walk_time_min": 0.3,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "gymnasium",
+   "to": "junction_147",
+   "distance_m": 17.0,
+   "walk_time_min": 0.2,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "georgia_food_court",
+   "to": "junction_151",
+   "distance_m": 22.8,
+   "walk_time_min": 0.3,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "gazebo_food_court",
+   "to": "junction_34",
+   "distance_m": 23.6,
+   "walk_time_min": 0.3,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "dominos",
+   "to": "junction_21",
+   "distance_m": 13.1,
+   "walk_time_min": 0.2,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "car_parking",
+   "to": "junction_116",
+   "distance_m": 18.0,
+   "walk_time_min": 0.2,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  },
+  {
+   "from": "axis_bank_atm",
+   "to": "junction_47",
+   "distance_m": 1.2,
+   "walk_time_min": 0.0,
+   "estimated": true,
+   "is_accessible": true,
+   "has_stairs": false,
+   "note": "entrance connector to the walkway network (short, straight)",
+   "geometry": null
+  }
+ ]
+}

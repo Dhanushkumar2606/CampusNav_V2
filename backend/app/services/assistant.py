@@ -31,6 +31,20 @@ INTENT_PATTERNS = [
     # "Nearest canteen" / "What's near the auditorium"
     (re.compile(r"(?:nearest|closest)\s+([a-z0-9\s]+)", re.IGNORECASE), "nearest"),
     (re.compile(r"what'?s\s+near\s+(.+)", re.IGNORECASE), "near"),
+    # "from main block to the library" / "route from the hostel to the library"
+    (
+        re.compile(r"(?:route\s+)?from\s+(.+?)\s+to\s+(.+)", re.IGNORECASE),
+        "route_between",
+    ),
+    # Bare "main block to library" (no "from") — but never steal queries
+    # that already start with a navigation verb or "how".
+    (
+        re.compile(
+            r"^(?!(?:navigate|go|take\s+me|how)\b)(.+?)\s+to\s+(.+)$",
+            re.IGNORECASE,
+        ),
+        "route_between",
+    ),
     # "Navigate to CSE Block"
     (re.compile(r"(?:navigate|go|take\s+me)\s+to\s+(.+)", re.IGNORECASE), "navigate_to"),
     # "How do I get to main gate"
@@ -70,6 +84,10 @@ class AssistantResponse:
 
 _STRONG_SCORE = 60.0
 _ARTICLE_RE = re.compile(r"^(the|a|an)\s+", re.IGNORECASE)
+# Trailing chat filler ("please", "now", "show me") must not become part of
+# a route point phrase — "boys hostel please" is not a place name.
+_TRAILING_FILLER_RE = re.compile(r"(?:\s+(?:please|now|thanks|thank\s+you|show\s+me|bro|mate|quickly|fast))+\s*$", re.IGNORECASE)
+_EDGE_PUNCT_RE = re.compile(r"^[\s,.!?;:'\"-]+|[\s,.!?;:'\"-]+$")
 
 
 def _first_result(session: Session, query: str, campus_slug: str | None) -> dict[str, Any] | None:
@@ -83,6 +101,8 @@ def _first_result(session: Session, query: str, campus_slug: str | None) -> dict
     real candidate list instead of guessing.
     """
     phrase = _ARTICLE_RE.sub("", query.strip())
+    phrase = _TRAILING_FILLER_RE.sub("", phrase)
+    phrase = _EDGE_PUNCT_RE.sub("", phrase)
     if not phrase:
         return None
     results = run_search_campus(session, {"query": phrase, "campus": campus_slug or "", "limit": 5})
@@ -170,6 +190,67 @@ def assistant_query(
     elif user_location:
         origin = {"node_id": user_location, "label": user_location}
 
+    if intent == "route_between":
+        origin_phrase = slots.get("1", "").strip()
+        dest_phrase = slots.get("2", "").strip()
+        origin_hit = _first_result(session, origin_phrase, campus_slug)
+        dest = _first_result(session, dest_phrase, campus_slug)
+        if origin_hit is None or dest is None:
+            results = call("search_campus", {"query": query, "campus": campus_slug or "", "limit": 5})
+            missing = origin_phrase if origin_hit is None else dest_phrase
+            return AssistantResponse(
+                kind="search",
+                text=f"I couldn't place “{missing}” as a route point. Here's what I found for “{query}”:",
+                data={"results": results.get("results", [])},
+                tool_calls=calls,
+            )
+        if origin_hit.get("slug") == dest.get("slug"):
+            return AssistantResponse(
+                kind="info",
+                text=f"You picked the same place for both ends — {dest['label']}.",
+                tool_calls=calls,
+            )
+        route_args: dict[str, Any] = {
+            "campus": dest.get("campus_slug") or campus_slug or "",
+            "source": origin_hit.get("slug") or origin_hit.get("id"),
+            "destination": dest.get("slug") or dest.get("id"),
+            "mode": "shortest",
+            "require_accessible": False,
+        }
+        route = call("calculate_route", route_args)
+        if "error" in route:
+            return AssistantResponse(
+                kind="error",
+                text=(
+                    f"I found {origin_hit['label']} and {dest['label']} but couldn't compute a route"
+                    + (f" ({route['error']})." if route.get("error") else ".")
+                ),
+                data={"destination": dest},
+                tool_calls=calls,
+            )
+        text = (
+            f"Here's the {route['mode']} route from {origin_hit['label']} to {dest['label']}: "
+            f"{route['total_distance_m']} m, about {route['estimated_walk_time_min']} min."
+        )
+        return AssistantResponse(
+            kind="route",
+            text=text,
+            data={
+                "destination": {**dest, "id": dest.get("slug") or dest.get("id")},
+                "origin": {
+                    "id": origin_hit.get("slug") or origin_hit.get("id"),
+                    "label": origin_hit["label"],
+                    "campus_slug": dest.get("campus_slug") or campus_slug or "",
+                },
+                "require_accessible": False,
+                "mode": route_args["mode"],
+                "total_distance_m": route.get("total_distance_m"),
+                "estimated_walk_time_min": route.get("estimated_walk_time_min"),
+                "step_count": route.get("step_count"),
+            },
+            tool_calls=calls,
+        )
+
     if intent in ("navigate_to", "class_with_time"):
         phrase = slots.get("1", "").strip()
         dest = _first_result(session, phrase, campus_slug)
@@ -227,8 +308,14 @@ def assistant_query(
             kind="route",
             text=text,
             data={
-                "destination": dest,
-                "origin": origin,
+                # Node ids for the map: slug = node label for both ends, so
+                # the frontend can resolve them against the campus graph.
+                "destination": {**dest, "id": dest.get("slug") or dest.get("id")},
+                "origin": (
+                    {**origin, "id": origin["node_id"]}
+                    if origin
+                    else {"id": "main_gate", "label": "Main Gate", "campus_slug": dest.get("campus_slug") or campus_slug or ""}
+                ),
                 "require_accessible": route_args.get("require_accessible", False),
                 "mode": route_args.get("mode", "shortest"),
                 "time_constraint_min": int(minutes) if minutes else time_constraint_min,

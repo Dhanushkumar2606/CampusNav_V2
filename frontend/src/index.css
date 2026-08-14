@@ -16,28 +16,66 @@
     --muted-foreground: 226 30% 68%;  /* brand.subtle */
     --accent: 172 66% 50%;            /* brand.cyan (teal) */
     --accent-foreground: 225 55% 6%;
+    --card: 225 47% 10%;              /* brand.navy  */
+    --card-foreground: 220 55% 94%;
+    --popover: 225 42% 15%;           /* brand.surface */
+    --popover-foreground: 220 55% 94%;
+    --destructive: 0 91% 55%;
+    --destructive-foreground: 220 55% 94%;
     --border: 224 40% 22%;
     --input: 224 40% 22%;
     --ring: 160 84% 39%;
     --radius: 0.75rem;
+
+    /* Brand palette as HSL variables so `brand.*` utilities flip with the
+       theme (dark values = the /BRANDING.md navy set). */
+    --brand-deep: 224 52% 6%;
+    --brand-navy: 226 52% 10%;
+    --brand-surface: 225 46% 14%;
+    --brand-muted: 226 40% 18%;
+    --brand-text: 219 55% 94%;
+    --brand-subtle: 222 31% 68%;
+    --brand-green: 160 84% 39%;
+    --brand-cyan: 172 66% 50%;
+    --brand-purple: 234 89% 74%;
+    --brand-amber: 38 92% 50%;
+    --brand-danger: 0 91% 71%;
   }
 
   .light {
     /* Light theme tokens — inverse of dark for premium feel. */
-    --background: 220 55% 94%;        /* brand.text  */
-    --foreground: 225 55% 6%;         /* brand.deep  */
-    --primary: 160 84% 39%;           /* brand.green (emerald) */
-    --primary-foreground: 220 55% 94%;
-    --secondary: 220 55% 94%;         /* brand.text */
-    --secondary-foreground: 225 55% 6%;
-    --muted: 220 55% 80%;
-    --muted-foreground: 225 42% 30%;
-    --accent: 172 66% 50%;            /* brand.cyan (teal) */
-    --accent-foreground: 220 55% 94%;
-    --border: 224 40% 70%;
-    --input: 224 40% 70%;
-    --ring: 160 84% 39%;
+    --background: 220 40% 97%;
+    --foreground: 225 45% 13%;
+    --primary: 160 84% 36%;           /* emerald — darker on light surfaces */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 38% 92%;
+    --secondary-foreground: 225 45% 13%;
+    --muted: 220 38% 92%;
+    --muted-foreground: 225 25% 38%;
+    --accent: 172 70% 36%;            /* teal — readable on near-white */
+    --accent-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 225 45% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 45% 13%;
+    --destructive: 0 84% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 30% 84%;
+    --input: 220 30% 84%;
+    --ring: 160 84% 36%;
     --radius: 0.75rem;
+
+    --brand-deep: 220 40% 97%;
+    --brand-navy: 220 36% 93%;
+    --brand-surface: 220 28% 97%;
+    --brand-muted: 220 30% 86%;
+    --brand-text: 225 45% 13%;
+    --brand-subtle: 225 25% 40%;
+    --brand-green: 160 84% 36%;
+    --brand-cyan: 172 70% 36%;
+    --brand-purple: 234 70% 60%;
+    --brand-amber: 38 92% 46%;
+    --brand-danger: 0 84% 55%;
   }
 
   * {
@@ -182,3 +220,20 @@
   background: transparent;
   border: none;
 }
+.cn-pin-icon {
+  background: transparent;
+  border: none;
+}
+
+/* ----- Map / overlay layer stacking cheat-sheet -----
+   MapLibre (WebGL)     Leaflet (fallback)
+   ---------------      ---------------
+   osm raster (base)    tile layer (base)
+   campus-edges         edge polylines (graph debug only, hidden by default)
+   route-line-casing    casing polylines (pair per step)
+   route-line           main polylines (pair per step)
+   nodes-dot/hit        node divIcons
+   nodes-label          tooltips
+   ui overlays          ui overlays
+   z-50 bottom sheet / z-60 dropdown portal   (React, above the map)
+------------------------------------------------------------------ */

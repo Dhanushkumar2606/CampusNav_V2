@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { prettyLabel } from "@/lib/brand";
 import { searchCampus, addFavorite, getCampusCategories } from "@/api/search";
 import { listCampuses } from "@/api/navigation";
+import { CampusHub } from "@/features/explore/CampusHub";
 import type { SearchResult, CategoryOut } from "@/lib/navigation-types";
 
 const RECENT_SEARCHES_KEY = "campusnav:recent-searches";
@@ -59,6 +60,7 @@ export function Explore() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [showBuildingDetail, setShowBuildingDetail] = useState<SearchResult | null>(null);
+  const [retryTick, setRetryTick] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Load recent searches on mount
@@ -148,7 +150,7 @@ export function Explore() {
       });
 
     return () => controller.abort();
-  }, [debouncedQuery, category]);
+  }, [debouncedQuery, category, retryTick]);
 
   // Update URL when query or category changes (but not on initial load)
   useEffect(() => {
@@ -345,11 +347,16 @@ export function Explore() {
 
       {/* Results */}
       <div className="flex-1 overflow-y-auto p-0 md:px-4 md:pb-6">
+        {debouncedQuery === "" ? (
+          <CampusHub onNavigate={(slug) => navigate(`/map?campus=${slug}`)} />
+        ) : (
         <StateWrapper
           status={status === "loading" ? "loading" : status === "error" ? "error" : status === "empty" ? "success" : "success"}
           loadingMessage="Searching…"
           errorMessage="Could not load results. Please try again."
           emptyMessage={debouncedQuery ? `No results for “${debouncedQuery}”` : "Start typing to search the campus"}
+          onRetry={() => setRetryTick((t) => t + 1)}
+          skeleton={{ rows: 4, className: "h-20" }}
         >
           {status === "success" && results.length > 0 && (
             <div className="space-y-3" role="listbox" aria-label="Search results">
@@ -422,6 +429,7 @@ export function Explore() {
             </div>
           )}
         </StateWrapper>
+        )}
       </div>
 
       {/* Building Detail Bottom Sheet */}

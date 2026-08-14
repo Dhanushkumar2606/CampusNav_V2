@@ -14,6 +14,7 @@ import type { ReactNode } from "react";
 
 import {
   getGraph,
+  getCampusesNear,
   listBuildings,
   listCampuses,
   postRoute,
@@ -24,6 +25,7 @@ import type { Building, Campus, GraphPayload, Route, RouteMode } from "@/lib/nav
 import { nearestNode, type NearestNodeOut } from "@/api/navigation";
 import { boundsFromNodes } from "@/lib/geo";
 import { useLiveLocation, type LocateResult } from "@/features/map/useLiveLocation";
+import { buildRouteGeometryModel, projectOnRoute } from "@/features/navigation/routeProgress";
 
 export type Bounds2D = [[number, number], [number, number]];
 export type RouteRequestStatus = "idle" | "loading" | "ok" | "error";
@@ -47,9 +49,26 @@ export interface MapController {
 
 export interface NavSession {
   active: boolean;
+  phase: "navigating" | "arrived";
   stepIndex: number;
   startedAt: number | null;
+  /** Remaining route distance from the latest processed GPS fix, or null. */
+  remainingM: number | null;
+  /** ETA seconds from the latest processed fix (pace-smoothed), or null. */
+  etaSec: number | null;
+  /** True when the live fix has drifted off the route (awaiting re-route). */
+  offRoute: boolean;
 }
+
+const IDLE_NAV: NavSession = {
+  active: false,
+  phase: "navigating",
+  stepIndex: 0,
+  startedAt: null,
+  remainingM: null,
+  etaSec: null,
+  offRoute: false,
+};
 
 interface HydratableSearchParams {
   get(name: string): string | null;
@@ -112,6 +131,10 @@ interface CampusRouteContextValue {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** Where the user last explored; the map reopens there next time. */
+const LAST_CAMPUS_KEY = "campusnav:last-campus";
+const NEAR_RADIUS_M = 200_000;
+
 const CampusRouteContext = createContext<CampusRouteContextValue | undefined>(undefined);
 
 export function CampusRouteProvider({ children }: { children: ReactNode }) {
@@ -136,17 +159,46 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
   // Campus currently reflected in the session, for cheap change detection in
   // hydrate (avoids nuking the loaded graph on same-campus URL re-syncs).
   const lastCampusRef = useRef<string | null>(null);
+  // True when the URL pinned a campus — geo auto-detect must not override it.
+  const explicitCampusRef = useRef(false);
   // One-shot: hydrating from a URL with both endpoints should auto-run the
   // route once the graph is present (sharing stays one click away).
   const autoRouteRef = useRef(false);
-  const setSourceIdSafe = useCallback((id: string | null) => {
-    pendingLabelsRef.current.source = null;
-    setSourceId(id);
+  // Live mirrors of the endpoint ids for change detection in the safe
+  // setters — state setters are async, and re-setting the same id (e.g. a
+  // hydration re-sync) must not nuke a freshly calculated route.
+  const sourceIdRef = useRef<string | null>(null);
+  const destinationIdRef = useRef<string | null>(null);
+  const clearRoute = useCallback(() => {
+    setRoute(null);
+    setAlternatives([]);
+    setActiveAltIndex(-1);
+    setRouteStatus("idle");
+    setRouteError(null);
+    setNavSession(IDLE_NAV);
   }, []);
-  const setDestinationIdSafe = useCallback((id: string | null) => {
-    pendingLabelsRef.current.destination = null;
-    setDestinationId(id);
-  }, []);
+  const setSourceIdSafe = useCallback(
+    (id: string | null) => {
+      pendingLabelsRef.current.source = null;
+      if (sourceIdRef.current !== id) {
+        sourceIdRef.current = id;
+        clearRoute();
+      }
+      setSourceId(id);
+    },
+    [clearRoute],
+  );
+  const setDestinationIdSafe = useCallback(
+    (id: string | null) => {
+      pendingLabelsRef.current.destination = null;
+      if (destinationIdRef.current !== id) {
+        destinationIdRef.current = id;
+        clearRoute();
+      }
+      setDestinationId(id);
+    },
+    [clearRoute],
+  );
   const [requireAccessible, setRequireAccessible] = useState(false);
   const [mode, setMode] = useState<RouteMode>("shortest");
   const [avoidStairs, setAvoidStairs] = useState(false);
@@ -157,9 +209,14 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
   const [routeStatus, setRouteStatus] = useState<RouteRequestStatus>("idle");
   const [routeError, setRouteError] = useState<string | null>(null);
 
-  const [edgesVisible, setEdgesVisible] = useState(true);
+  // Campus pathway overlay (the raw graph). Off by default — normal users
+  // see the computed route, not the routing network. Set
+  // VITE_SHOW_GRAPH_DEBUG=true to paint every edge for development.
+  const [edgesVisible, setEdgesVisible] = useState(
+    () => import.meta.env.VITE_SHOW_GRAPH_DEBUG === "true",
+  );
   const [mapController, setMapController] = useState<MapController | null>(null);
-  const [navSession, setNavSession] = useState<NavSession>({ active: false, stepIndex: 0, startedAt: null });
+  const [navSession, setNavSession] = useState<NavSession>(IDLE_NAV);
   const [nearestNodeHit, setNearestNodeHit] = useState<NearestNodeOut | null>(null);
 
   const locate = useLiveLocation();
@@ -200,6 +257,11 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
   }, [campusSlug, locate.status, locate.coords]);
 
   // ---- load campuses once -------------------------------------------------
+  // Default campus selection: URL param (set by hydrate) wins; otherwise the
+  // last campus from localStorage; otherwise a geolocation auto-detect; the
+  // featured campus is the fallback. Only the fallback is applied before the
+  // geo lookup resolves, so the map paints instantly and re-targets when the
+  // fix arrives.
   useEffect(() => {
     let cancelled = false;
     listCampuses()
@@ -207,7 +269,21 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
         setCampuses(cs);
         setLoadingCampuses(false);
-        if (cs.length > 0) setCampusSlug((prev) => prev ?? cs[0].slug);
+        if (cs.length === 0) return;
+        setCampusSlug((prev) => {
+          if (prev) return prev;
+          try {
+            const stored = localStorage.getItem(LAST_CAMPUS_KEY);
+            if (stored && cs.some((c) => c.slug === stored)) {
+              lastCampusRef.current = stored;
+              return stored;
+            }
+          } catch {
+            // ignore storage errors
+          }
+          const featured = cs.find((c) => c.featured);
+          return featured?.slug ?? cs[0].slug;
+        });
       })
       .catch((err: unknown) => {
         if (cancelled) return;
@@ -219,9 +295,50 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Auto-detect (one-shot at boot): when no campus was pinned — no URL
+  // param (hydrate has already run) and nothing stored — ask for a GPS fix
+  // and hop to the nearest catalog centroid. Runs strictly before the
+  // campuses load resolves, so it can't be cancelled by that state change.
+  useEffect(() => {
+    if (campusSlug || explicitCampusRef.current) return;
+    if (!("geolocation" in navigator)) return;
+    try {
+      if (localStorage.getItem(LAST_CAMPUS_KEY)) return;
+    } catch {
+      // ignore storage errors
+    }
+    let cancelled = false;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (cancelled) return;
+        getCampusesNear(pos.coords.latitude, pos.coords.longitude, { radiusM: NEAR_RADIUS_M })
+          .then((near) => {
+            if (cancelled || near.length === 0 || lastCampusRef.current) return;
+            selectCampus(near[0].slug);
+          })
+          .catch(() => {
+            // cold fallback stays selected
+          });
+      },
+      () => {
+        // permission denied / no fix — the fallback campus stays
+      },
+      { timeout: 8000, maximumAge: 300_000 },
+    );
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ---- fetch graph on campus change ---------------------------------------
   const selectCampus = useCallback((slug: string) => {
     lastCampusRef.current = slug;
+    try {
+      localStorage.setItem(LAST_CAMPUS_KEY, slug);
+    } catch {
+      // ignore storage errors
+    }
     setCampusSlug(slug);
     // Node ids are campus-scoped — stale selections must not leak across.
     setSourceId(null);
@@ -260,31 +377,40 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
   // /map?destination=central_library resolves to a node id and then fetches
   // the route without a button press.
   useEffect(() => {
-    if (autoRouteRef.current && sourceId && destinationId) {
-      autoRouteRef.current = false;
-      setTimeout(() => findRouteRef.current?.(), 0);
-      return;
-    }
+    // Resolve deep-link labels FIRST: they live in a ref and arrive on a
+    // different render than the ids, and the one-shot auto-route below must
+    // run against the RESOLVED endpoints. Skipping this and early-returning
+    // on the auto-route branch would strand a fresh destination as pending
+    // whenever a route already exists (e.g. a GPS-snapped follow-up query
+    // while the previous route is still on screen) — the map would then
+    // keep routing to the old place while the chat reports the new one.
     const pending = pendingLabelsRef.current;
-    if (!graph || (!pending.source && !pending.destination && !pending.place)) return;
     let srcId = sourceId;
     let dstId = destinationId;
-    if (pending.source && graph.labels?.[pending.source]) {
+    let placeId = place;
+    if (pending.source && graph?.labels?.[pending.source]) {
       srcId = graph.labels[pending.source];
       pending.source = null;
     }
-    if (pending.destination && graph.labels?.[pending.destination]) {
+    if (pending.destination && graph?.labels?.[pending.destination]) {
       dstId = graph.labels[pending.destination];
       pending.destination = null;
     }
-    let placeId = place;
-    if (pending.place && graph.labels?.[pending.place]) {
+    if (pending.place && graph?.labels?.[pending.place]) {
       placeId = graph.labels[pending.place];
       pending.place = null;
     }
     if (srcId !== sourceId) setSourceId(srcId);
     if (dstId !== destinationId) setDestinationId(dstId);
     if (placeId !== place) setPlace(placeId);
+    // One-shot auto-route (deep links, chat route intents): hold the flag
+    // until the campus graph is present AND both endpoints resolve — on a
+    // fresh load or a campus switch the graph arrives in a later render
+    // than the node ids, and findRoute needs it.
+    if (autoRouteRef.current && graph && srcId && dstId) {
+      autoRouteRef.current = false;
+      setTimeout(() => findRouteRef.current?.(), 0);
+    }
   }, [graph, sourceId, destinationId, place, pendingTick]);
 
   // ---- building details for the active campus -----------------------------
@@ -308,37 +434,48 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
   }, [graph?.campus.slug]);
 
   // ---- route request ------------------------------------------------------
-  const findRoute = useCallback(async () => {
-    if (!graph || !sourceId || !destinationId) return;
-    setRouteStatus("loading");
-    setRouteError(null);
-    setAlternatives([]);
-    setActiveAltIndex(-1);
-    try {
-      const res = await postRoute(graph.campus.slug, {
-        source_id: sourceId,
-        destination_id: destinationId,
-        require_accessible: requireAccessible,
-        heuristic: "haversine",
-        mode,
-        avoid_stairs: avoidStairs,
-        alternatives: 3,
-      });
-      if (res.status === "ok" && res.route) {
-        setRoute(res.route);
-        setAlternatives(res.alternatives ?? []);
-        setRouteStatus("ok");
-      } else {
+  const findRoute = useCallback(
+    async (overrides?: { sourceId?: string | null }) => {
+      const srcId = overrides?.sourceId ?? sourceId;
+      if (!graph || !srcId || !destinationId) return;
+      setRouteStatus("loading");
+      setRouteError(null);
+      setAlternatives([]);
+      setActiveAltIndex(-1);
+      try {
+        const res = await postRoute(graph.campus.slug, {
+          source_id: srcId,
+          destination_id: destinationId,
+          require_accessible: requireAccessible,
+          heuristic: "haversine",
+          mode,
+          avoid_stairs: avoidStairs,
+          alternatives: 3,
+        });
+        if (res.status === "ok" && res.route) {
+          setRoute(res.route);
+          setAlternatives(res.alternatives ?? []);
+          setRouteStatus("ok");
+          // A fresh route supersedes any navigation progress: after an
+          // off-route re-route the walker restarts from the snapped origin.
+          setNavSession((prev) =>
+            prev.active
+              ? { ...prev, phase: "navigating", stepIndex: 0, offRoute: false, remainingM: null, etaSec: null }
+              : prev,
+          );
+        } else {
+          setRoute(null);
+          setRouteError(routeErrorMessage(res.status, res.error));
+          setRouteStatus("error");
+        }
+      } catch (err) {
         setRoute(null);
-        setRouteError(routeErrorMessage(res.status, res.error));
+        setRouteError(transportErrorMessage(err));
         setRouteStatus("error");
       }
-    } catch (err) {
-      setRoute(null);
-      setRouteError(transportErrorMessage(err));
-      setRouteStatus("error");
-    }
-  }, [graph, sourceId, destinationId, requireAccessible, mode, avoidStairs]);
+    },
+    [graph, sourceId, destinationId, requireAccessible, mode, avoidStairs],
+  );
 
   const pickAlternative = useCallback(
     (index: number) => {
@@ -349,15 +486,6 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
     [alternatives],
   );
 
-  const clearRoute = useCallback(() => {
-    setRoute(null);
-    setAlternatives([]);
-    setActiveAltIndex(-1);
-    setRouteStatus("idle");
-    setRouteError(null);
-    setNavSession({ active: false, stepIndex: 0, startedAt: null });
-  }, []);
-
   // ---- map controller registry --------------------------------------------
   const registerMapController = useCallback((c: MapController) => {
     setMapController(c);
@@ -367,27 +495,224 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
     setMapController((prev) => (prev?.kind === kind ? null : prev));
   }, []);
 
+  // ---- auto re-route on preference changes ---------------------------------
+  // The Find button (or a deep link) drives the FIRST request. After that,
+  // any change to the route inputs — mode, accessible-only, avoid-stairs,
+  // endpoints, campus or graph — immediately re-runs the request so the map
+  // always shows the route for the currently selected preferences. Guarded
+  // by a last-key ref so stable re-renders never re-fire, and skipped while
+  // an active navigation session is in progress.
+  const recalcKeyRef = useRef<string | null>(null);
+  const recalcKey = `${campusSlug}|${sourceId ?? ""}|${destinationId ?? ""}|${mode}|${requireAccessible}|${avoidStairs}`;
+  useEffect(() => {
+    if (!graph || !sourceId || !destinationId || navSession.active) return;
+    // No route yet and no failed attempt: wait for the Find button or the
+    // one-shot deep-link auto-route. Once a route exists (or the last
+    // request failed) an input change re-runs the calculation.
+    if (route === null && routeStatus !== "error") return;
+    if (recalcKeyRef.current === recalcKey) return;
+    recalcKeyRef.current = recalcKey;
+    // Drop the stale route and its alternatives so the map never shows the
+    // previous preferences' path while the new request is in flight.
+    setRoute(null);
+    setAlternatives([]);
+    setActiveAltIndex(-1);
+    void findRouteRef.current?.();
+  }, [recalcKey, graph, route, routeStatus, navSession.active, sourceId, destinationId]);
+
   // ---- navigation session --------------------------------------------------
   const findRouteRef = useRef<typeof findRoute | null>(null);
   findRouteRef.current = findRoute;
 
-  const startNavigation = useCallback(() => {
-    setNavSession({ active: true, stepIndex: 0, startedAt: Date.now() });
+  const updateNavSession = useCallback((patch: Partial<NavSession>) => {
+    setNavSession((prev) => ({ ...prev, ...patch }));
   }, []);
 
+  const startNavigation = useCallback(() => {
+    // Start from where you are: with a live fix, re-run the route from the
+    // snapped node so the session and the walker share the user's real
+    // origin instead of the last planned source. The route response lands
+    // before the next fix and restarts the walker at step 0 (findRoute
+    // resets the session phase when active).
+    const snap = nearestNodeHit;
+    if (snap && sourceId && destinationId && snap.node_id !== sourceId) {
+      void findRouteRef.current?.({ sourceId: snap.node_id });
+    }
+    setNavSession({
+      active: true,
+      phase: "navigating",
+      stepIndex: 0,
+      startedAt: Date.now(),
+      remainingM: null,
+      etaSec: null,
+      offRoute: false,
+    });
+    // Walking navigation needs a live GPS fix — kick the locator off as
+    // part of starting, so the walker actually tracks without the user
+    // having to remember the locate button.
+    locate.locate();
+  }, [locate, nearestNodeHit, sourceId, destinationId]);
+
   const cancelNavigation = useCallback(() => {
-    setNavSession({ active: false, stepIndex: 0, startedAt: null });
+    setNavSession(IDLE_NAV);
   }, []);
 
   const setNavStep = useCallback((index: number) => {
     setNavSession((prev) => ({ ...prev, stepIndex: Math.max(0, index) }));
   }, []);
 
+  // ---- live tracking engine (GPS -> nav state) -----------------------------
+  // Projects each fix onto the route geometry and drives stepIndex/arrival/
+  // remaining/ETA/off-route. Accuracy-gated: fixes worse than 40 m cannot
+  // advance steps or declare arrival, and a step boundary must be crossed
+  // twice (hysteresis) before the instruction turns over. Off-route episodes
+  // trigger one automatic re-route from the snapped node.
+  const NAV_FIX_MAX_ACCURACY_M = 40;
+  const NAV_FIX_COARSE_ACCURACY_M = 80;
+  const NAV_ARRIVED_M = 20;
+  const NAV_OFFROUTE_M = 50;
+  const NAV_OFFROUTE_CLEAR_M = 30;
+  const NAV_FALLBACK_SPEED_MPS = 75 / 60;
+  const paceSamplesRef = useRef<number[]>([]);
+  const lastFixRef = useRef<{ at: number; distM: number } | null>(null);
+  const crossedRef = useRef<{ step: number; count: number } | null>(null);
+  const reRouteInFlightRef = useRef(false);
+
+  // Fresh sessions start with clean tracking state.
+  useEffect(() => {
+    if (navSession.active) {
+      paceSamplesRef.current = [];
+      lastFixRef.current = null;
+      crossedRef.current = null;
+      reRouteInFlightRef.current = false;
+    }
+  }, [navSession.active]);
+
+  useEffect(() => {
+    if (!navSession.active || navSession.phase === "arrived" || !route || !graph) return;
+    const fix = locate.coords;
+    if (locate.status !== "ok" || !fix) return;
+    // Two-tier accuracy gate: a coarse fix (40-80 m — typical phone GPS in
+    // a canyon or indoors) still refreshes remaining distance and ETA, but
+    // only a fine fix may advance steps, declare arrival or judge off-route
+    // (those decisions need decimeter-grade projection). Junk fixes
+    // (> 80 m) are ignored entirely.
+    if (fix.accuracyM > NAV_FIX_COARSE_ACCURACY_M) return;
+    const coarse = fix.accuracyM > NAV_FIX_MAX_ACCURACY_M;
+
+    const model = buildRouteGeometryModel(route, graph);
+    if (model.totalM <= 0 || model.polyline.length < 2) return;
+    const proj = projectOnRoute(fix.lat, fix.lng, model);
+
+    // Arrival: the projection has effectively reached the end of the route.
+    if (!coarse && (model.totalM - proj.distM <= NAV_ARRIVED_M || proj.frac >= 0.99)) {
+      updateNavSession({ phase: "arrived", remainingM: 0, etaSec: 0, offRoute: false });
+      return;
+    }
+
+    // Step advance with 2-fix hysteresis: a boundary must be crossed on two
+    // consecutive processed fixes before the step turns over, so jitter
+    // around a turn can't flip instructions back and forth.
+    if (!coarse) {
+      if (proj.stepIndex > navSession.stepIndex) {
+        const crossed = crossedRef.current;
+        if (crossed && crossed.step === proj.stepIndex) {
+          crossedRef.current = null;
+          updateNavSession({ stepIndex: proj.stepIndex });
+        } else {
+          crossedRef.current = { step: proj.stepIndex, count: 1 };
+        }
+      } else if (proj.stepIndex < navSession.stepIndex) {
+        // GPS regressed behind the current step — wait for a stable re-cross.
+        crossedRef.current = null;
+      } else {
+        crossedRef.current = null;
+      }
+    }
+
+    // Remaining distance + ETA with pace smoothing (A2): instantaneous
+    // speed between fixes, median of the last samples, capped to sanity.
+    const now = Date.now();
+    const last = lastFixRef.current;
+    const remainingM = Math.max(0, model.totalM - proj.distM);
+    let paceMps = NAV_FALLBACK_SPEED_MPS;
+    if (last && now - last.at >= 1000) {
+      const dt = (now - last.at) / 1000;
+      const speed = (proj.distM - last.distM) / dt;
+      if (speed > 0.2 && speed < 3) {
+        paceSamplesRef.current.push(speed);
+        if (paceSamplesRef.current.length > 5) paceSamplesRef.current.shift();
+      }
+      if (paceSamplesRef.current.length > 0) {
+        const sorted = [...paceSamplesRef.current].sort((a, b) => a - b);
+        paceMps = sorted[Math.floor(sorted.length / 2)];
+      }
+    }
+    lastFixRef.current = { at: now, distM: proj.distM };
+    const etaSec = Math.round(remainingM / Math.max(0.3, paceMps));
+
+    // Off-route detection + one-shot auto re-route (A4). Toggle thresholds
+    // are separate so a fix near the boundary doesn't flap the banner.
+    // Coarse fixes can't judge deviations — a blurry fix is already an
+    // uncertainty bubble of that size.
+    const nearStart = proj.frac < 0.03;
+    const offNow = !coarse && !nearStart && proj.offRouteM > NAV_OFFROUTE_M;
+    const cleared = proj.offRouteM < NAV_OFFROUTE_CLEAR_M;
+    if (offNow && !navSession.offRoute) {
+      updateNavSession({ offRoute: true, remainingM, etaSec });
+      if (nearestNodeHit && !reRouteInFlightRef.current) {
+        reRouteInFlightRef.current = true;
+        findRouteRef.current?.({ sourceId: nearestNodeHit.node_id })?.finally(() => {
+          reRouteInFlightRef.current = false;
+        });
+      }
+    } else if (cleared && navSession.offRoute) {
+      updateNavSession({ offRoute: false, remainingM, etaSec });
+    } else {
+      updateNavSession({ remainingM, etaSec });
+    }
+  }, [
+    navSession.active,
+    navSession.phase,
+    navSession.stepIndex,
+    navSession.offRoute,
+    route,
+    graph,
+    locate.status,
+    locate.coords,
+    nearestNodeHit,
+    updateNavSession,
+  ]);
+
+  // ---- map follows the walker (navigation mode) ---------------------------
+  // Throttled fly-along: recenters on the live fix when the user has moved
+  // meaningfully (or after a quiet period), so the walker stays in view
+  // without fighting every GPS jitter. Reset whenever a session ends.
+  const lastFollowRef = useRef<{ lat: number; lng: number; at: number } | null>(null);
+  useEffect(() => {
+    if (!navSession.active || navSession.phase === "arrived") {
+      lastFollowRef.current = null;
+      return;
+    }
+    const fix = locate.coords;
+    if (locate.status !== "ok" || !fix || !mapController) return;
+    if (fix.accuracyM > NAV_FIX_COARSE_ACCURACY_M) return;
+    const last = lastFollowRef.current;
+    const now = Date.now();
+    if (last) {
+      const moved = Math.hypot(fix.lat - last.lat, fix.lng - last.lng) * 111_320;
+      if (moved < 20 || now - last.at < 4000) return;
+    }
+    lastFollowRef.current = { lat: fix.lat, lng: fix.lng, at: now };
+    mapController.flyTo(fix.lat, fix.lng, 17);
+  }, [navSession.active, navSession.phase, locate.status, locate.coords, mapController]);
+
   // ---- URL hydration (called once by MapViewHost on mount) ----------------
   const hydrate = useCallback(
     (params: HydratableSearchParams) => {
       const campus = params.get("campus");
       if (campus) {
+        explicitCampusRef.current = true;
         setCampusSlug(campus);
         if (lastCampusRef.current !== campus) {
           lastCampusRef.current = campus;

@@ -7,7 +7,9 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import __version__
 from app.config import get_settings
@@ -34,18 +36,40 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(health.router)
-app.include_router(auth.router)
-app.include_router(navigation.router)
-app.include_router(discovery.router)
-app.include_router(favorites.router)
-app.include_router(preferences.router)
-app.include_router(admin.router)
-app.include_router(assistant.router)
+# The API is registered twice: bare (`/auth/login`, used by the Vite dev
+# proxy, which strips the `/api` prefix) and under `/api` (`/api/auth/login`,
+# used by the built SPA in production where no proxy exists).
+_BARE_ROUTERS = [
+    health.router,
+    auth.router,
+    navigation.router,
+    discovery.router,
+    favorites.router,
+    preferences.router,
+    admin.router,
+    assistant.router,
+]
+for router in _BARE_ROUTERS:
+    app.include_router(router)
+    app.include_router(router, prefix="/api")
 
-# Serve frontend SPA (mounted after API routes so API takes precedence)
+# Serve frontend SPA (mounted after API routes so API takes precedence).
+# SPA fallback: any unknown path (e.g. refreshing /register or /map) gets
+# index.html so the client-side router can render it, instead of a 404.
+# StaticFiles raises HTTPException(404) for missing files rather than
+# returning a 404 response, so the catch is on the exception.
+class SPAStaticFiles(StaticFiles):
+    async def get_response(self, path: str, scope) -> Response:
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            if exc.status_code != 404:
+                raise
+            return await super().get_response("index.html", scope)
+
+
 if os.path.isdir("frontend/dist"):
-    app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="static")
+    app.mount("/", SPAStaticFiles(directory="frontend/dist", html=True), name="static")
 
 
 @app.get("/api/root", tags=["root"])

@@ -32,8 +32,11 @@ Authorization: Bearer <access_token>
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/navigation/campuses` | — | List campuses `{id, name, slug, description}` |
+| GET | `/navigation/campuses` | — | List campuses `{id, name, slug, description, featured, center_lat, center_lng}` (catalog metadata for the Explore hub) |
+| GET | `/navigation/campuses/near?lat=&lng=&limit=&radius_m=` | — | Campuses ranked by haversine distance from a point, nearest first. Only campuses with a catalog centroid participate; `distance_m` is the honest great-circle distance in meters |
+| GET | `/navigation/campuses/{slug}/stats` | — | Cheap catalog counts `{campus_id, campus_slug, buildings, nodes, entrances, landmarks, transit, poi, edges, surveyed_edges}` — no graph loading |
 | GET | `/navigation/campuses/{slug}/graph` | — | Full graph: `{campus, nodes[], edges[], labels{}}` |
+| GET | `/navigation/campuses/{slug}/nearest-node?lat=&lng=` | — | Snap a GPS fix to the closest walkable node; `distance_m` is honest, never invented |
 | GET | `/navigation/campuses/{slug}/buildings` | — | Building list |
 | POST | `/navigation/campuses/{slug}/route` | — | Compute a route. See below |
 

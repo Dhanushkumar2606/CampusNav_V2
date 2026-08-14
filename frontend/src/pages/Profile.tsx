@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { getPreferences, updatePreferences } from "@/api/search";
@@ -17,21 +18,33 @@ import { useTheme } from "@/context/ThemeContext";
 export function Profile() {
   const { user, status, logout, getToken } = useAuth();
   const navigate = useNavigate();
-  const { theme, setTheme, toggleTheme } = useTheme();
+  const { theme, setTheme, toggleTheme, hasUserChosenTheme } = useTheme();
   const [prefs, setPrefs] = useState<PreferencesOut | null>(null);
+  const [prefsLoading, setPrefsLoading] = useState(false);
+  const [prefsError, setPrefsError] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const fetchPrefs = async () => {
     const token = await getToken();
     if (!token) return;
+    setPrefsLoading(true);
+    setPrefsError(false);
     try {
       const data = await getPreferences(token);
       setPrefs(data);
-      // Persisted theme preference wins over the local default on load.
-      if (data.theme === "dark" || data.theme === "light") setTheme(data.theme);
+      // Persisted theme preference seeds the theme only when the user has
+      // not already chosen one locally — never flip the UI on navigation.
+      if (
+        (data.theme === "dark" || data.theme === "light") &&
+        !hasUserChosenTheme()
+      ) {
+        setTheme(data.theme);
+      }
     } catch {
-      // ignore
+      setPrefsError(true);
+    } finally {
+      setPrefsLoading(false);
     }
   };
 
@@ -119,7 +132,24 @@ export function Profile() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {prefs && (
+            {prefsLoading ? (
+              <div className="space-y-4" role="status" aria-label="Loading preferences">
+                <Skeleton className="h-9 w-full" />
+                <Skeleton className="h-9 w-full" />
+                <Skeleton className="h-6 w-2/3" />
+                <Skeleton className="h-6 w-2/3" />
+                <Skeleton className="h-6 w-1/2" />
+              </div>
+            ) : prefsError ? (
+              <div className="flex flex-col items-start gap-3">
+                <p className="text-sm text-brand-danger">
+                  Couldn't load your preferences.
+                </p>
+                <Button variant="outline" size="sm" onClick={() => void fetchPrefs()}>
+                  Try again
+                </Button>
+              </div>
+            ) : prefs && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="units">Units</Label>

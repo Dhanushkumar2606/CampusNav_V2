@@ -71,7 +71,7 @@ export function useLiveLocation(): LiveLocation {
         status: denied ? "denied" : "unavailable",
         coords: null,
         error: denied
-          ? "Location permission denied. Enable it in your browser to use your current position."
+          ? "Location permission denied. Enable it for this site in your browser's settings, then tap locate again."
           : "Could not determine your location.",
       });
     };

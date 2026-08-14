@@ -8,7 +8,7 @@
  * are removed before re-adding. This keeps the hook safe to re-run
  * whenever the user picks a different campus.
  */
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 
 import type { GraphPayload } from "@/lib/navigation-types";
@@ -30,6 +30,27 @@ const LYR_EDGES_SUR = "edges-surveyed";
 const LYR_NODES_HIT = "nodes-hit";
 const LYR_NODES_DOT = "nodes-dot";
 const LYR_NODES_LABEL = "nodes-label";
+
+// The layers a normal user actually SEES. `nodes-hit` is deliberately not
+// in this set: it stays mounted (invisible paint) so node clicks keep
+// working while the raw graph is hidden.
+const LYR_GRAPH_VISIBLE = [
+  LYR_EDGES_EST,
+  LYR_EDGES_SUR,
+  LYR_NODES_DOT,
+  LYR_NODES_LABEL,
+] as const;
+
+/** Flip layout-visibility on every visible graph layer. */
+export function setGraphLayersVisible(
+  map: import("maplibre-gl").Map,
+  visible: boolean,
+) {
+  const value = visible ? "visible" : "none";
+  for (const id of LYR_GRAPH_VISIBLE) {
+    if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", value);
+  }
+}
 
 function nodesToFeatureCollection(graph: GraphPayload): FeatureCollection<Point> {
   return {
@@ -57,14 +78,19 @@ function edgesToFeatureCollection(graph: GraphPayload): FeatureCollection<LineSt
     const a = byId.get(e.from_id);
     const b = byId.get(e.to_id);
     if (!a || !b) continue;
+    // Follow the surveyed walkway shape when the edge has one; otherwise
+    // fall back to the straight line between the endpoints.
+    const coords: [number, number][] = e.geometry && e.geometry.length >= 2
+      ? e.geometry
+      : [
+          [a.lng, a.lat],
+          [b.lng, b.lat],
+        ];
     features.push({
       type: "Feature",
       geometry: {
         type: "LineString",
-        coordinates: [
-          [a.lng, a.lat],
-          [b.lng, b.lat],
-        ],
+        coordinates: coords,
       },
       properties: {
         id: e.id,
@@ -82,8 +108,12 @@ function removeIfExists(map: import("maplibre-gl").Map, kind: "source" | "layer"
   if (kind === "source" && map.getSource(name)) map.removeSource(name);
 }
 
-export function useGraphSources(graph: GraphPayload | null) {
+export function useGraphSources(graph: GraphPayload | null, edgesVisible: boolean) {
   const map = useMap();
+  // Latest toggle value without re-entering the (expensive) build effect;
+  // the sync effect below re-runs when the toggle flips.
+  const edgesVisibleRef = useRef(edgesVisible);
+  edgesVisibleRef.current = edgesVisible;
 
   useEffect(() => {
     if (!map || !graph) return;
@@ -145,6 +175,10 @@ export function useGraphSources(graph: GraphPayload | null) {
         layout: NODE_LABEL_LAYOUT,
         paint: NODE_LABEL_PAINT,
       });
+
+      // Newly added layers inherit the CURRENT toggle state, so the raw
+      // graph never flashes on — off by default for normal users.
+      setGraphLayersVisible(map, edgesVisibleRef.current);
     };
 
     if (map.isStyleLoaded()) {
@@ -157,6 +191,15 @@ export function useGraphSources(graph: GraphPayload | null) {
       cancelled = true;
     };
   }, [map, graph]);
+
+  // Sync the toggle into every visible layer, and re-apply once after the
+  // style loads (in case a graph arrived before the map did).
+  useEffect(() => {
+    if (!map) return;
+    const sync = () => setGraphLayersVisible(map, edgesVisibleRef.current);
+    sync();
+    if (!map.isStyleLoaded()) map.once("load", sync);
+  }, [map, edgesVisible]);
 }
 
 /** IDs the rest of the app needs to wire interactions. */

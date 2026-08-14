@@ -6,26 +6,28 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Brand palette — premium dark-navy + emerald/teal. Kept under the
-        // `brand.*` namespace so existing components keep compiling; swap
-        // values here, in `src/index.css`, and in `src/lib/brand.ts`
-        // (the non-CSS mirror used by MapLibre paint specs).
+        // Brand palette — premium dark-navy + emerald/teal, defined as HSL
+        // CSS variables (src/index.css) with dark values on `:root` and
+        // light overrides under `.light`, so every `brand.*` utility flips
+        // with the theme. Keep in sync with `src/index.css` and the JS
+        // mirror in `src/lib/brand.ts` (used by MapLibre paint specs, which
+        // stay on the dark palette by design).
         brand: {
-          deep: "#070B16",
-          navy: "#0C1226",
-          surface: "#131B33",
-          muted: "#1C2542",
-          text: "#E7EDF8",
-          subtle: "#94A3C7",
-          green: "#10B981",
-          cyan: "#2DD4BF",
-          purple: "#818CF8",
-          amber: "#F59E0B",
-          warning: "#F59E0B",
-          danger: "#F87171",
+          deep: "hsl(var(--brand-deep) / <alpha-value>)",
+          navy: "hsl(var(--brand-navy) / <alpha-value>)",
+          surface: "hsl(var(--brand-surface) / <alpha-value>)",
+          muted: "hsl(var(--brand-muted) / <alpha-value>)",
+          text: "hsl(var(--brand-text) / <alpha-value>)",
+          subtle: "hsl(var(--brand-subtle) / <alpha-value>)",
+          green: "hsl(var(--brand-green) / <alpha-value>)",
+          cyan: "hsl(var(--brand-cyan) / <alpha-value>)",
+          purple: "hsl(var(--brand-purple) / <alpha-value>)",
+          amber: "hsl(var(--brand-amber) / <alpha-value>)",
+          warning: "hsl(var(--brand-amber) / <alpha-value>)",
+          danger: "hsl(var(--brand-danger) / <alpha-value>)",
         },
-        // shadcn CSS variable bridge so the button (and any future
-        // shadcn components) renders against our dark navy by default.
+        // shadcn CSS variable bridge so shadcn components render against
+        // the active theme (dark navy by default, near-white on `.light`).
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: "hsl(var(--primary))",
@@ -36,6 +38,12 @@ const config: Config = {
         "muted-foreground": "hsl(var(--muted-foreground))",
         accent: "hsl(var(--accent))",
         "accent-foreground": "hsl(var(--accent-foreground))",
+        card: "hsl(var(--card))",
+        "card-foreground": "hsl(var(--card-foreground))",
+        popover: "hsl(var(--popover))",
+        "popover-foreground": "hsl(var(--popover-foreground))",
+        destructive: "hsl(var(--destructive))",
+        "destructive-foreground": "hsl(var(--destructive-foreground))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

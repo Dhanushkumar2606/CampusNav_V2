@@ -1,19 +1,49 @@
+/**
+ * NavStatusBar — the live turn-by-turn banner shown while navigation runs.
+ *
+ * Purely presentational: the GPS -> step/arrival/progress engine lives in
+ * CampusRouteContext (accuracy-gated, hysteresis, off-route re-route). This
+ * bar renders the current instruction + progress, announces steps by voice
+ * (speechSynthesis) and haptics (vibration) — both user-toggleable and
+ * persisted in localStorage — keeps the camera following the walker, and
+ * shows the arrival screen when the engine reports the route is done.
+ */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCampusRoute } from "../campus/CampusRouteContext";
-import { useToast } from "../../components/ui/toast";
-import { haversineMeters, bearingDegrees, boundsFromNodes } from "../../lib/geo";
+import { bearingDegrees, boundsFromNodes } from "../../lib/geo";
 
-const STEP_ADVANCE_M = 25;
-const ARRIVAL_M = 20;
-const WALK_SPEED_M_PER_MIN = 75;
+const CAMERA_FOLLOW_ZOOM = 17;
+const VOICE_KEY = "campusnav:voice";
+const HAPTICS_KEY = "campusnav:haptics";
+
+function voiceEnabled(): boolean {
+  return localStorage.getItem(VOICE_KEY) !== "off";
+}
+function hapticsEnabled(): boolean {
+  return localStorage.getItem(HAPTICS_KEY) !== "off";
+}
+
+function speak(text: string, enabled: boolean): void {
+  if (!enabled || !("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US";
+  u.rate = 1.05;
+  window.speechSynthesis.speak(u);
+}
+
+function buzz(ms: number | number[], enabled: boolean): void {
+  if (!enabled || !("vibrate" in navigator)) return;
+  navigator.vibrate(ms);
+}
 
 function formatMinutes(min: number): string {
   const whole = Math.max(1, Math.ceil(min));
   return `${whole} min`;
 }
 
-function formatArrival(minFromNow: number): string {
-  const d = new Date(Date.now() + minFromNow * 60_000);
+function formatArrival(secFromNow: number): string {
+  const d = new Date(Date.now() + secFromNow * 1000);
   return `~${d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
 }
 
@@ -25,35 +55,70 @@ export function NavStatusBar() {
     locate,
     mapController,
     cancelNavigation,
-    setNavStep,
   } = useCampusRoute();
   const [follow, setFollow] = useState(true);
-  const finishedRef = useRef(false);
+  const [voice, setVoice] = useState(voiceEnabled);
+  const [haptics, setHaptics] = useState(hapticsEnabled);
   const lastCheckedRef = useRef<{ lat: number; lng: number; at: number } | null>(null);
-  const { toast } = useToast();
+  const announcedRef = useRef(-1);
+  const headedToRef = useRef<string | null>(null);
+
   const destinationLabel = useMemo(() => {
     if (!graph || !route) return null;
     return graph.nodes.find((n) => n.id === route.destination)?.label ?? null;
   }, [graph, route]);
 
-  const step = navSession.active ? route?.steps ?? null : null;
+  const step = navSession.active ? (route?.steps ?? null) : null;
+  const arrived = navSession.active && navSession.phase === "arrived";
 
-  const remainingMeters = step
-    ? step.slice(navSession.stepIndex).reduce((acc, s) => acc + (s.distance_m ?? 0), 0)
-    : 0;
+  // ---- voice + haptic announcements: new step, or arrival -----------------
+  useEffect(() => {
+    if (!navSession.active || !route) {
+      announcedRef.current = -1;
+      return;
+    }
+    if (arrived) {
+      if (announcedRef.current !== -2) {
+        announcedRef.current = -2;
+        speak(`You have arrived at ${destinationLabel ?? "your destination"}`, voice);
+        buzz([60, 60, 120], haptics);
+      }
+      return;
+    }
+    const steps = route.steps;
+    const idx = navSession.stepIndex;
+    if (idx < 0 || idx >= steps.length) return;
+    if (announcedRef.current !== idx) {
+      announcedRef.current = idx;
+      const text = steps[idx].instruction ?? `Walk ${Math.round(steps[idx].distance_m)} meters`;
+      speak(text, voice);
+      buzz(60, haptics);
+    }
+  }, [navSession.active, navSession.stepIndex, arrived, route, destinationLabel, voice, haptics]);
 
-  const arrival = useMemo(() => {
-    if (!navSession.startedAt || remainingMeters <= 0 || !step) return null;
-    return { min: Math.max(1, Math.ceil(remainingMeters / WALK_SPEED_M_PER_MIN)) };
-  }, [navSession.startedAt, remainingMeters, step]);
+  const toggleVoice = () => {
+    setVoice((v) => {
+      const next = !v;
+      localStorage.setItem(VOICE_KEY, next ? "on" : "off");
+      if (next) speak("Voice guidance on", true);
+      return next;
+    });
+  };
+  const toggleHaptics = () => {
+    setHaptics((h) => {
+      const next = !h;
+      localStorage.setItem(HAPTICS_KEY, next ? "on" : "off");
+      buzz(40, next);
+      return next;
+    });
+  };
 
+  // ---- camera follow: glide to the fix, bearing toward the next node ------
   const checkPosition = useCallback(
     (lat: number, lng: number) => {
-      if (!navSession.active || !route || finishedRef.current) return;
+      if (!navSession.active) return;
       // Skip only when this identical fix was already processed very recently
-      // (prevents camera churn on duplicate GPS samples); every *new* fix is
-      // processed immediately so a position change can never fall in a
-      // throttle window unnoticed.
+      // (prevents camera churn on duplicate GPS samples).
       const prev = lastCheckedRef.current;
       const sameFix =
         prev !== null &&
@@ -62,35 +127,19 @@ export function NavStatusBar() {
         Date.now() - prev.at < 4000;
       if (sameFix) return;
       lastCheckedRef.current = { lat, lng, at: Date.now() };
+
+      const steps = route?.steps ?? [];
       const idx = navSession.stepIndex;
-      const steps = route.steps;
-      if (idx >= steps.length) return;
-      const node = graph?.nodes?.find((n) => n.id === steps[idx].to_node_id);
-      if (!node) return;
-      const d = haversineMeters(lat, lng, node.lat, node.lng);
-      if (d <= ARRIVAL_M && idx === steps.length - 1) {
-        finishedRef.current = true;
-        cancelNavigation();
-        toast({
-          title: `You've arrived at ${destinationLabel ?? "your destination"}`,
-          tone: "success",
-        });
-        return;
-      }
-      if (d <= STEP_ADVANCE_M && idx < steps.length - 1) {
-        setNavStep(idx + 1);
-        return;
-      }
+      const targetNode =
+        idx < steps.length ? graph?.nodes.find((n) => n.id === steps[idx].to_node_id) : null;
       if (!follow) return;
-      // Identical fix already flew the camera: nothing new to see.
-      if (prev && prev.lat === lat && prev.lng === lng) return;
-      mapController?.flyTo(lat, lng, 17);
-      if (mapController?.supportsBearing && idx < steps.length - 1 && d > 40) {
+      mapController?.flyTo(lat, lng, CAMERA_FOLLOW_ZOOM);
+      if (mapController?.supportsBearing && targetNode) {
         mapController.resetBearing();
-        mapController.setBearing(bearingDegrees(lat, lng, node.lat, node.lng));
+        mapController.setBearing(bearingDegrees(lat, lng, targetNode.lat, targetNode.lng));
       }
     },
-    [navSession.active, navSession.stepIndex, route, graph, follow, mapController, cancelNavigation, setNavStep, toast, destinationLabel],
+    [navSession.active, navSession.stepIndex, route, graph, follow, mapController],
   );
 
   useEffect(() => {
@@ -98,10 +147,6 @@ export function NavStatusBar() {
       checkPosition(locate.coords.lat, locate.coords.lng);
     }
   }, [locate, checkPosition]);
-
-  useEffect(() => {
-    if (!navSession.active) finishedRef.current = false;
-  }, [navSession.active]);
 
   // Navigation needs a live fix — request one when the session starts and
   // the user hasn't locked geolocation to denied/ok this page-lifetime yet.
@@ -113,59 +158,138 @@ export function NavStatusBar() {
   }, [navSession.active]);
 
   useEffect(() => {
-    if (navSession.active && route && graph) {
-      const coords = route.steps
-        .map((s) => graph.nodes.find((n) => n.id === s.to_node_id))
-        .filter((n): n is NonNullable<typeof n> => !!n)
-        .map((n) => ({ lat: n.lat, lng: n.lng }));
-      if (coords.length > 1) {
-        const bounds = boundsFromNodes(coords);
-        if (bounds) mapController?.flyToBounds(bounds);
-      }
+    if (!navSession.active || !route || !graph) return;
+    const headedTo = route.destination;
+    if (headedToRef.current === headedTo) return;
+    headedToRef.current = headedTo;
+    const nodes = route.steps
+      .map((s) => graph.nodes.find((n) => n.id === s.to_node_id))
+      .filter((n): n is NonNullable<typeof n> => !!n)
+      .map((n) => ({ lat: n.lat, lng: n.lng }));
+    if (nodes.length > 1) {
+      const bounds = boundsFromNodes(nodes);
+      if (bounds) mapController?.flyToBounds(bounds);
     }
   }, [navSession.active, route, graph, mapController]);
 
   if (!navSession.active || !step) return null;
 
   const hasFix = locate.status === "ok" && !!locate.coords;
-  const current = step[navSession.stepIndex];
   const total = step.length;
-  const progress = total > 0 ? Math.min(1, navSession.stepIndex / total) : 0;
+  const idx = navSession.stepIndex;
+  const current = idx < total ? step[idx] : null;
+  const remainingM = navSession.remainingM;
+  const etaSec = navSession.etaSec;
+
+  const timeText =
+    remainingM !== null
+      ? etaSec !== null
+        ? `${formatMinutes(etaSec / 60)} · ${formatArrival(etaSec)} · ${remainingM.toFixed(0)} m left`
+        : `${remainingM.toFixed(0)} m left`
+      : null;
+
+  const progressPct = (() => {
+    if (arrived) return 100;
+    if (remainingM === null || !route || route.total_distance_m <= 0) {
+      return total > 0 ? Math.min(100, (idx / total) * 100) : 4;
+    }
+    const done = route.total_distance_m - remainingM;
+    return Math.max(4, Math.min(100, (done / route.total_distance_m) * 100));
+  })();
 
   return (
-    <div className="pointer-events-auto absolute bottom-4 left-1/2 z-30 w-[min(92vw,420px)] -translate-x-1/2 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
-      <div className="flex items-start gap-3">
+    <div
+      className={
+        "pointer-events-auto absolute bottom-24 left-1/2 z-30 w-[min(92vw,420px)] -translate-x-1/2 rounded-xl border shadow-lg backdrop-blur md:bottom-4 " +
+        (arrived
+          ? "border-brand-green/50 bg-brand-navy/95"
+          : navSession.offRoute
+            ? "border-brand-amber/60 bg-brand-navy/95"
+            : "border-brand-muted bg-brand-navy/95")
+      }
+    >
+      <div className="flex items-start gap-3 p-3">
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
-            {navSession.stepIndex >= total
-              ? "Arrived"
-              : current?.instruction ?? "Getting ready…"}
-          </p>
-          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-            {navSession.stepIndex >= total
-              ? "You have reached your destination."
-              : step.length - navSession.stepIndex > 1
-                ? `${formatMinutes(arrival?.min ?? remainingMeters / WALK_SPEED_M_PER_MIN)} · ${formatArrival(arrival?.min ?? remainingMeters / WALK_SPEED_M_PER_MIN)} · ${remainingMeters.toFixed(0)} m left`
-                : `Last leg · ${remainingMeters.toFixed(0)} m left`}
-          </p>
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+          {arrived ? (
+            <>
+              <p className="text-sm font-semibold text-brand-green">
+                You've arrived at {destinationLabel ?? "your destination"}
+              </p>
+              <p className="mt-0.5 text-xs text-brand-subtle">
+                Navigation complete. End the session whenever you're ready.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="truncate text-sm font-semibold text-brand-text">
+                {current?.instruction ?? "Getting ready…"}
+              </p>
+              <p className="mt-0.5 text-xs text-brand-subtle">
+                {navSession.offRoute
+                  ? "Off the route — re-routing from your position…"
+                  : total - idx > 1
+                    ? `${timeText ?? "…"}`
+                    : `Last leg · ${remainingM !== null ? remainingM.toFixed(0) + " m" : "…"} left`}
+              </p>
+            </>
+          )}
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-brand-muted/50">
             <div
-              className="h-full rounded-full bg-teal-500 transition-all"
-              style={{ width: `${Math.max(4, progress * 100)}%` }}
+              className={
+                "h-full rounded-full transition-all " +
+                (arrived ? "bg-brand-green" : "bg-brand-cyan")
+              }
+              style={{ width: `${progressPct}%` }}
             />
           </div>
           {!hasFix && (
-            <p className="mt-1.5 text-xs font-medium text-amber-600 dark:text-amber-400">
-              GPS signal lost — steps won't auto-advance until it returns.
+            <p className="mt-1.5 text-xs font-medium text-brand-amber">
+              GPS signal lost — steps won't advance until it returns.
             </p>
           )}
         </div>
         <div className="flex shrink-0 flex-col gap-1.5">
           <button
+            type="button"
+            onClick={toggleVoice}
+            aria-label={voice ? "Disable voice guidance" : "Enable voice guidance"}
+            aria-pressed={voice}
+            title={voice ? "Voice guidance on" : "Voice guidance off"}
+            className="flex h-8 w-8 items-center justify-center rounded-md border border-brand-muted text-brand-subtle transition-colors hover:bg-brand-surface hover:text-brand-text"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M11 5 6 9H3v6h3l5 4V5z" strokeLinejoin="round" />
+              {voice ? <path d="M15.5 8.5a5 5 0 0 1 0 7" strokeLinecap="round" /> : <path d="M16 9l5 6M21 9l-5 6" strokeLinecap="round" />}
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={toggleHaptics}
+            aria-label={haptics ? "Disable haptics" : "Enable haptics"}
+            aria-pressed={haptics}
+            title={haptics ? "Haptics on" : "Haptics off"}
+            className="flex h-8 w-8 items-center justify-center rounded-md border border-brand-muted text-brand-subtle transition-colors hover:bg-brand-surface hover:text-brand-text"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              {haptics ? (
+                <>
+                  <path d="M6 8v8M10 5v14M14 7v10M18 9v6" strokeLinecap="round" />
+                </>
+              ) : (
+                <>
+                  <path d="M6 8v8M10 5v14M14 7v10M18 9v6" strokeLinecap="round" />
+                  <path d="M4 4l16 16" strokeLinecap="round" />
+                </>
+              )}
+            </svg>
+          </button>
+          <button
+            type="button"
             onClick={() => setFollow((f) => !f)}
             aria-label={follow ? "Stop following my location" : "Follow my location"}
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+            aria-pressed={follow}
             title={follow ? "Following location" : "Not following"}
+            className="flex h-8 w-8 items-center justify-center rounded-md border border-brand-muted text-brand-subtle transition-colors hover:bg-brand-surface hover:text-brand-text"
           >
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="3" />
@@ -173,9 +297,10 @@ export function NavStatusBar() {
             </svg>
           </button>
           <button
+            type="button"
             onClick={cancelNavigation}
             aria-label="End navigation"
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950"
+            className="flex h-8 w-8 items-center justify-center rounded-md border border-brand-red/40 text-brand-red transition-colors hover:bg-brand-red/10"
             title="End navigation"
           >
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -184,6 +309,17 @@ export function NavStatusBar() {
           </button>
         </div>
       </div>
+      {arrived ? (
+        <div className="border-t border-brand-muted/50 p-3">
+          <button
+            type="button"
+            onClick={cancelNavigation}
+            className="w-full rounded-lg border border-brand-green/40 bg-brand-green/10 py-2 text-sm font-medium text-brand-green transition-colors hover:bg-brand-green/20"
+          >
+            Done · Return to map
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

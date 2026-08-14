@@ -1,14 +1,14 @@
 import { createContext, useContext } from "react";
-import type { LayerGroup, Map as LeafletMap, Polyline } from "leaflet";
+import type { Layer, LayerGroup, Map as LeafletMap } from "leaflet";
 
 export interface LeafletMapValue {
   map: LeafletMap | null;
   /** Live handle to the graph-edges layer group (set by LeafletCanvas). */
   edgesGroup: LayerGroup | null;
-  /** Live handle to the route polyline (set by LeafletCanvas). */
-  routePolyline: Polyline | null;
+  /** Live handle to the route polylines group (set by LeafletCanvas). */
+  routePolyline: Layer | null;
   setEdgesGroup: (g: LayerGroup | null) => void;
-  setRoutePolyline: (p: Polyline | null) => void;
+  setRoutePolyline: (p: Layer | null) => void;
 }
 
 const LeafletContext = createContext<LeafletMapValue>({

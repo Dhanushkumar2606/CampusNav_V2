@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { Header } from "./Header";
 import { SideNav } from "./SideNav";
+import { PageTransition } from "@/components/ui/page-transition";
 
 /**
  * AppShell — the premium product shell.
@@ -23,7 +24,9 @@ export function AppShell() {
       <div className="flex min-h-0 flex-1">
         <SideNav />
         <main id="main-content" className="relative min-h-0 flex-1 overflow-hidden">
-          <Outlet />
+          <PageTransition>
+            <Outlet />
+          </PageTransition>
         </main>
       </div>
       <BottomNav />

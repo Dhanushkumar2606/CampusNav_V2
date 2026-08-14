@@ -43,40 +43,61 @@ export const OSM_RASTER_STYLE: StyleSpecification = {
   ],
 };
 
-/** Paint spec for estimated (gray dashed) edges. */
+/**
+ * Paint spec for estimated (gray dashed) edges — debug graph overlay only,
+ * hidden unless VITE_SHOW_GRAPH_DEBUG=true.
+ */
 export const ESTIMATED_LINE_PAINT = {
   "line-color": brand.subtle,
-  "line-width": 2,
+  "line-width": 1.5,
   "line-dasharray": [2, 2] as [number, number],
-  "line-opacity": 0.7,
+  "line-opacity": 0.6,
 };
 
-/** Paint spec for surveyed (neon green) edges. */
+/** Paint spec for surveyed (neon green) edges — debug graph overlay only. */
 export const SURVEYED_LINE_PAINT = {
   "line-color": brand.green,
-  "line-width": 3.5,
+  "line-width": 2.5,
+  "line-opacity": 0.75,
+};
+
+/**
+ * Route layer paints — a dark casing under a cyan main line (Google-Maps
+ * style). Both use round caps/joins; the main line's dash array switches
+ * per feature so estimated steps stay honest (dashed) instead of looking
+ * surveyed. Casing width must exceed the main width by a few px.
+ */
+export const ROUTE_CASING_PAINT = {
+  "line-color": brand.deep,
+  "line-width": 8,
   "line-opacity": 0.95,
 };
 
-/** Paint spec for the A\* route polyline overlay. */
 export const ROUTE_LINE_PAINT = {
   "line-color": brand.cyan,
-  "line-width": 4,
+  "line-width": 4.5,
   "line-opacity": 0.95,
+  "line-dasharray": [
+    "case",
+    ["==", ["get", "estimated"], true],
+    ["literal", [5, 4]],
+    ["literal", [1, 0]],
+  ] as unknown as number[],
 };
 
-/** Node dot circle paint spec (radius depends on `isBuilding`). */
+/** Node dot circle paint spec (radius depends on `isBuilding`). Subtle by
+ *  design: the dots are click targets + orientation, not the main show. */
 export const NODE_CIRCLE_PAINT = {
   "circle-radius": [
     "case",
     ["==", ["get", "isBuilding"], true],
-    6,
-    3,
+    4.5,
+    2.5,
   ] as unknown as number,
   "circle-color": brand.text,
   "circle-stroke-color": brand.navy,
-  "circle-stroke-width": 1.5,
-  "circle-opacity": 0.95,
+  "circle-stroke-width": 1,
+  "circle-opacity": 0.6,
 };
 
 /** Invisible click target — slightly larger than the visible dot. */

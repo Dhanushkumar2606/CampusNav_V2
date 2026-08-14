@@ -37,12 +37,49 @@ export function BottomSheet({
   const opacity = useTransform(dragY, [0, 200], [1, 0]);
   const sheetRef = React.useRef<HTMLDivElement | null>(null);
 
-  // Escape closes the sheet; focus lands on the first interactive element
-  // when it opens so keyboard users don't lose their place.
+  // Escape closes the sheet; while open, Tab is trapped inside so keyboard
+  // users can't reach the page behind the modal. Focus lands on the first
+  // interactive element when it opens.
   React.useEffect(() => {
     if (!open) return;
+    const sheet = sheetRef.current;
+    const focusables = () => {
+      if (!sheet) return [];
+      return Array.from(
+        sheet.querySelectorAll<HTMLElement>(
+          "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
+        ),
+      ).filter((el) => !el.hasAttribute("disabled"));
+    };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !e.defaultPrevented) onClose();
+      if (e.key === "Escape" && !e.defaultPrevented) {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      // A dropdown portaled to <body> (z-60, above this sheet) owns the
+      // keyboard while it's open — trapping Tab back into the sheet would
+      // make its search input unusable.
+      const openDropdown = document.querySelector('[data-dropdown-open="true"]');
+      if (openDropdown?.contains(document.activeElement)) return;
+      const els = focusables();
+      if (els.length === 0) {
+        e.preventDefault();
+        sheet?.focus();
+        return;
+      }
+      const first = els[0];
+      const last = els[els.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey) {
+        if (active === first || !sheet?.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (active === last || !sheet?.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
     const t = window.setTimeout(() => {
@@ -81,7 +118,7 @@ export function BottomSheet({
       <motion.div
         ref={sheetRef}
         role="dialog"
-        aria-modal="false"
+        aria-modal="true"
         aria-label={title}
         tabIndex={-1}
         initial={{ y: "100%" }}

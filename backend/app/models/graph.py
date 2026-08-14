@@ -108,6 +108,11 @@ class PathEdge(Base):
     is_indoor: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     is_outdoor: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     is_restricted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # Optional real walkway shape: WKT ``LINESTRING(lng lat, ...)``. NULL
+    # means the edge has no surveyed geometry (the client falls back to a
+    # straight line between the endpoints). Populated from OSM walkways by
+    # backend/scripts/osm_paths.py. Distance is measured along this shape.
+    geometry: Mapped[str | None] = mapped_column(String(2048), nullable=True)
 
     from_node: Mapped[PathNode] = relationship(
         "PathNode", foreign_keys=[from_node_id], back_populates="edges_from"

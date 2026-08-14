@@ -9,6 +9,8 @@ import { useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { CampusRouteProvider, useCampusRoute } from "@/features/campus/CampusRouteContext";
+import { getPreferences } from "@/api/search";
+import { useAuth } from "@/auth/AuthContext";
 import { MapView } from "./MapView";
 
 export function MapViewHost() {
@@ -47,6 +49,34 @@ function MapRouteSync() {
     }
     return m;
   }, [ctx.graph?.labels]);
+
+  // Apply the signed-in user's saved preferences (default mode, stairs,
+  // accessibility) as session defaults — but only when the URL doesn't
+  // already pin those values, so deep links and explicit choices win.
+  const { status: authStatus, getToken } = useAuth();
+  const prefsAppliedRef = useRef(false);
+  useEffect(() => {
+    if (authStatus !== "authenticated" || prefsAppliedRef.current) return;
+    if (searchParams.get("source") || searchParams.get("destination")) return;
+    prefsAppliedRef.current = true;
+    let cancelled = false;
+    const token = getToken();
+    if (!token) return;
+    getPreferences(token)
+      .then((p) => {
+        if (cancelled) return;
+        if (!searchParams.get("mode")) ctx.setMode(p.default_mode);
+        if (!searchParams.get("avoid_stairs")) ctx.setAvoidStairs(p.default_avoid_stairs);
+        if (!searchParams.get("accessible")) ctx.setRequireAccessible(p.default_require_accessible);
+      })
+      .catch(() => {
+        // Preferences are a soft default; a failed load changes nothing.
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authStatus]);
 
   useEffect(() => {
     const next = new URLSearchParams();

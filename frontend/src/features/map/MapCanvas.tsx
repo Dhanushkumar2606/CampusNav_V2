@@ -20,7 +20,7 @@ import { brand } from "@/lib/brand";
 import type { MapController } from "@/features/campus/CampusRouteContext";
 import { MapContext } from "./MapContext";
 import { MapUnavailable } from "./MapUnavailable";
-import { GRAPH_LAYER_IDS } from "./useGraphSources";
+import { setGraphLayersVisible } from "./useGraphSources";
 import { OSM_RASTER_STYLE, SRM_KTR_BOUNDS } from "./mapStyle";
 
 /** Coalesce bursts of failed tiles into a single reload pass. */
@@ -41,6 +41,7 @@ export function MapCanvas({
   onRegister,
   onUnregister,
   edgesVisible,
+  initialBounds,
 }: {
   children?: React.ReactNode;
   /** Called when WebGL dies after mount — the parent swaps to the Leaflet renderer. */
@@ -51,6 +52,9 @@ export function MapCanvas({
   onUnregister?: (kind: MapController["kind"]) => void;
   /** Whether the graph-edge layers are visible (driven by MapControls). */
   edgesVisible?: boolean;
+  /** Opening viewport for the active campus; the shared default is only
+   *  used when no campus data is known yet (first paint). */
+  initialBounds?: [[number, number], [number, number]];
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [map, setMap] = useState<MlMap | null>(null);
@@ -63,8 +67,8 @@ export function MapCanvas({
   onFallbackRef.current = onFallback;
   const handlersRef = useRef({ onRegister, onUnregister });
   handlersRef.current = { onRegister, onUnregister };
-  const edgesVisibleRef = useRef(edgesVisible);
-  edgesVisibleRef.current = edgesVisible;
+  const edgesVisibleRef = useRef<boolean>(false);
+  edgesVisibleRef.current = !!edgesVisible;
   const userMarkerRef = useRef<maplibregl.Marker | null>(null);
   const accuracyCleanupRef = useRef<(() => void) | null>(null);
   const [userMarkerEl] = useState(() => {
@@ -88,7 +92,9 @@ export function MapCanvas({
     const m = new maplibregl.Map({
       container: ref.current,
       style: OSM_RASTER_STYLE,
-      bounds: SRM_KTR_BOUNDS,
+      // Per-campus opening viewport; the SRM box is only the pre-data
+      // fallback — fit-on-campus-change re-aims once the campus resolves.
+      bounds: initialBounds ?? SRM_KTR_BOUNDS,
       fitBoundsOptions: { padding: 64 },
       attributionControl: { compact: true },
     });
@@ -174,12 +180,7 @@ export function MapCanvas({
         [bounds[1][1], bounds[1][0]],
       ] as [[number, number], [number, number]];
     const applyEdgesVisibility = () => {
-      const visible = edgesVisibleRef.current;
-      for (const id of [GRAPH_LAYER_IDS.edgesEstimated, GRAPH_LAYER_IDS.edgesSurveyed]) {
-        if (m.getLayer(id)) {
-          m.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
-        }
-      }
+      setGraphLayersVisible(m, edgesVisibleRef.current);
     };
     const controller: MapController = {
       kind: "maplibre",
@@ -205,45 +206,54 @@ export function MapCanvas({
       setUserAccuracy: (lat, lng, radiusM) => {
         accuracyCleanupRef.current?.();
         accuracyCleanupRef.current = null;
-        if (!radiusM || radiusM <= 0 || !m.isStyleLoaded()) return;
-        if (m.getLayer(ACCURACY_LAYER_ID)) m.removeLayer(ACCURACY_LAYER_ID);
-        if (m.getSource(ACCURACY_SOURCE_ID)) m.removeSource(ACCURACY_SOURCE_ID);
-        if (!m.getSource(ACCURACY_SOURCE_ID)) {
-          m.addSource(ACCURACY_SOURCE_ID, {
-            type: "geojson",
-            data: {
-              type: "FeatureCollection",
-              features: [
-                {
-                  type: "Feature",
-                  geometry: { type: "Point", coordinates: [lng, lat] },
-                  properties: {},
-                },
-              ],
-            },
-          });
-        }
-        m.addLayer({
-          id: ACCURACY_LAYER_ID,
-          type: "circle",
-          source: ACCURACY_SOURCE_ID,
-          paint: {
-            "circle-color": "rgba(45,212,191,0.15)",
-            "circle-stroke-color": "rgba(45,212,191,0.35)",
-            "circle-stroke-width": 1,
-            "circle-radius": 10, // placeholder; corrected on zoomend/moveend
-          },
-        });
-        const updateRadius = () => {
-          if (!m.isStyleLoaded() || !m.getLayer(ACCURACY_LAYER_ID)) return;
+        if (!radiusM || radiusM <= 0) return;
+        const draw = () => {
+          if (!m.isStyleLoaded()) return;
+          if (!m.getLayer(ACCURACY_LAYER_ID)) {
+            if (m.getSource(ACCURACY_SOURCE_ID)) m.removeSource(ACCURACY_SOURCE_ID);
+            m.addSource(ACCURACY_SOURCE_ID, {
+              type: "geojson",
+              data: {
+                type: "FeatureCollection",
+                features: [
+                  {
+                    type: "Feature",
+                    geometry: { type: "Point", coordinates: [lng, lat] },
+                    properties: {},
+                  },
+                ],
+              },
+            });
+            m.addLayer({
+              id: ACCURACY_LAYER_ID,
+              type: "circle",
+              source: ACCURACY_SOURCE_ID,
+              paint: {
+                "circle-color": "rgba(45,212,191,0.15)",
+                "circle-stroke-color": "rgba(45,212,191,0.35)",
+                "circle-stroke-width": 1,
+                "circle-radius": 10, // placeholder; corrected below
+              },
+            });
+          }
           const mPerPx = 156543.03392 * Math.cos((lat * Math.PI) / 180) / Math.pow(2, m.getZoom());
           m.setPaintProperty(ACCURACY_LAYER_ID, "circle-radius", Math.max(2, radiusM / mPerPx));
         };
-        updateRadius();
-        m.on("zoomend", updateRadius);
-        m.once("moveend", updateRadius);
+        if (!m.isStyleLoaded()) {
+          // Style still loading (common on the very first fix): create the
+          // halo as soon as it's ready instead of dropping it silently.
+          const onStyleLoad = () => draw();
+          m.once("style.load", onStyleLoad);
+          accuracyCleanupRef.current = () => {
+            m.off("style.load", onStyleLoad);
+          };
+          return;
+        }
+        draw();
+        m.on("zoomend", draw);
+        m.once("moveend", draw);
         accuracyCleanupRef.current = () => {
-          m.off("zoomend", updateRadius);
+          m.off("zoomend", draw);
         };
       },
     };
@@ -281,11 +291,7 @@ export function MapCanvas({
   // the sourcedata hook registered above).
   useEffect(() => {
     if (!map) return;
-    for (const id of [GRAPH_LAYER_IDS.edgesEstimated, GRAPH_LAYER_IDS.edgesSurveyed]) {
-      if (map.getLayer(id)) {
-        map.setLayoutProperty(id, "visibility", edgesVisible ? "visible" : "none");
-      }
-    }
+    setGraphLayersVisible(map, !!edgesVisible);
   }, [map, edgesVisible]);
 
   const onManualRetry = () => {

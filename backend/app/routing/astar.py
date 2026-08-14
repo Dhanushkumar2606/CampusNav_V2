@@ -58,6 +58,9 @@ class NavEdge:
     is_indoor: bool = False
     is_outdoor: bool = True
     surface_type: str | None = None
+    # Walked shape [lng, lat] in the edge's stored (from_id -> to_id)
+    # orientation; steps orient it explicitly when building the route.
+    geometry: list[list[float]] | None = None
     slope: float | None = None
 
 
@@ -99,6 +102,9 @@ class RouteStep:
     estimated: bool
     walk_time_min: float | None
     instruction: str | None = None
+    # [lng, lat] walkway shape oriented from_node_id -> to_node_id, so map
+    # renderers can draw the real path without re-deriving edge orientation.
+    geometry: list[list[float]] | None = None
 
 
 @dataclass(frozen=True)
@@ -200,6 +206,9 @@ class InMemoryGraph:
                     is_outdoor=e.is_outdoor,
                     surface_type=e.surface_type,
                     slope=e.slope,
+                    # The reversed clone's geometry runs from_id -> to_id of
+                    # the clone, i.e. the stored shape reversed.
+                    geometry=list(reversed(e.geometry)) if e.geometry else None,
                 )
             )
         return g
@@ -457,6 +466,9 @@ def _reconstruct(
         target = graph.node(cur)
         label = target.metadata.get("label") if target is not None else None
         instruction = _step_instruction(edge, target, label, cur == destination_id)
+        geom = edge.geometry
+        if geom and edge.from_id != prev:
+            geom = list(reversed(geom))
         steps.append(
             RouteStep(
                 from_node_id=prev,
@@ -466,6 +478,7 @@ def _reconstruct(
                 estimated=edge.estimated,
                 walk_time_min=edge.walk_time_min,
                 instruction=instruction,
+                geometry=geom,
             )
         )
         cur = prev

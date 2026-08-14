@@ -16,6 +16,11 @@ know something, it tells you honestly instead of guessing.
 The map (MapLibre) shows the real SRM Kattankulathur campus graph:
 buildings, path nodes, gates and transit stops.
 
+When you open the map without a specific campus, it tries to pick the right
+one for you: the last campus you explored wins; otherwise the nearest campus
+to your GPS fix (only if you allow location); otherwise the featured campus.
+You can always switch campuses from the routing panel.
+
 - **Click / tap any marker** to see place details and set it as origin or destination.
 - **Plan a route** in the left panel (desktop) or the sheet (mobile):
   1. Pick a *From* point and a *To* point.
@@ -30,6 +35,11 @@ buildings, path nodes, gates and transit stops.
 
 ## Explore
 
+- With no search text the page becomes a **campus hub**: cards for every
+  campus (featured ones first) with real counts — buildings, entrances,
+  landmarks, transit stops, walkable nodes and surveyed paths — plus a
+  **"Use my location"** row that ranks campuses by honest distance from
+  your fix. Tap a campus to open its map.
 - **Search** any building, department, landmark, gate or transit stop.
 - Filter by **category chips** (Buildings, Landmarks, Transit, Entrances).
 - Use **↑/↓ arrows + Enter** to navigate results from the keyboard, or click

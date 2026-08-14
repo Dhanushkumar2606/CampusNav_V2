@@ -54,9 +54,7 @@ export function Saved() {
   };
 
   const handleNavigate = (favorite: FavoriteOut) => {
-    if (favorite.target_type === "building") {
-      navigate(`/map?destination=${favorite.target_id}`);
-    }
+    navigate(`/map?destination=${favorite.target_id}`);
   };
 
   if (status !== "authenticated") {
@@ -68,6 +66,9 @@ export function Saved() {
           <p className="text-brand-subtle mb-6 max-w-xs">
             Bookmark buildings, save routes, and keep your frequent destinations handy.
           </p>
+          <Button variant="default" onClick={() => navigate("/login", { state: { from: "/saved" } })}>
+            Sign in
+          </Button>
         </div>
       </div>
     );
@@ -87,6 +88,8 @@ export function Saved() {
         loadingMessage="Loading your saved places…"
         errorMessage={error ?? "Could not load favorites"}
         emptyMessage="No saved places yet. Tap the bookmark on any building or route to keep it here."
+        onRetry={() => void fetchFavorites()}
+        skeleton={{ rows: 4, className: "h-16" }}
       >
         {favorites.length > 0 && (
           <div className="space-y-3" role="list">
@@ -128,6 +131,12 @@ export function Saved() {
                 </CardHeader>
               </Card>
             ))}
+            <div className="flex justify-center pt-2">
+              <Button variant="outline" size="sm" onClick={() => navigate("/explore")}>
+                <ArrowRight className="size-4" aria-hidden />
+                Discover more places
+              </Button>
+            </div>
           </div>
         )}
       </StateWrapper>

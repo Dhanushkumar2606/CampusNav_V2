@@ -45,6 +45,8 @@ from app.routing.astar import (
 )
 
 _WKT_RE = re.compile(r"POINT\s*\(\s*(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s*\)", re.IGNORECASE)
+_LINESTRING_RE = re.compile(r"LINESTRING\s*\((.*)\)", re.IGNORECASE)
+_COORD_PAIR_RE = re.compile(r"(-?\d+\.?\d*)\s+(-?\d+\.?\d*)")
 
 
 def _parse_point(wkt: str) -> tuple[float, float]:
@@ -53,6 +55,17 @@ def _parse_point(wkt: str) -> tuple[float, float]:
     if not m:
         raise ValueError(f"Invalid WKT: {wkt!r}")
     return float(m.group(1)), float(m.group(2))
+
+
+def _parse_linestring(wkt: str | None) -> list[list[float]] | None:
+    """WKT LINESTRING(lng lat, ...) -> [[lng, lat], ...], or None."""
+    if not wkt:
+        return None
+    m = _LINESTRING_RE.search(wkt)
+    if not m:
+        return None
+    pts = [[float(p.group(1)), float(p.group(2))] for p in _COORD_PAIR_RE.finditer(m.group(1))]
+    return pts if len(pts) >= 2 else None
 
 
 # ---------------------------------------------------------------------------
@@ -138,6 +151,7 @@ def build_campus_graph(session: Session, campus_id: UUID) -> InMemoryGraph:
                 is_outdoor=bool(e.is_outdoor),
                 surface_type=e.surface_type,
                 slope=float(e.slope) if e.slope is not None else None,
+                geometry=_parse_linestring(e.geometry),
             )
         )
 
@@ -223,6 +237,64 @@ def list_campus_edges(session: Session, campus_id: UUID) -> Sequence[PathEdge]:
 
 def list_campuses(session: Session) -> Sequence[Campus]:
     return session.execute(select(Campus).order_by(Campus.name)).scalars().all()
+
+
+def campus_stats(session: Session, campus_id: UUID) -> dict[str, int]:
+    """Catalog counts for one campus (used by the Explore hub cards)."""
+    nodes = session.execute(
+        select(PathNode).where(PathNode.campus_id == campus_id)
+    ).scalars().all()
+    edges = session.execute(
+        select(PathEdge)
+        .join(PathNode, PathEdge.from_node_id == PathNode.id)
+        .where(PathNode.campus_id == campus_id)
+    ).scalars().all()
+    buildings = len(session.execute(
+        select(Building).where(Building.campus_id == campus_id)
+    ).all())
+    kinds = {"entrances": 0, "landmarks": 0, "transit": 0, "poi": 0}
+    for n in nodes:
+        if n.kind is PathNodeKind.BUILDING_ENTRANCE:
+            kinds["entrances"] += 1
+        elif n.kind is PathNodeKind.LANDMARK:
+            kinds["landmarks"] += 1
+        elif n.kind is PathNodeKind.TRANSIT:
+            kinds["transit"] += 1
+        elif n.kind is PathNodeKind.POI:
+            kinds["poi"] += 1
+    return {
+        "buildings": buildings,
+        "nodes": len(nodes),
+        "entrances": kinds["entrances"],
+        "landmarks": kinds["landmarks"],
+        "transit": kinds["transit"],
+        "poi": kinds["poi"],
+        "edges": len(edges),
+        "surveyed_edges": sum(1 for e in edges if not e.is_estimated),
+    }
+
+
+def campuses_near(
+    session: Session,
+    lat: float,
+    lng: float,
+    limit: int = 10,
+    radius_m: float = 200_000,
+) -> list[tuple[Campus, float]]:
+    """Campuses sorted by great-circle distance from a point (centroid).
+
+    Only campuses with a catalog centroid participate; the returned
+    distance is honest (haversine, meters).
+    """
+    out: list[tuple[Campus, float]] = []
+    for campus in session.execute(select(Campus)).scalars().all():
+        if campus.center_lat is None or campus.center_lng is None:
+            continue
+        d = _haversine(lat, lng, campus.center_lat, campus.center_lng)
+        if d <= radius_m:
+            out.append((campus, round(d, 1)))
+    out.sort(key=lambda pair: pair[1])
+    return out[:limit]
 
 
 def get_campus_by_slug(session: Session, slug: str) -> Campus | None:

@@ -12,6 +12,29 @@ export interface Campus {
   name: string;
   slug: string;
   description: string | null;
+  /** Explore-hub flag: featured campuses render first. */
+  featured: boolean;
+  /** Catalog centroid for geo-ranking (null when the loader had no data). */
+  center_lat: number | null;
+  center_lng: number | null;
+}
+
+export interface CampusNear extends Campus {
+  /** Honest haversine distance from the query point (meters). */
+  distance_m: number;
+}
+
+export interface CampusStats {
+  campus_id: string;
+  campus_slug: string;
+  buildings: number;
+  nodes: number;
+  entrances: number;
+  landmarks: number;
+  transit: number;
+  poi: number;
+  edges: number;
+  surveyed_edges: number;
 }
 
 export interface Building {
@@ -60,6 +83,11 @@ export interface PathEdge {
   surface_type: string | null;
   slope: number | null;
   accessibility_verified: boolean;
+  /**
+   * Real walkway shape as [lng, lat] pairs (from OpenStreetMap), when the
+   * edge is surveyed. Null = straight line between the endpoints.
+   */
+  geometry: [number, number][] | null;
 }
 
 export interface GraphPayload {
@@ -78,6 +106,8 @@ export interface RouteStep {
   estimated: boolean;
   walk_time_min: number | null;
   instruction: string | null;
+  /** [lng, lat] walkway shape oriented from_node_id -> to_node_id. */
+  geometry: [number, number][] | null;
 }
 
 export interface Route {

@@ -69,6 +69,40 @@ def test_class_with_time_intent(client: TestClient) -> None:
     assert data["mode"] == "fastest"
 
 
+def test_route_between_intent(client: TestClient) -> None:
+    res = _query(client, "route from main block to the library")
+    assert res["kind"] == "route", res
+    data = res["data"]
+    assert data["origin"]["id"] == "main_block"
+    assert data["destination"]["id"] == "central_library"
+    assert data["mode"] == "shortest"
+    assert "main_block" not in (
+        str(data["destination"]["id"]),
+        str(data["destination"]["label"]),
+    )
+
+
+def test_route_between_without_from(client: TestClient) -> None:
+    res = _query(client, "main block to library")
+    assert res["kind"] == "route", res
+    assert res["data"]["origin"]["id"] == "main_block"
+    assert res["data"]["destination"]["id"] == "central_library"
+
+
+def test_route_between_main_gate_to_boys_hostel(client: TestClient) -> None:
+    res = _query(client, "main gate to boys hostel")
+    assert res["kind"] == "route", res
+    assert res["data"]["origin"]["id"] == "main_gate"
+    assert res["data"]["destination"]["id"] == "boys_hostel"
+
+
+def test_route_between_strips_filler_words(client: TestClient) -> None:
+    res = _query(client, "from main gate to boys hostel please")
+    assert res["kind"] == "route", res
+    assert res["data"]["origin"]["id"] == "main_gate"
+    assert res["data"]["destination"]["id"] == "boys_hostel"
+
+
 def test_unknown_intent_falls_back_to_search(client: TestClient) -> None:
     res = _query(client, "what time does the cafeteria close")
     assert res["kind"] in ("search", "info"), res

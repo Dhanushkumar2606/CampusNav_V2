@@ -15,7 +15,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { prettyLabel } from "@/lib/brand";
 import { formatDistance, formatMinutes } from "@/lib/format";
 import { useCampusRoute } from "@/features/campus/CampusRouteContext";
 
@@ -57,16 +56,10 @@ export function RoutingPanel() {
     navSession,
   } = useCampusRoute();
 
-  const canSubmit = !!graph && !!sourceId && !!destinationId && routeStatus !== "loading";
-  const sourceNode = useMemo(
-    () => graph?.nodes.find((n) => n.id === sourceId) ?? null,
-    [graph, sourceId],
-  );
-  const destinationNode = useMemo(
-    () => graph?.nodes.find((n) => n.id === destinationId) ?? null,
-    [graph, destinationId],
-  );
-
+    // While navigation runs, the planner is read-only: changing or recomputing
+  // the route under the walker would desync the live session.
+  const canSubmit =
+    !!graph && !!sourceId && !!destinationId && routeStatus !== "loading" && !navSession.active;
   const visibleRoute: Route | null = activeAltIndex >= 0 ? alternatives[activeAltIndex] ?? null : route;
 
   // Honest accessibility diagnosis: when an accessible route is required
@@ -96,7 +89,7 @@ export function RoutingPanel() {
       <EstimatedBanner />
 
       {/* Campus picker */}
-      <Card className="border-brand-muted bg-brand-navy/60">
+      <Card className="border-brand-muted bg-brand-navy">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm uppercase tracking-wider text-brand-subtle">
             Campus
@@ -121,7 +114,7 @@ export function RoutingPanel() {
       </Card>
 
       {/* Source / destination */}
-      <Card className="border-brand-muted bg-brand-navy/60">
+      <Card className="border-brand-muted bg-brand-navy">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm uppercase tracking-wider text-brand-subtle">
             Plan a route
@@ -137,8 +130,10 @@ export function RoutingPanel() {
             <ErrorAlert title="Could not load graph" message={graphError} />
           ) : null}
 
-          <div className="space-y-2">
-            <Label htmlFor="src">From</Label>
+          <div className="space-y-2.5">
+            <Label htmlFor="src" className="text-sm font-medium">
+              From
+            </Label>
             <LocationPicker
               id="src"
               graph={graph}
@@ -146,16 +141,14 @@ export function RoutingPanel() {
               onChange={(id) => setSourceId(id)}
               placeholder={graph ? "Pick a starting point" : "Loading graph…"}
               disabled={!graph}
+              allowLive
             />
-            {sourceNode ? (
-              <p className="text-xs text-brand-subtle">
-                <span className="text-brand-cyan">●</span> {prettyLabel(sourceNode.label)}
-              </p>
-            ) : null}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="dst">To</Label>
+          <div className="space-y-2.5">
+            <Label htmlFor="dst" className="text-sm font-medium">
+              To
+            </Label>
             <LocationPicker
               id="dst"
               graph={graph}
@@ -164,11 +157,6 @@ export function RoutingPanel() {
               placeholder={graph ? "Pick a destination" : "Loading graph…"}
               disabled={!graph}
             />
-            {destinationNode ? (
-              <p className="text-xs text-brand-subtle">
-                <span className="text-brand-green">●</span> {prettyLabel(destinationNode.label)}
-              </p>
-            ) : null}
           </div>
 
           <Separator className="bg-brand-muted" />
@@ -188,7 +176,12 @@ export function RoutingPanel() {
             onClick={() => void findRoute()}
             className="w-full"
           >
-            {routeStatus === "loading" ? (
+            {navSession.active ? (
+              <>
+                <NavigationIcon className="size-4" />
+                Navigation in progress
+              </>
+            ) : routeStatus === "loading" ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
                 Finding route…
@@ -226,7 +219,7 @@ export function RoutingPanel() {
 
       {/* Route result */}
       {route && visibleRoute ? (
-        <Card className="border-brand-cyan/40 bg-brand-navy/70">
+        <Card className="border-brand-cyan/40 bg-brand-navy">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm uppercase tracking-wider text-brand-cyan">
               <RouteIcon className="size-4" /> Route
@@ -266,7 +259,10 @@ export function RoutingPanel() {
                 {navSession.active ? "Navigating…" : "Start navigation"}
               </Button>
             </div>
-            <NavigationSteps route={visibleRoute} />
+            <NavigationSteps
+              route={visibleRoute}
+              currentIndex={navSession.active ? navSession.stepIndex : undefined}
+            />
           </CardContent>
         </Card>
       ) : null}

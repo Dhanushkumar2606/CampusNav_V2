@@ -8,6 +8,8 @@
 import type {
   Building,
   Campus,
+  CampusNear,
+  CampusStats,
   GraphPayload,
   Route,
   RouteRequest,
@@ -48,6 +50,28 @@ async function unwrap<T>(res: Response): Promise<T> {
 
 export async function listCampuses(): Promise<Campus[]> {
   return unwrap<Campus[]>(await fetch("/api/navigation/campuses"));
+}
+
+/** Cheap catalog counts for one campus (Explore hub cards). */
+export async function getCampusStats(slug: string): Promise<CampusStats> {
+  return unwrap<CampusStats>(
+    await fetch(`/api/navigation/campuses/${encodeURIComponent(slug)}/stats`),
+  );
+}
+
+/** Campuses ranked by distance from a point, nearest first (haversine). */
+export async function getCampusesNear(
+  lat: number,
+  lng: number,
+  options?: { limit?: number; radiusM?: number },
+): Promise<CampusNear[]> {
+  const limit = options?.limit ?? 10;
+  const radius = options?.radiusM ?? 200_000;
+  return unwrap<CampusNear[]>(
+    await fetch(
+      `/api/navigation/campuses/near?lat=${lat}&lng=${lng}&limit=${limit}&radius_m=${radius}`,
+    ),
+  );
 }
 
 export async function getGraph(slug: string): Promise<GraphPayload> {

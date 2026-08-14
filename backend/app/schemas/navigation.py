@@ -22,6 +22,28 @@ class CampusOut(BaseModel):
     name: str
     slug: str
     description: str | None = None
+    featured: bool = False
+    center_lat: float | None = None
+    center_lng: float | None = None
+
+
+class CampusStatsOut(BaseModel):
+    """Cheap catalog counts for the Explore hub (no graph loading)."""
+
+    campus_id: UUID
+    campus_slug: str
+    buildings: int
+    nodes: int
+    entrances: int
+    landmarks: int
+    transit: int
+    poi: int
+    edges: int
+    surveyed_edges: int
+
+
+class CampusNearOut(CampusOut):
+    distance_m: float
 
 
 class BuildingOut(BaseModel):
@@ -64,6 +86,9 @@ class PathEdgeOut(BaseModel):
     surface_type: str | None = None
     slope: float | None = None
     accessibility_verified: bool = False
+    # Real walkway shape ([lng, lat] pairs along the path), when surveyed.
+    # Null = straight-line between the endpoints (estimated edge).
+    geometry: list[list[float]] | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -89,6 +114,9 @@ class RouteStepOut(BaseModel):
     estimated: bool
     walk_time_min: float | None = None
     instruction: str | None = None
+    # The edge's walkway shape as [lng, lat], oriented from_node_id ->
+    # to_node_id. Absent for estimated (straight-line) steps.
+    geometry: list[list[float]] | None = None
 
 
 class RouteOut(BaseModel):

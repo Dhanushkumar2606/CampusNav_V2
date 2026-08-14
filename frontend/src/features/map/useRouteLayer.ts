@@ -1,79 +1,64 @@
 /**
- * Adds / updates the A\* route polyline layer on the map. When `route`
- * changes, builds a FeatureCollection of one LineString per consecutive
- * step and writes it to a single source. fitBounds is called so the
- * user sees the whole route.
+ * Adds / updates the A* route polyline layer on the map. When `route`
+ * changes, builds one LineString per consecutive step — following each
+ * edge's real walkway geometry (curves and bends from OSM) when surveyed,
+ * straight-line fallback otherwise.
+ *
+ * While navigation is active the layer highlights the current step (wider,
+ * full opacity), dims completed steps and fades upcoming ones via
+ * data-driven paint expressions.
  */
 import { useEffect, useMemo, useRef } from "react";
 import type { Feature, FeatureCollection, LineString } from "geojson";
 
-import type { Route } from "@/lib/navigation-types";
+import type { GraphPayload, Route } from "@/lib/navigation-types";
+import type { NavSession } from "@/features/campus/CampusRouteContext";
+import { polylineBounds, routePolyline, stepCoords } from "./routeGeometry";
 import { useMap } from "./MapContext";
-import { ROUTE_LINE_PAINT } from "./mapStyle";
-import type { GraphPayload } from "@/lib/navigation-types";
+import { ROUTE_CASING_PAINT, ROUTE_LINE_PAINT } from "./mapStyle";
 
 const SRC_ROUTE = "route-line";
+const LYR_ROUTE_CASING = "route-line-casing";
 const LYR_ROUTE = "route-line";
 
-function buildRouteGeoJson(
-  route: Route,
-  graph: GraphPayload,
-): FeatureCollection<LineString> {
-  const byId = new Map(graph.nodes.map((n) => [n.id, n]));
+function buildRouteGeoJson(route: Route, graph: GraphPayload): FeatureCollection<LineString> {
   const features: Feature<LineString>[] = [];
-  for (const step of route.steps) {
-    const a = byId.get(step.from_node_id);
-    const b = byId.get(step.to_node_id);
-    if (!a || !b) continue;
+  route.steps.forEach((step, index) => {
+    const coords = stepCoords(step, graph);
+    if (!coords || coords.length < 2) return;
+    const estimated = step.estimated ?? false;
     features.push({
       type: "Feature",
-      geometry: {
-        type: "LineString",
-        coordinates: [
-          [a.lng, a.lat],
-          [b.lng, b.lat],
-        ],
-      },
-      properties: { edgeId: step.edge_id },
+      geometry: { type: "LineString", coordinates: coords },
+      properties: { edgeId: step.edge_id, estimated, stepIndex: index },
     });
-  }
+  });
   return { type: "FeatureCollection", features };
 }
 
-function bboxFromCoords(coords: number[][]): [[number, number], [number, number]] | null {
-  if (coords.length === 0) return null;
-  let minLng = Infinity;
-  let minLat = Infinity;
-  let maxLng = -Infinity;
-  let maxLat = -Infinity;
-  for (const [lng, lat] of coords) {
-    if (lng < minLng) minLng = lng;
-    if (lng > maxLng) maxLng = lng;
-    if (lat < minLat) minLat = lat;
-    if (lat > maxLat) maxLat = lat;
-  }
-  return [
-    [minLng, minLat],
-    [maxLng, maxLat],
-  ];
-}
-
-export function useRouteLayer(route: Route | null, graph: GraphPayload | null) {
+export function useRouteLayer(
+  route: Route | null,
+  graph: GraphPayload | null,
+  navSession?: NavSession,
+) {
   const map = useMap();
+  const navStep = navSession?.active ? navSession.stepIndex : -1;
 
   const fc = useMemo<FeatureCollection<LineString> | null>(() => {
     if (!route || !graph) return null;
     return buildRouteGeoJson(route, graph);
   }, [route, graph]);
 
-  // Add / update the source + layer. A null route removes any stale
+  // Add / update the source + layers. A null route removes any stale
   // polyline so a failed/cleared route never leaves a ghost line on the map.
   useEffect(() => {
     if (!map) return;
     let cancelled = false;
 
     const clear = () => {
-      if (map.getLayer(LYR_ROUTE)) map.removeLayer(LYR_ROUTE);
+      for (const id of [LYR_ROUTE, LYR_ROUTE_CASING]) {
+        if (map.getLayer(id)) map.removeLayer(id);
+      }
       if (map.getSource(SRC_ROUTE)) map.removeSource(SRC_ROUTE);
     };
 
@@ -102,15 +87,38 @@ export function useRouteLayer(route: Route | null, graph: GraphPayload | null) {
         map.addSource(SRC_ROUTE, { type: "geojson", data: fc });
         // Insert above the campus-edges layers but below the dots/labels.
         const before = map.getLayer("nodes-dot") ? "nodes-dot" : undefined;
+        // Dark casing under the cyan main line — rounded caps/joins and a
+        // per-feature dash array (estimated steps stay dashed, honestly).
+        map.addLayer(
+          {
+            id: LYR_ROUTE_CASING,
+            type: "line",
+            source: SRC_ROUTE,
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: { ...ROUTE_CASING_PAINT, "line-opacity": 0 },
+          },
+          before,
+        );
         map.addLayer(
           {
             id: LYR_ROUTE,
             type: "line",
             source: SRC_ROUTE,
-            paint: ROUTE_LINE_PAINT,
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: { ...ROUTE_LINE_PAINT, "line-opacity": 0 },
           },
           before,
         );
+        // Draw-in: fade both lines in after they land.
+        window.setTimeout(() => {
+          if (cancelled || !map.isStyleLoaded()) return;
+          if (map.getLayer(LYR_ROUTE_CASING)) {
+            map.setPaintProperty(LYR_ROUTE_CASING, "line-opacity", 0.95);
+          }
+          if (map.getLayer(LYR_ROUTE)) {
+            map.setPaintProperty(LYR_ROUTE, "line-opacity", 0.95);
+          }
+        }, 30);
       }
     };
 
@@ -122,16 +130,64 @@ export function useRouteLayer(route: Route | null, graph: GraphPayload | null) {
     };
   }, [map, fc]);
 
+  // Navigation styling: highlight the current step, dim the traveled part.
+  // Data-driven expressions compare each feature's stepIndex against the
+  // live nav step, so no geometry rebuilds while walking. The casing stays
+  // constant; only the main line animates.
+  useEffect(() => {
+    if (!map || !fc) return;
+    const styleNavStep = () => {
+      if (!map.isStyleLoaded()) return;
+      const main = map.getLayer(LYR_ROUTE);
+      const casing = map.getLayer(LYR_ROUTE_CASING);
+      if (!main || !casing) return;
+      // No active session → one calm, continuous route at full opacity.
+      map.setPaintProperty(LYR_ROUTE, "line-width", [
+        "case",
+        ["==", ["get", "stepIndex"], navStep],
+        6.5,
+        4.5,
+      ]);
+      map.setPaintProperty(
+        LYR_ROUTE,
+        "line-opacity",
+        navStep < 0
+          ? 0.95
+          : [
+              "case",
+              ["<", ["get", "stepIndex"], navStep],
+              0.18,
+              ["==", ["get", "stepIndex"], navStep],
+              0.95,
+              0.55,
+            ],
+      );
+      map.setPaintProperty(LYR_ROUTE_CASING, "line-opacity", navStep < 0 ? 0.95 : 0.6);
+    };
+    if (map.isStyleLoaded()) styleNavStep();
+    else map.once("load", styleNavStep);
+  }, [map, fc, navStep]);
+
   // Fit the camera to a NEW route only — keyed on the route reference so a
   // campus switch doesn't yank the camera around while the route is intact.
   const lastRouteRef = useRef<Route | null>(null);
   useEffect(() => {
-    if (!map || !fc) return;
+    if (!map || !fc || !route || !graph) return;
     if (lastRouteRef.current === route) return;
     lastRouteRef.current = route;
-    const coords = fc.features.flatMap((f) => f.geometry.coordinates);
-    const bbox = bboxFromCoords(coords);
+    const bbox = polylineBounds(routePolyline(route, graph));
     if (!bbox) return;
     map.fitBounds(bbox, { padding: 80, duration: 600, maxZoom: 17 });
-  }, [map, fc, route]);
+  }, [map, fc, route, graph]);
+}
+
+/** The continuous geometry of the current route (for the progress engine). */
+export function useRoutePolyline(
+  route: Route | null,
+  graph: GraphPayload | null,
+): [number, number][] {
+  return useMemo(() => {
+    if (!route || !graph) return [];
+    return routePolyline(route, graph);
+  }, [route, graph]);
 }

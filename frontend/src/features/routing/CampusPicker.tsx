@@ -1,17 +1,11 @@
 /**
- * Dropdown bound to /api/navigation/campuses. Auto-selects the first
- * campus on mount if none is set.
+ * CampusPicker — searchable dropdown bound to /api/navigation/campuses.
+ * Auto-selects the first campus on mount if none is set.
  */
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import type { Campus } from "@/lib/navigation-types";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 interface Props {
   campuses: Campus[];
@@ -27,18 +21,24 @@ export function CampusPicker({ campuses, value, onChange, disabled }: Props) {
     }
   }, [value, campuses, onChange]);
 
+  const options = useMemo(
+    () =>
+      campuses.map((c) => ({
+        value: c.slug,
+        label: c.name,
+        caption: c.description ?? undefined,
+      })),
+    [campuses],
+  );
+
   return (
-    <Select value={value ?? ""} onValueChange={onChange} disabled={disabled}>
-      <SelectTrigger className="bg-brand-deep/60">
-        <SelectValue placeholder="Select a campus…" />
-      </SelectTrigger>
-      <SelectContent>
-        {campuses.map((c) => (
-          <SelectItem key={c.id} value={c.slug}>
-            {c.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <SearchableSelect
+      options={options}
+      value={value}
+      onValueChange={onChange}
+      placeholder="Select a campus…"
+      searchPlaceholder="Search campuses…"
+      disabled={disabled}
+    />
   );
 }

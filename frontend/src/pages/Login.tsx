@@ -4,7 +4,7 @@
  */
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LogIn, AlertTriangle } from "lucide-react";
+import { LogIn, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 import { useAuth } from "@/auth/AuthContext";
 import { NavigationApiError, transportErrorMessage } from "@/api/navigation";
@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 
 interface LocationState {
   from?: string;
+  registered?: boolean;
 }
 
 export function Login() {
@@ -27,6 +28,7 @@ export function Login() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const justRegistered = (location.state as LocationState | null)?.registered === true;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,9 +62,9 @@ export function Login() {
 
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 py-16">
         <header className="mb-8 flex items-center gap-3">
-          <div className="size-2.5 rounded-full bg-brand-green shadow-[0_0_12px_2px_rgba(57,255,20,0.6)]" />
+          <div className="size-2.5 rounded-full bg-brand-green shadow-[0_0_12px_2px_rgba(16,185,129,0.6)]" />
           <span className="text-sm uppercase tracking-[0.2em] text-brand-subtle">
-            CampusNav · Phase 2
+            CampusNav · v1.0.0-premium
           </span>
         </header>
 
@@ -103,6 +105,16 @@ export function Login() {
             </div>
           </div>
 
+          {justRegistered ? (
+            <Alert className="mt-4 border-brand-green/40 bg-brand-green/10">
+              <CheckCircle2 className="size-4 text-brand-green" />
+              <AlertTitle>Account created</AlertTitle>
+              <AlertDescription>
+                Your account is ready — sign in with your new credentials.
+              </AlertDescription>
+            </Alert>
+          ) : null}
+
           {error ? (
             <Alert variant="destructive" className="mt-4">
               <AlertTriangle className="size-4" />
@@ -121,10 +133,13 @@ export function Login() {
             {submitting ? "Signing in…" : "Sign in"}
           </Button>
 
-          <p className="mt-4 text-center text-xs text-brand-subtle">
+          <p className="mt-5 text-center text-sm text-brand-subtle">
             Don't have an account?{" "}
-            <Link to="/" className="text-brand-cyan hover:underline">
-              Back to landing
+            <Link
+              to="/register"
+              className="font-medium text-brand-cyan hover:text-brand-cyan/80 hover:underline"
+            >
+              Create an account
             </Link>
           </p>
         </form>

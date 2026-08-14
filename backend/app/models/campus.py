@@ -51,6 +51,11 @@ class Campus(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Catalog discovery (Explore hub): featured campuses surface first, and
+    # center_* is the catalog centroid used by /campuses/near geo-ranking.
+    featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    center_lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    center_lng: Mapped[float | None] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

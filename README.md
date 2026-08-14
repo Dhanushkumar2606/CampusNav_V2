@@ -4,7 +4,7 @@ AI-native campus navigation. Users state an intent
 ("I have class in 15 minutes, I'm at the library, get me the accessible route")
 and the AI agent resolves location, destination, and route type automatically.
 
-**Current phase: Phase 9 — Accessibility + Docs + Final Report (complete — v1.0.0-premium).**
+**Current phase: v1.0.0-premium + post-release stabilization (design-system tokens, Explore campus hub, map auto-detect).**
 
 ## Status
 
@@ -86,6 +86,34 @@ and the AI agent resolves location, destination, and route type automatically.
 - Docs: `docs/API.md` (full API reference), `docs/USER_GUIDE.md` (user guide), `docs/FINAL_REPORT.md` (phase-by-phase report). OpenAPI served at `/docs`.
 - Explore search results now save to `/favorites` (was a stub).
 - Tagged `v1.0.0-premium` with a GitHub release.
+
+### Stabilization — design-system tokens (post-release)
+- Brand palette moved to CSS variables (`:root` dark + `.light` overrides) in
+  `src/index.css`; `tailwind.config.ts` maps `brand.*` utilities to
+  `hsl(var(--brand-X))`, so one token set serves both themes.
+- Added `card`, `popover`, `destructive` tokens; Button default is now
+  `bg-brand-green` with a subtle emerald glow; `destructive` variant.
+- `SearchableSelect` primitive (search highlight, keyboard nav, group headers)
+  replaces the bespoke pickers in LocationPicker + CampusPicker.
+- `PageTransition` remount strategy in `AppShell`; `BottomSheet` focus trap +
+  `aria-modal`; `StateWrapper` gains spinner/skeleton/ErrorState-with-retry,
+  wired into Explore, Saved, and Profile (prefs) flows.
+- Map honors saved preferences (mode/stairs/accessible) on entry when
+  authenticated and the URL doesn't pin values.
+
+### Stabilization — campus hub + auto-detect (post-release)
+- Migration `0007`: `campuses.featured` + `campuses.center_lat/center_lng`
+  (catalog metadata; centroid auto-computed from seed nodes when absent).
+- New API: `GET /navigation/campuses/near` (haversine geo-ranking,
+  `distance_m` is honest) and `GET /navigation/campuses/{slug}/stats`
+  (cheap catalog counts for the Explore hub).
+- Explore home now renders a campus hub: featured-first campus cards with
+  live stats plus a "Use my location" row ranking campuses by distance.
+- Map auto-detects the nearest campus from a GPS fix when no campus is
+  pinned (URL param → last-used campus → geo → featured fallback); campus
+  choice persists to localStorage.
+- Seed loader accepts multi-file directories (one campus per JSON) plus
+  `featured`/`center` payload keys.
 
 ## Guardrails (all phases)
 

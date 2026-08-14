@@ -54,6 +54,23 @@ export function boundsFromNodes(
   ];
 }
 
+/**
+ * Small bounds box around a campus catalog center — used before the campus
+ * graph has loaded (or when a campus has no graph yet) so the map opens on
+ * the right part of the world for ANY campus, not just the hardcoded
+ * default. ~±0.006° ≈ a 1.3 km box at zoom ~15.
+ */
+export function boundsFromCenter(
+  center: { center_lat: number | null; center_lng: number | null } | null | undefined,
+  spanDeg = 0.006,
+): [[number, number], [number, number]] | null {
+  if (!center || center.center_lat == null || center.center_lng == null) return null;
+  return [
+    [center.center_lng - spanDeg, center.center_lat - spanDeg],
+    [center.center_lng + spanDeg, center.center_lat + spanDeg],
+  ];
+}
+
 /** Haversine distance in meters between two coordinates. */
 export function haversineMeters(
   lat1: number,
