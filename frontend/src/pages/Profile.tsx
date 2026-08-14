@@ -17,7 +17,7 @@ import { useTheme } from "@/context/ThemeContext";
 export function Profile() {
   const { user, status, logout, getToken } = useAuth();
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme, toggleTheme } = useTheme();
   const [prefs, setPrefs] = useState<PreferencesOut | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -28,6 +28,8 @@ export function Profile() {
     try {
       const data = await getPreferences(token);
       setPrefs(data);
+      // Persisted theme preference wins over the local default on load.
+      if (data.theme === "dark" || data.theme === "light") setTheme(data.theme);
     } catch {
       // ignore
     }
@@ -171,7 +173,15 @@ export function Profile() {
                       <Label className="text-sm font-medium">Dark theme</Label>
                       <p className="text-xs text-brand-subtle">Toggle dark/light theme</p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={toggleTheme} className="h-8">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        toggleTheme();
+                        setPrefs((prev) => (prev ? { ...prev, theme: prev.theme === "dark" ? "light" : "dark" } : prev));
+                      }}
+                      className="h-8"
+                    >
                       {theme === "dark" ? <Moon className="size-4" /> : <Sun className="size-4" />}
                     </Button>
                   </div>

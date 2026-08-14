@@ -12,6 +12,7 @@ The service:
 from __future__ import annotations
 
 import enum
+import math
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -20,13 +21,18 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.campus import Building, Campus, _uuid_pk  # noqa: F401  (Building/Campus used by callers)
+from app.models.campus import (  # noqa: F401  (Building/Campus used by callers)
+    Building,
+    Campus,
+    _uuid_pk,
+)
 from app.models.graph import PathEdge, PathNode, PathNodeKind
 from app.routing.astar import (
     HeuristicKind,
     InMemoryGraph,
     NavEdge,
     NavNode,
+    NoAccessiblePath,
     NoPath,
     Route,
     RouteError,
@@ -37,7 +43,6 @@ from app.routing.astar import (
     find_alternatives,
     find_route,
 )
-
 
 _WKT_RE = re.compile(r"POINT\s*\(\s*(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s*\)", re.IGNORECASE)
 
@@ -60,6 +65,7 @@ class RouteStatus(str, enum.Enum):
     UNKNOWN_NODE = "unknown_node"
     SOURCE_EQUALS_DEST = "source_equals_destination"
     NO_PATH = "no_path"
+    NO_ACCESS_ROUTE = "no_access_route"
     INVALID_GRAPH = "invalid_graph"
 
 
@@ -188,6 +194,8 @@ def request_route(graph: InMemoryGraph, req: RouteRequest) -> NavigationResult:
         return NavigationResult(status=RouteStatus.UNKNOWN_NODE, error=str(e))
     except SourceEqualsDest as e:
         return NavigationResult(status=RouteStatus.SOURCE_EQUALS_DEST, error=str(e))
+    except NoAccessiblePath as e:
+        return NavigationResult(status=RouteStatus.NO_ACCESS_ROUTE, error=str(e))
     except NoPath as e:
         return NavigationResult(status=RouteStatus.NO_PATH, error=str(e))
     except RouteError as e:
@@ -221,3 +229,34 @@ def get_campus_by_slug(session: Session, slug: str) -> Campus | None:
     return session.execute(
         select(Campus).where(Campus.slug == slug)
     ).scalar_one_or_none()
+
+
+def nearest_node(
+    session: Session,
+    campus_id: UUID,
+    lat: float,
+    lng: float,
+) -> tuple[PathNode, float] | None:
+    """Closest graph node to a raw GPS fix (haversine over campus nodes).
+
+    Returns (node, distance_m) or None when the campus has no nodes. This
+    is the honest GPS-snapping primitive: it never invents a position on a
+    path — the fix is matched to the nearest real node and the distance is
+    reported so the UI can show "you are 45 m from the Main Gate".
+    """
+    best: tuple[PathNode, float] | None = None
+    for node in list_campus_nodes(session, campus_id):
+        node_lng, node_lat = _parse_point(node.location)
+        d = _haversine(lat, lng, node_lat, node_lng)
+        if best is None or d < best[1]:
+            best = (node, d)
+    return best
+
+
+def _haversine(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    """Great-circle distance in meters (Earth radius 6371 km)."""
+    lat1, lng1, lat2, lng2 = map(math.radians, (lat1, lng1, lat2, lng2))
+    dlat = lat2 - lat1
+    dlng = lng2 - lng1
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlng / 2) ** 2
+    return 2 * 6371000.0 * math.asin(math.sqrt(a))

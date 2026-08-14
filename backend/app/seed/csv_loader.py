@@ -55,7 +55,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.db import SessionLocal
-from app.models.campus import Building, Campus
+from app.models.campus import Building, Campus, Entrance
 from app.models.graph import PathEdge, PathNode, PathNodeKind
 from app.models.provenance import DataProvenance
 
@@ -193,6 +193,22 @@ def load_buildings_and_nodes(
             # For buildings the graph node carries `kind=entrance` at the
             # building centroid so the A* router can land on it.
             node_kind = PathNodeKind.BUILDING_ENTRANCE
+            # Mirror that node as an `Entrance` row (Phase 2: building
+            # details). Coordinates come from the same surveyed centroid;
+            # accessibility mirrors the building's `is_accessible` default.
+            existing_entrance = session.execute(
+                select(Entrance).where(Entrance.building_id == existing.id)
+            ).scalar_one_or_none()
+            if existing_entrance is None:
+                session.add(
+                    Entrance(
+                        building_id=existing.id,
+                        label=n["name"],
+                        location=point,
+                        is_accessible=existing.is_accessible,
+                        has_stairs=False,
+                    )
+                )
         else:
             node_kind = kind
 

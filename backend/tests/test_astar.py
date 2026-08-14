@@ -11,6 +11,7 @@ from app.routing.astar import (
     InMemoryGraph,
     NavEdge,
     NavNode,
+    NoAccessiblePath,
     NoPath,
     RouteOptions,
     SourceEqualsDest,
@@ -104,6 +105,64 @@ def test_unreachable_raises_no_path(disconnected_graph: InMemoryGraph) -> None:
         find_route(disconnected_graph, "A", "Z")
 
 
+def test_accessible_blocked_endpoint_raises_no_access_route() -> None:
+    """When the accessible filter is on and an endpoint has zero accessible
+    edges, the router must say the endpoint is the blocker (no_access_route)
+    instead of a generic no_path."""
+    nodes = [
+        NavNode(id="A", lat=0.0, lng=0.0),
+        NavNode(id="B", lat=0.0, lng=0.0001),
+        NavNode(id="C", lat=0.0, lng=0.0002),
+    ]
+    edges = [
+        NavEdge(id="ab", from_id="A", to_id="B", distance=10.0, accessible=True),
+        # Only connection to C has stairs (not accessible).
+        NavEdge(id="bc", from_id="B", to_id="C", distance=10.0, accessible=False, has_stairs=True),
+    ]
+    g = InMemoryGraph.build(nodes, edges)
+    opts = RouteOptions(require_accessible=True)
+    with pytest.raises(NoAccessiblePath) as excinfo:
+        find_route(g, "A", "C", opts)
+    assert "starting point" not in str(excinfo.value)
+    assert "destination has no" in str(excinfo.value)
+
+
+def test_accessible_blocked_source_raises_no_access_route() -> None:
+    nodes = [
+        NavNode(id="A", lat=0.0, lng=0.0),
+        NavNode(id="B", lat=0.0, lng=0.0001),
+    ]
+    edges = [
+        NavEdge(id="ab", from_id="A", to_id="B", distance=10.0, accessible=False),
+    ]
+    g = InMemoryGraph.build(nodes, edges)
+    opts = RouteOptions(require_accessible=True)
+    with pytest.raises(NoAccessiblePath) as excinfo:
+        find_route(g, "A", "B", opts)
+    assert "starting point has no" in str(excinfo.value)
+
+
+def test_accessible_mid_graph_gap_stays_no_path() -> None:
+    """Endpoints both have accessible edges but the accessible subgraph is
+    split — that's a genuine no_path, not an endpoint diagnosis."""
+    nodes = [
+        NavNode(id="A", lat=0.0, lng=0.0),
+        NavNode(id="B", lat=0.0, lng=0.0001),
+        NavNode(id="C", lat=0.0, lng=0.0002),
+        NavNode(id="Z", lat=1.0, lng=1.0),
+    ]
+    edges = [
+        NavEdge(id="ab", from_id="A", to_id="B", distance=10.0, accessible=True),
+        # Middle cut: B → C only reachable via stairs.
+        NavEdge(id="bc", from_id="B", to_id="C", distance=10.0, accessible=False, has_stairs=True),
+        NavEdge(id="cz", from_id="C", to_id="Z", distance=10.0, accessible=True),
+    ]
+    g = InMemoryGraph.build(nodes, edges)
+    opts = RouteOptions(require_accessible=True)
+    with pytest.raises(NoPath):
+        find_route(g, "A", "Z", opts)
+
+
 def test_invalid_node_raises_unknown_node(line_graph: InMemoryGraph) -> None:
     with pytest.raises(UnknownNode):
         find_route(line_graph, "A", "NOT_THERE")
@@ -150,8 +209,8 @@ def test_require_accessible_excludes_blocking_edge() -> None:
     route_open = find_route(graph, "A", "C")
     assert route_open.total_distance_m == pytest.approx(20.0)
 
-    # With filter, B is unreachable from A → NoPath.
-    with pytest.raises(NoPath):
+    # With filter, A has zero accessible edges → endpoint diagnosis.
+    with pytest.raises(NoAccessiblePath):
         find_route(
             graph, "A", "C", RouteOptions(require_accessible=True)
         )

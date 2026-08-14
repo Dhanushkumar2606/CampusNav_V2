@@ -1,9 +1,14 @@
 """Tests for Phase 4: search, building detail, categories, favorites,
-preferences."""
+preferences. Phase F additions: slugs, phrase/category boosts, near-me,
+room results."""
 
 from __future__ import annotations
 
+import uuid
+
 from fastapi.testclient import TestClient
+
+from app.models.campus import Floor, Room
 
 
 def _register_and_login(client: TestClient, email: str = "phase4@test.com") -> str:
@@ -64,6 +69,78 @@ def test_search_unknown_campus_falls_back_to_all(client: TestClient) -> None:
     assert r.status_code == 200  # graceful: unknown campus ignored
 
 
+def test_search_results_carry_graph_slugs(client: TestClient) -> None:
+    """Phase F: destination keys that resolve through graph `labels`."""
+    r = client.get("/search", params={"q": "Tech Park"})
+    building = next(x for x in r.json() if x["type"] == "building")
+    assert building["slug"] == "tech_park"  # building code, lowercased
+
+    r2 = client.get("/search", params={"q": "potheri"})
+    node = next(x for x in r2.json() if x["type"] == "node")
+    assert node["slug"] == "potheri_station"
+
+
+def test_search_phrase_boost_ranks_full_match_first(client: TestClient) -> None:
+    """A whole-phrase hit ('college of management') outranks any partial
+    token overlap via the 90-point phrase branch."""
+    r = client.get("/search", params={"q": "college of management"})
+    results = r.json()
+    assert results and "MBA Block" in results[0]["label"]
+    assert results[0]["score"] == 90  # whole-phrase hit
+
+
+def test_search_category_boost_prefers_transit_for_station(client: TestClient) -> None:
+    r = client.get("/search", params={"q": "station"})
+    results = r.json()
+    assert results and results[0]["type"] == "node"
+    assert results[0]["slug"] == "potheri_station"
+
+
+def test_search_near_me_biases_rank(client: TestClient) -> None:
+    """With two same-name-ish candidates, proximity lifts the closer one."""
+    slug = client.get("/navigation/campuses").json()[0]["slug"]
+    g = client.get(f"/navigation/campuses/{slug}/graph").json()
+    mba = next(n for n in g["nodes"] if n["label"] == "mba_block")
+    lib = next(n for n in g["nodes"] if n["label"] == "central_library")
+
+    near_mba = client.get("/search", params={"q": "SRM", "lat": mba["lat"], "lng": mba["lng"]})
+    labels = [x["label"] for x in near_mba.json()]
+    assert "SRM College of Management (MBA Block)" in labels
+    assert labels.index("SRM College of Management (MBA Block)") < labels.index("SRM Central Library")
+
+    near_lib = client.get("/search", params={"q": "SRM", "lat": lib["lat"], "lng": lib["lng"]})
+    labels2 = [x["label"] for x in near_lib.json()]
+    assert labels2.index("SRM Central Library") < labels2.index("SRM College of Management (MBA Block)")
+
+
+def test_search_returns_seeded_rooms(client: TestClient, db_session) -> None:
+    """Phase F: rooms join the index the moment floor/room data exists."""
+    slug = client.get("/navigation/campuses").json()[0]["slug"]
+    g = client.get(f"/navigation/campuses/{slug}/graph").json()
+    building = next(x for x in client.get("/search", params={"q": "Tech Park"}).json()
+                    if x["type"] == "building")
+    floor = Floor(id=uuid.uuid4(), building_id=uuid.UUID(building["id"]), level=5, label="Level 5")
+    db_session.add(floor)
+    db_session.flush()
+    db_session.add(Room(
+        id=uuid.uuid4(),
+        floor_id=floor.id,
+        code="CSE-501",
+        name="AI Lab",
+        capacity=40,
+        is_accessible=True,
+    ))
+    db_session.commit()
+
+    r = client.get("/search", params={"q": "CSE-501"})
+    results = r.json()
+    room = next(x for x in results if x["type"] == "room")
+    assert room["label"] == "CSE-501"
+    assert room["slug"] == "tech_park:cse-501"
+    assert room["subtitle"] == "AI Lab · Tech Park (CSE/IT/ECE/EEE, G+15) · Level 5"
+    assert room["building_id"] == building["id"]
+
+
 def test_building_detail_returns_real_fields(client: TestClient) -> None:
     r = client.get("/search", params={"q": "Central Library"})
     building = next(x for x in r.json() if x["type"] == "building")
@@ -76,6 +153,22 @@ def test_building_detail_returns_real_fields(client: TestClient) -> None:
     # Entrances/floors may be empty (honest) but must be lists.
     assert isinstance(body["entrances"], list)
     assert isinstance(body["floors"], list)
+
+
+def test_building_detail_surfaces_seeded_entrances(client: TestClient) -> None:
+    """Phase G: every seeded building mirrors its graph entrance node as an
+    Entrance row with real coordinates (not the old 0.0 fallback)."""
+    r = client.get("/search", params={"q": "Central Library"})
+    building = next(x for x in r.json() if x["type"] == "building")
+    d = client.get(f"/buildings/{building['id']}")
+    assert d.status_code == 200
+    body = d.json()
+    assert len(body["entrances"]) >= 1
+    entrance = body["entrances"][0]
+    assert entrance["label"] == "SRM Central Library"
+    assert entrance["lat"] != 0.0 and entrance["lng"] != 0.0
+    assert entrance["is_accessible"] is True
+    assert entrance["has_stairs"] is False
 
 
 def test_building_detail_404_for_unknown(client: TestClient) -> None:

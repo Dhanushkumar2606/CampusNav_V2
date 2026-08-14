@@ -4,7 +4,7 @@
  * step and writes it to a single source. fitBounds is called so the
  * user sees the whole route.
  */
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { Feature, FeatureCollection, LineString } from "geojson";
 
 import type { Route } from "@/lib/navigation-types";
@@ -66,24 +66,40 @@ export function useRouteLayer(route: Route | null, graph: GraphPayload | null) {
     return buildRouteGeoJson(route, graph);
   }, [route, graph]);
 
-  // Add / update the source + layer.
+  // Add / update the source + layer. A null route removes any stale
+  // polyline so a failed/cleared route never leaves a ghost line on the map.
   useEffect(() => {
-    if (!map || !fc) return;
+    if (!map) return;
     let cancelled = false;
+
+    const clear = () => {
+      if (map.getLayer(LYR_ROUTE)) map.removeLayer(LYR_ROUTE);
+      if (map.getSource(SRC_ROUTE)) map.removeSource(SRC_ROUTE);
+    };
+
+    if (!fc) {
+      const clearWhenReady = () => {
+        if (cancelled) return;
+        clear();
+      };
+      if (map.isStyleLoaded()) clearWhenReady();
+      else map.once("load", clearWhenReady);
+      return () => {
+        cancelled = true;
+      };
+    }
 
     const apply = () => {
       if (cancelled || !map.isStyleLoaded()) return;
-      const data = fc;
       const existing = map.getSource(SRC_ROUTE) as
         | import("maplibre-gl").GeoJSONSource
         | undefined;
       if (existing && "setData" in existing) {
-        existing.setData(data);
+        existing.setData(fc);
       } else {
         // Ensure no stale layer from a previous mount.
-        if (map.getLayer(LYR_ROUTE)) map.removeLayer(LYR_ROUTE);
-        if (map.getSource(SRC_ROUTE)) map.removeSource(SRC_ROUTE);
-        map.addSource(SRC_ROUTE, { type: "geojson", data });
+        clear();
+        map.addSource(SRC_ROUTE, { type: "geojson", data: fc });
         // Insert above the campus-edges layers but below the dots/labels.
         const before = map.getLayer("nodes-dot") ? "nodes-dot" : undefined;
         map.addLayer(
@@ -106,12 +122,16 @@ export function useRouteLayer(route: Route | null, graph: GraphPayload | null) {
     };
   }, [map, fc]);
 
-  // Animate fitBounds when a new route arrives.
+  // Fit the camera to a NEW route only — keyed on the route reference so a
+  // campus switch doesn't yank the camera around while the route is intact.
+  const lastRouteRef = useRef<Route | null>(null);
   useEffect(() => {
     if (!map || !fc) return;
+    if (lastRouteRef.current === route) return;
+    lastRouteRef.current = route;
     const coords = fc.features.flatMap((f) => f.geometry.coordinates);
     const bbox = bboxFromCoords(coords);
     if (!bbox) return;
     map.fitBounds(bbox, { padding: 80, duration: 600, maxZoom: 17 });
-  }, [map, fc]);
+  }, [map, fc, route]);
 }

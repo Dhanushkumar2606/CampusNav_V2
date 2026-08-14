@@ -22,7 +22,9 @@ _USER = Annotated[User, Depends(get_current_user)]
 class AssistantQueryIn(BaseModel):
     query: str = Field(..., min_length=1, max_length=500)
     campus_slug: str | None = None
-    user_location: str | None = None  # node UUID
+    user_location: str | None = None  # node UUID (legacy)
+    user_lat: float | None = Field(default=None, ge=-90, le=90)
+    user_lng: float | None = Field(default=None, ge=-180, le=180)
     time_constraint_min: int | None = Field(default=None, ge=1, le=1440)
 
 
@@ -30,6 +32,7 @@ class AssistantResponseOut(BaseModel):
     kind: str
     text: str
     data: dict | None = None
+    tool_calls: list[dict] = Field(default_factory=list)
 
 
 @router.post("/query", response_model=AssistantResponseOut)
@@ -38,12 +41,20 @@ def assistant_query_endpoint(
     db: Session = Depends(get_db),
     _user: User = Depends(get_current_user),
 ) -> AssistantResponseOut:
-    """Rule-based AI assistant — resolves intent and returns structured response."""
+    """Rule-based AI assistant — resolves intent, executes tools (including
+    real routing), and returns structured tool calls for result cards."""
     response = assistant_query(
         session=db,
         query=payload.query,
         campus_slug=payload.campus_slug,
         user_location=payload.user_location,
+        user_lat=payload.user_lat,
+        user_lng=payload.user_lng,
         time_constraint_min=payload.time_constraint_min,
     )
-    return AssistantResponseOut(kind=response.kind, text=response.text, data=response.data)
+    return AssistantResponseOut(
+        kind=response.kind,
+        text=response.text,
+        data=response.data,
+        tool_calls=response.tool_calls,
+    )

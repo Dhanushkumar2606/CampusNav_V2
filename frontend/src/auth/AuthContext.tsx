@@ -6,7 +6,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
-import { login as apiLogin, me as apiMe } from "@/api/navigation";
+import { login as apiLogin, me as apiMe, NavigationApiError } from "@/api/navigation";
 import type { User } from "@/lib/navigation-types";
 
 export type AuthStatus = "loading" | "authenticated" | "anonymous";
@@ -43,13 +43,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(u);
         setStatus("authenticated");
       })
-      .catch(() => {
+      .catch((err: unknown) => {
         if (cancelled) return;
-        // Token was invalid or backend down — drop it.
-        localStorage.removeItem(TOKEN_KEY);
-        setToken(null);
-        setUser(null);
-        setStatus("anonymous");
+        const authProblem =
+          err instanceof NavigationApiError &&
+          (err.status === 401 || err.status === 403);
+        if (authProblem) {
+          // Token was rejected — drop it.
+          localStorage.removeItem(TOKEN_KEY);
+          setToken(null);
+          setUser(null);
+          setStatus("anonymous");
+        } else {
+          // Backend unreachable (network blip) — keep the token so a later
+          // successful /me can hydrate the session without re-logging in.
+          setUser(null);
+          setStatus("anonymous");
+        }
       });
     return () => {
       cancelled = true;

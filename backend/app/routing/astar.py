@@ -137,6 +137,16 @@ class NoPath(RouteError):
     code = "no_path"
 
 
+class NoAccessiblePath(RouteError):
+    """No path under `require_accessible` AND an endpoint is the blocker.
+
+    Raised when the source or destination has zero accessible edges, so
+    the API can say *why* instead of returning a generic `no_path`.
+    """
+
+    code = "no_access_route"
+
+
 class InvalidGraph(RouteError):
     code = "invalid_graph"
 
@@ -340,7 +350,42 @@ def find_route(
                 f = tentative + _heuristic_cost(opts.heuristic, current_node, dst, opts)
                 heapq.heappush(open_heap, (f, counter, edge.to_id))
 
-    raise NoPath(f"No path from {source_id} to {destination_id}")
+    raise _no_path_diagnosis(graph, source_id, destination_id, opts)
+
+
+def _no_path_diagnosis(
+    graph: Graph,
+    source_id: Hashable,
+    destination_id: Hashable,
+    opts: RouteOptions,
+) -> RouteError:
+    """Root-cause a failed search: is an endpoint the blocker, or the graph?
+
+    Under `require_accessible`, an endpoint with zero accessible edges
+    makes a route impossible regardless of the rest of the graph — report
+    that specifically. Otherwise the failure is a genuine gap in the
+    accessible subgraph and stays a plain NoPath.
+    """
+    if not opts.require_accessible:
+        return NoPath(f"No path from {source_id} to {destination_id}")
+    src = graph.node(source_id)
+    dst = graph.node(destination_id)
+    src_has_accessible = bool(
+        src and any(_allowed(e, opts) for e in graph.neighbors(source_id))
+    )
+    dst_has_accessible = bool(
+        dst and any(_allowed(e, opts) for e in graph.neighbors(destination_id))
+    )
+    blocked: list[str] = []
+    if src and not src_has_accessible:
+        blocked.append("the starting point has no wheelchair-accessible connections")
+    if dst and not dst_has_accessible:
+        blocked.append("the destination has no wheelchair-accessible connections")
+    if blocked:
+        return NoAccessiblePath(
+            f"No accessible route: {', '.join(blocked)} on this campus"
+        )
+    return NoPath(f"No accessible path from {source_id} to {destination_id}")
 
 
 def find_alternatives(

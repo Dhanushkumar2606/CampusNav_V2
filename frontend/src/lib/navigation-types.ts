@@ -96,6 +96,7 @@ export type RouteStatus =
   | "unknown_node"
   | "source_equals_destination"
   | "no_path"
+  | "no_access_route"
   | "invalid_graph";
 
 export interface RouteResponse {
@@ -137,7 +138,7 @@ export interface TokenResponse {
 export interface SearchResult {
   id: string;
   label: string;
-  type: "building" | "node" | "poi";
+  type: "building" | "node" | "poi" | "room";
   category: string;
   lat: number;
   lng: number;
@@ -147,6 +148,8 @@ export interface SearchResult {
   building_id: string | null;
   subtitle: string | null;
   score: number;
+  /** Destination key resolving through the graph `labels` map; null when no graph node. */
+  slug: string | null;
 }
 
 export interface CategoryOut {

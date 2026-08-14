@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Bot,
+  Building2,
+  Clock,
   MapPin,
   Navigation,
   RotateCcw,
@@ -16,8 +18,10 @@ import { assistantQuery } from "@/api/assistant";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useLiveLocation } from "@/features/map/useLiveLocation";
 import { cn } from "@/lib/utils";
 import { prettyLabel } from "@/lib/brand";
+import { formatDistance, formatMinutes } from "@/lib/format";
 import type { AssistantResponseOut } from "@/lib/navigation-types";
 
 interface ChatMessage {
@@ -99,6 +103,24 @@ function AssistantResultCards({ message }: { message: ChatMessage }) {
     const mode = data.mode === "fastest" ? "fastest" : "shortest";
     if (!destinationId) return null;
 
+    const origin = data.origin as Record<string, unknown> | null | undefined;
+    const sourceId =
+      origin && typeof origin.id === "string" ? origin.id : null;
+    const distanceM =
+      typeof data.total_distance_m === "number" ? data.total_distance_m : null;
+    const etaMin =
+      typeof data.estimated_walk_time_min === "number" ? data.estimated_walk_time_min : null;
+    const stepCount = typeof data.step_count === "number" ? data.step_count : null;
+    const deadline =
+      typeof data.time_constraint_min === "number" ? data.time_constraint_min : null;
+
+    const mapQuery = new URLSearchParams();
+    if (sourceId) mapQuery.set("source", sourceId);
+    mapQuery.set("destination", destinationId);
+    if (campusSlug) mapQuery.set("campus", campusSlug);
+    mapQuery.set("accessible", String(requireAccessible));
+    if (mode === "fastest") mapQuery.set("mode", "fastest");
+
     return (
       <Card className="border-brand-cyan/30 bg-brand-navy/70">
         <CardContent className="p-3">
@@ -110,26 +132,99 @@ function AssistantResultCards({ message }: { message: ChatMessage }) {
               <p className="truncate text-sm font-medium text-brand-text">
                 {prettyLabel(String(destination.label ?? destination.name ?? ""))}
               </p>
-              <p className="text-xs text-brand-subtle">
-                {requireAccessible ? "Accessible · " : ""}
-                {mode} route
+              <p className="flex flex-wrap items-center gap-x-2 text-xs text-brand-subtle">
+                <span>
+                  {requireAccessible ? "Accessible · " : ""}
+                  {mode} route
+                </span>
+                {distanceM !== null ? <span>· {formatDistance(distanceM)}</span> : null}
+                {etaMin !== null ? (
+                  <span className="flex items-center gap-0.5">
+                    <Clock className="size-3" aria-hidden />
+                    {formatMinutes(etaMin)}
+                  </span>
+                ) : null}
+                {stepCount !== null ? <span>· {stepCount} steps</span> : null}
+                {deadline !== null ? (
+                  <span className="text-brand-amber">· {formatMinutes(deadline)} to get there</span>
+                ) : null}
               </p>
             </div>
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                navigate(
-                  `/map?destination=${destinationId}&accessible=${requireAccessible}${
-                    campusSlug ? `&campus=${campusSlug}` : ""
-                  }`,
-                )
-              }
+              onClick={() => navigate(`/map?${mapQuery.toString()}`)}
             >
               <Navigation className="size-3.5 mr-1.5" aria-hidden />
               Navigate
             </Button>
           </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (message.kind === "info" && data.building_detail) {
+    const b = data.building_detail as Record<string, unknown>;
+    const id = typeof b.id === "string" ? b.id : null;
+    const entrances = Array.isArray(b.entrances) ? (b.entrances as Record<string, unknown>[]) : [];
+    const floors = Array.isArray(b.floors) ? (b.floors as Record<string, unknown>[]) : [];
+    const label = prettyLabel(String(b.name ?? b.label ?? ""));
+    if (!id) return null;
+
+    return (
+      <Card className="border-brand-cyan/30 bg-brand-navy/70">
+        <CardContent className="space-y-2 p-3">
+          <div className="flex items-center gap-2.5">
+            <span className="flex size-8 items-center justify-center rounded-lg bg-brand-cyan/15 text-brand-cyan">
+              <Building2 className="size-4" aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-brand-text">{label}</p>
+              <p className="text-xs text-brand-subtle">
+                {typeof b.num_floors === "number" ? `${b.num_floors} floors` : ""}
+                {b.has_elevator ? " · elevator" : ""}
+                {b.is_accessible ? " · accessible" : ""}
+              </p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => navigate(`/map?destination=${id}`)}>
+              <Navigation className="size-3.5 mr-1.5" aria-hidden />
+              Navigate
+            </Button>
+          </div>
+          {entrances.length > 0 ? (
+            <div className="border-t border-brand-muted/60 pt-2">
+              <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-brand-subtle">
+                Entrances
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {entrances.map((e) => {
+                  const eid = typeof e.id === "string" ? e.id : null;
+                  const ename = prettyLabel(String(e.label ?? ""));
+                  return (
+                    <button
+                      key={eid ?? ename}
+                      type="button"
+                      disabled={!eid}
+                      onClick={() => eid && navigate(`/map?destination=${eid}`)}
+                      className="rounded-full border border-brand-muted bg-brand-surface/70 px-2.5 py-1 text-xs text-brand-text transition-colors hover:border-brand-cyan/40"
+                    >
+                      {ename}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+          {floors.length > 0 ? (
+            <p className="text-xs text-brand-subtle">
+              Floors:{" "}
+              {floors
+                .map((f) => String(f.label ?? f.level ?? ""))
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          ) : null}
         </CardContent>
       </Card>
     );
@@ -144,6 +239,7 @@ function AssistantResultCards({ message }: { message: ChatMessage }) {
           const id = typeof r.id === "string" ? r.id : null;
           const label = prettyLabel(String(r.label ?? ""));
           const category = String(r.category ?? "");
+          const distanceM = typeof r.distance_m === "number" ? r.distance_m : null;
           if (!id) return null;
           return (
             <button
@@ -156,7 +252,10 @@ function AssistantResultCards({ message }: { message: ChatMessage }) {
               <Search className="size-3.5 shrink-0 text-brand-cyan" aria-hidden />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm text-brand-text">{label}</span>
-                <span className="block text-xs capitalize text-brand-subtle">{category}</span>
+                <span className="block text-xs capitalize text-brand-subtle">
+                  {category}
+                  {distanceM !== null ? ` · ${formatDistance(distanceM)} from you` : ""}
+                </span>
               </span>
               <ArrowRight className="size-3.5 shrink-0 text-brand-subtle" aria-hidden />
             </button>
@@ -194,6 +293,7 @@ function TypingIndicator() {
 
 export function Assistant() {
   const { getToken, status } = useAuth();
+  const location = useLiveLocation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -210,6 +310,9 @@ export function Assistant() {
 
   useEffect(() => {
     inputRef.current?.focus();
+    // One-shot: if the user is on this page and hasn't denied access, get a
+    // fix so "nearest X" queries can use their real position.
+    if (location.status === "idle") location.locate();
   }, []);
 
   const send = useCallback(
@@ -230,7 +333,15 @@ export function Assistant() {
       setSending(true);
 
       try {
-        const res: AssistantResponseOut = await assistantQuery(token, query);
+        const res: AssistantResponseOut = await assistantQuery(
+          token,
+          query,
+          undefined,
+          undefined,
+          undefined,
+          location.coords?.lat,
+          location.coords?.lng,
+        );
         setMessages((prev) => [
           ...prev,
           {
@@ -259,7 +370,7 @@ export function Assistant() {
         inputRef.current?.focus();
       }
     },
-    [getToken, sending],
+    [getToken, sending, location.coords?.lat, location.coords?.lng],
   );
 
   const handleSubmit = (e: React.FormEvent) => {

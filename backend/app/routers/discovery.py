@@ -3,37 +3,24 @@
 from __future__ import annotations
 
 import dataclasses
-import re
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.models.campus import Building, Campus, Entrance, Floor
+from app.models.campus import Building, Campus
 from app.models.graph import PathNode, PathNodeKind
 from app.schemas.discovery import (
     BuildingDetailOut,
     CategoryOut,
-    EntranceOut,
-    FloorOut,
     SearchResultOut,
 )
+from app.services.discovery import get_building_detail
 from app.services.search import search
 
 router = APIRouter(tags=["discovery"])
-
-_WKT_RE = re.compile(r"POINT\s*\(\s*(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s*\)", re.IGNORECASE)
-
-
-def _parse_point(wkt: str | None) -> tuple[float, float] | None:
-    if not wkt:
-        return None
-    m = _WKT_RE.search(wkt)
-    if not m:
-        return None
-    return float(m.group(1)), float(m.group(2))
 
 
 @router.get("/search", response_model=list[SearchResultOut])
@@ -41,10 +28,18 @@ def search_endpoint(
     q: Annotated[str, Query(min_length=1, max_length=120)],
     campus: Annotated[str | None, Query(max_length=64)] = None,
     limit: Annotated[int, Query(ge=1, le=50)] = 20,
+    lat: Annotated[float | None, Query(ge=-90, le=90)] = None,
+    lng: Annotated[float | None, Query(ge=-180, le=180)] = None,
     db: Session = Depends(get_db),
 ) -> list[SearchResultOut]:
-    """Fuzzy campus search over buildings, graph nodes and POIs."""
-    return [SearchResultOut.model_validate(dataclasses.asdict(r)) for r in search(db, q, campus, limit)]
+    """Fuzzy campus search over buildings, graph nodes, POIs and rooms.
+
+    Optional `lat`/`lng` bias results toward that location ("near me").
+    """
+    return [
+        SearchResultOut.model_validate(dataclasses.asdict(r))
+        for r in search(db, q, campus, limit, near_lat=lat, near_lng=lng)
+    ]
 
 
 @router.get("/campuses/{slug}/categories", response_model=list[CategoryOut])
@@ -91,59 +86,7 @@ def building_detail(
     db: Session = Depends(get_db),
 ) -> BuildingDetailOut:
     """Full building record: entrances, floors, connected graph nodes."""
-    building = db.get(Building, building_id)
-    if building is None:
+    detail = get_building_detail(db, building_id)
+    if detail is None:
         raise HTTPException(status_code=404, detail="building not found")
-
-    entrances = [
-        EntranceOut(
-            id=e.id,
-            label=e.label,
-            lat=lat if (pt := _parse_point(e.location)) is not None else 0.0,
-            lng=(pt[0] if pt else 0.0),
-            is_accessible=e.is_accessible,
-            has_stairs=e.has_stairs,
-        )
-        for e in building.entrances
-    ]
-
-    floors = [
-        FloorOut(id=f.id, level=f.level, label=f.label, rooms_count=len(f.rooms))
-        for f in sorted(building.floors, key=lambda f: f.level)
-    ]
-
-    # Graph nodes that represent this building (entrance node at centroid).
-    connected: list[dict[str, object]] = []
-    nodes = db.execute(
-        select(PathNode).where(
-            PathNode.campus_id == building.campus_id,
-            PathNode.label == building.code.lower(),
-        )
-    ).scalars().all()
-    for n in nodes:
-        pt = _parse_point(n.location)
-        connected.append(
-            {
-                "id": str(n.id),
-                "label": n.label,
-                "type": n.kind.value,
-                "lat": pt[1] if pt else 0.0,
-                "lng": pt[0] if pt else 0.0,
-            }
-        )
-
-    pt = _parse_point(building.centroid)
-    return BuildingDetailOut(
-        id=building.id,
-        campus_id=building.campus_id,
-        name=building.name,
-        code=building.code,
-        num_floors=building.num_floors,
-        has_elevator=building.has_elevator,
-        is_accessible=building.is_accessible,
-        lat=pt[1] if pt else None,
-        lng=pt[0] if pt else None,
-        entrances=entrances,
-        floors=floors,
-        connecting_nodes=connected,
-    )
+    return detail

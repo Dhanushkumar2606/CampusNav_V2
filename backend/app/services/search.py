@@ -16,8 +16,9 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.campus import Building, Campus, POI
+from app.models.campus import Building, Campus, Floor, POI, Room
 from app.models.graph import PathNode, PathNodeKind
+from app.services.navigation import _haversine
 
 _WORD_RE = re.compile(r"[a-z0-9]+")
 
@@ -26,7 +27,7 @@ _WORD_RE = re.compile(r"[a-z0-9]+")
 class SearchResult:
     id: UUID
     label: str
-    type: str  # "building" | "node" | "poi"
+    type: str  # "building" | "node" | "poi" | "room"
     category: str
     lat: float
     lng: float
@@ -36,6 +37,9 @@ class SearchResult:
     building_id: UUID | None
     subtitle: str | None
     score: float
+    # Graph/destination key: resolves via the campus graph `labels` map.
+    # Null when the result has no graph node (e.g. POI rows).
+    slug: str | None = None
 
 
 @dataclass(frozen=True)
@@ -52,6 +56,7 @@ class _Candidate:
     campus_name: str
     building_id: UUID | None
     subtitle: str | None
+    slug: str | None = None
 
 
 _WKT_RE = re.compile(r"POINT\s*\(\s*(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s*\)", re.IGNORECASE)
@@ -84,11 +89,15 @@ def _score(query: str, haystack: str) -> float:
     h_tokens = _tokens(h)
     if not q_tokens:
         return 40.0 if q in h else 0.0
-    # Word-boundary contains: strongest signal after prefix.
-    if any(t == q or t.startswith(q) for t in h_tokens):
-        return 70.0
+    # Every query token present (word-boundary): the whole query matched.
+    all_present = all(any(ht.startswith(t) for ht in h_tokens) for t in q_tokens)
     if q in h:
-        return 45.0
+        # Whole-phrase substring — a full intent match ("cse block") beats
+        # scattered token hits.
+        return 90.0 if all_present else 45.0
+    # Word-boundary contains: strongest signal after prefix.
+    if any(ht.startswith(q) or ht == q for ht in h_tokens):
+        return 90.0 if all_present else 70.0
     # Token-level: fraction of query tokens present anywhere.
     hits = sum(1 for t in q_tokens if any(ht.startswith(t) for ht in h_tokens))
     return round(30.0 * hits / len(q_tokens), 1)
@@ -120,6 +129,7 @@ def _candidates(session: Session, campus: Campus | None) -> list[_Candidate]:
                 building_id=b.id,
                 subtitle=f"{b.num_floors} floor{'s' if b.num_floors != 1 else ''}"
                 + (", elevator" if b.has_elevator else ""),
+                slug=b.code.lower(),
             )
         )
 
@@ -148,6 +158,7 @@ def _candidates(session: Session, campus: Campus | None) -> list[_Candidate]:
                 campus_name=n.campus.name if n.campus else "",
                 building_id=None,
                 subtitle=n.kind.value.capitalize(),
+                slug=n.label,
             )
         )
 
@@ -174,7 +185,64 @@ def _candidates(session: Session, campus: Campus | None) -> list[_Candidate]:
                 subtitle=p.description or None,
             )
         )
+
+    # Rooms — schema-ready: rows appear only when floor/room data is seeded
+    # (none today), but the query path is real and tested.
+    rq = (
+        select(Room, Floor, Building)
+        .join(Floor, Floor.id == Room.floor_id)
+        .join(Building, Building.id == Floor.building_id)
+    )
+    if campus is not None:
+        rq = rq.where(Building.campus_id == campus.id)
+    for room, floor, b in session.execute(rq):
+        bpt = _parse_point(b.centroid)
+        if bpt is None:
+            continue
+        out.append(
+            _Candidate(
+                id=room.id,
+                label=room.code,
+                haystack=f"{room.code} {room.name} {b.name} {floor.label} floor {floor.level}",
+                type="room",
+                category="room",
+                lat=bpt[1],
+                lng=bpt[0],
+                campus_id=b.campus_id,
+                campus_slug=b.campus.slug if b.campus else "",
+                campus_name=b.campus.name if b.campus else "",
+                building_id=b.id,
+                subtitle=f"{room.name} · {b.name} · {floor.label}",
+                slug=f"{b.code.lower()}:{room.code.lower()}",
+            )
+        )
     return out
+
+
+# Category words that, when present in a query, boost that category.
+# Query "nearest canteen" should favor POIs over buildings, etc.
+_CATEGORY_BOOSTS: dict[str, str] = {
+    "building": "building",
+    "buildings": "building",
+    "block": "building",
+    "cafe": "poi",
+    "cafes": "poi",
+    "canteen": "poi",
+    "canteens": "poi",
+    "restroom": "poi",
+    "restrooms": "poi",
+    "atm": "poi",
+    "landmark": "landmark",
+    "landmarks": "landmark",
+    "gate": "landmark",
+    "station": "transit",
+    "transit": "transit",
+    "transport": "transit",
+    "entrance": "entrance",
+    "entrances": "entrance",
+    "room": "room",
+    "rooms": "room",
+}
 
 
 def search(
@@ -182,9 +250,16 @@ def search(
     query: str,
     campus_slug: str | None = None,
     limit: int = 20,
+    near_lat: float | None = None,
+    near_lng: float | None = None,
 ) -> list[SearchResult]:
-    """Search across buildings + graph nodes + POIs. Returns scored results
-    (best first); empty list when nothing matches or query is blank."""
+    """Search across buildings + graph nodes + POIs (+ rooms when seeded).
+    Returns scored results (best first); empty list when nothing matches or
+    query is blank.
+
+    `near_lat`/`near_lng` bias results toward the given location: candidates
+    within ~1.5 km get a proximity bonus (up to 40 points), relevance first.
+    """
     q = query.strip()
     if not q:
         return []
@@ -195,13 +270,30 @@ def search(
             select(Campus).where(Campus.slug == campus_slug)
         ).scalar_one_or_none()
 
+    boost_targets = {_CATEGORY_BOOSTS[t] for t in _tokens(q) if t in _CATEGORY_BOOSTS}
+
     scored: list[tuple[float, _Candidate]] = []
     for c in _candidates(session, campus):
         score = _score(q, c.haystack)
-        if score > 0:
-            scored.append((score, c))
+        if score <= 0:
+            continue
+        if c.category in boost_targets:
+            score += 20.0
+        if near_lat is not None and near_lng is not None:
+            dist = _haversine(near_lat, near_lng, c.lat, c.lng)
+            score += 40.0 * max(0.0, 1.0 - dist / 1500.0)
+        scored.append((score, c))
 
-    scored.sort(key=lambda pair: (-pair[0], pair[1].label))
+    # Relevance first; ties break toward richer result types (a building
+    # outranks its entrance node, which outranks rooms/POIs).
+    _type_priority = {"building": 0, "poi": 1, "node": 2, "room": 3}
+    scored.sort(
+        key=lambda pair: (
+            -pair[0],
+            _type_priority.get(pair[1].type, 9),
+            pair[1].label,
+        )
+    )
     return [
         SearchResult(
             id=c.id,
@@ -216,6 +308,7 @@ def search(
             building_id=c.building_id,
             subtitle=c.subtitle,
             score=score,
+            slug=c.slug,
         )
         for score, c in scored[:limit]
     ]

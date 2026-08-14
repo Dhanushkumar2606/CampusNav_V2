@@ -10,6 +10,7 @@ from app.routing.astar import (
     InMemoryGraph,
     NavEdge,
     NavNode,
+    NoAccessiblePath,
     NoPath,
     RouteMode,
     RouteOptions,
@@ -59,7 +60,7 @@ def test_require_accessible_skips_restricted_edges() -> None:
     edges = [NavEdge(id="ab", from_id="A", to_id="B", distance=10.0, is_restricted=True)]
     g = InMemoryGraph.build(nodes, edges)
 
-    with pytest.raises(NoPath):
+    with pytest.raises(NoAccessiblePath):
         find_route(g, "A", "B", RouteOptions(require_accessible=True))
     # Unrestricted mode still uses it.
     assert find_route(g, "A", "B").total_distance_m == pytest.approx(10.0)
@@ -136,7 +137,7 @@ def test_alternatives_honor_accessible_filter() -> None:
     ]
     g = InMemoryGraph.build(nodes, edges)
     opts = RouteOptions(require_accessible=True)
-    with pytest.raises(NoPath):
+    with pytest.raises(NoAccessiblePath):
         find_route(g, "A", "C", opts)
     assert find_alternatives(g, "A", "C", count=2, options=opts) == []
 

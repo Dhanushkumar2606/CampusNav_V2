@@ -29,8 +29,17 @@ export async function assistantQuery(
   campusSlug?: string,
   userLocation?: string,
   timeConstraintMin?: number,
+  userLat?: number,
+  userLng?: number,
 ): Promise<AssistantResponseOut> {
-  const body = { query, campus_slug: campusSlug, user_location: userLocation, time_constraint_min: timeConstraintMin };
+  const body = {
+    query,
+    campus_slug: campusSlug,
+    user_location: userLocation,
+    time_constraint_min: timeConstraintMin,
+    user_lat: userLat,
+    user_lng: userLng,
+  };
   return unwrap<AssistantResponseOut>(
     await fetch("/api/assistant/query", {
       method: "POST",

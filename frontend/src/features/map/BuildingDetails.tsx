@@ -1,22 +1,32 @@
 /**
  * BuildingDetails — shared content for the selected-place experience.
- * Renders ONLY real data: building name/kind/floors/elevator/accessibility
- * plus the node's connected neighbors. Missing data shows "Not available".
+ * Renders ONLY real data: building name/kind/floors/elevator/accessibility,
+ * the node's connected neighbors, plus (Phase G) the building's entrances
+ * from `getBuildingDetail`, an Add-to-Saved toggle and a shareable
+ * `/map?place=<id>` deep link. Missing data shows "Not available".
  */
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Accessibility,
+  Bookmark,
   Building2,
+  Check,
   DoorOpen,
   Footprints,
   Landmark,
   Layers,
+  Loader2,
   Navigation,
+  Share2,
   TrainFront,
   X,
 } from "lucide-react";
 
+import { useAuth } from "@/auth/AuthContext";
 import { Button } from "@/components/ui/button";
-import type { Building, GraphPayload, PathNode } from "@/lib/navigation-types";
+import { useToast } from "@/components/ui/toast";
+import { addFavorite, getBuildingDetail, listFavorites, removeFavorite } from "@/api/search";
+import type { Building, BuildingDetailOut, GraphPayload, PathNode } from "@/lib/navigation-types";
 import { prettyLabel } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
@@ -60,14 +70,107 @@ export function BuildingDetails({
   onClose,
   variant = "compact",
 }: BuildingDetailsProps) {
+  const { getToken } = useAuth();
+  const { toast } = useToast();
   const kind = KIND_META[node.type] ?? KIND_META.poi;
   const KindIcon = kind.icon;
-  const connected = graph.edges
-    .filter((e) => e.from_id === node.id || e.to_id === node.id)
-    .map((e) => (e.from_id === node.id ? e.to_id : e.from_id))
-    .map((id) => graph.nodes.find((n) => n.id === id))
-    .filter((n): n is PathNode => Boolean(n))
-    .slice(0, 4);
+
+  // ---- Phase G: full building record (entrances, floors, rooms) ----------
+  const [detail, setDetail] = useState<BuildingDetailOut | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    if (!building) {
+      setDetail(null);
+      return;
+    }
+    setLoadingDetail(true);
+    getBuildingDetail(building.id)
+      .then((d) => {
+        if (!cancelled) setDetail(d);
+      })
+      .catch(() => {
+        if (!cancelled) setDetail(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingDetail(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [building?.id]);
+
+  const connected = useMemo(
+    () =>
+      graph.edges
+        .filter((e) => e.from_id === node.id || e.to_id === node.id)
+        .map((e) => (e.from_id === node.id ? e.to_id : e.from_id))
+        .map((id) => graph.nodes.find((n) => n.id === id))
+        .filter((n): n is PathNode => Boolean(n))
+        .slice(0, 4),
+    [graph, node.id],
+  );
+
+  const totalRooms = useMemo(
+    () => (detail?.floors ?? []).reduce((sum, f) => sum + f.rooms_count, 0),
+    [detail],
+  );
+
+  // ---- Add-to-Saved (favorites) + shareable deep link --------------------
+  const favoriteType = building ? "building" : "node";
+  const favoriteId = building ? building.id : node.id;
+  const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    const token = getToken();
+    if (!token) return;
+    listFavorites(token).then((favs) => {
+      if (!cancelled) setSaved(favs.some((f) => f.target_type === favoriteType && f.target_id === favoriteId));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [getToken, favoriteType, favoriteId]);
+
+  const toggleSaved = useCallback(async () => {
+    const token = getToken();
+    if (!token) {
+      toast({ title: "Saved requires sign-in", tone: "error" });
+      return;
+    }
+    try {
+      if (saved) {
+        const favs = await listFavorites(token);
+        const match = favs.find((f) => f.target_type === favoriteType && f.target_id === favoriteId);
+        if (match) {
+          await removeFavorite(token, match.id);
+          setSaved(false);
+        }
+      } else {
+        await addFavorite(token, {
+          target_type: favoriteType,
+          target_id: favoriteId,
+          note: null,
+        });
+        setSaved(true);
+      }
+    } catch {
+      toast({ title: "Could not update Saved", tone: "error" });
+    }
+  }, [getToken, toast, saved, favoriteType, favoriteId]);
+
+  const shareLink = useMemo(
+    () => `${window.location.origin}/map?place=${encodeURIComponent(node.id)}`,
+    [node.id],
+  );
+  const share = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      toast({ title: "Link copied", description: "Anyone with a map link can open this place.", tone: "success" });
+    } catch {
+      toast({ title: "Could not copy link", tone: "error" });
+    }
+  }, [shareLink, toast]);
 
   return (
     <div className={variant === "full" ? "pb-2" : ""}>
@@ -100,6 +203,11 @@ export function BuildingDetails({
           ok={Boolean(building)}
         />
         <InfoRow
+          label="Rooms"
+          value={detail && detail.floors.length > 0 ? String(totalRooms) : "Not available"}
+          ok={Boolean(detail && detail.floors.length > 0)}
+        />
+        <InfoRow
           label="Elevator"
           value={building ? (building.has_elevator ? "Available" : "Not available") : "Not available"}
           ok={Boolean(building?.has_elevator)}
@@ -123,6 +231,32 @@ export function BuildingDetails({
               : "Not available"}
           </span>
         </div>
+
+        <div className="flex items-center justify-between gap-3 border-t border-brand-muted/60 py-1.5 text-sm">
+          <span className="text-brand-subtle">Entrances</span>
+          <span className="max-w-[55%] text-right">
+            {loadingDetail ? (
+              <Loader2 className="ml-auto size-4 animate-spin text-brand-subtle" aria-hidden />
+            ) : detail && detail.entrances.length > 0 ? (
+              <span className="flex flex-col items-end gap-1">
+                {detail.entrances.map((e) => (
+                  <span key={e.id} className="flex items-center gap-1.5 font-medium text-brand-text">
+                    {e.label}
+                    {e.has_stairs ? (
+                      <span className="text-[10px] uppercase tracking-wide text-brand-subtle">stairs</span>
+                    ) : null}
+                    <Accessibility
+                      className={cn("size-3.5", e.is_accessible ? "text-brand-green" : "text-brand-subtle")}
+                      aria-label={e.is_accessible ? "Accessible entrance" : "Not marked accessible"}
+                    />
+                  </span>
+                ))}
+              </span>
+            ) : (
+              <span className="text-brand-subtle/70">Not available</span>
+            )}
+          </span>
+        </div>
       </div>
 
       {building ? (
@@ -140,6 +274,16 @@ export function BuildingDetails({
         <Button size="sm" className="flex-1" onClick={onSetDestination}>
           <Navigation className="size-3.5" aria-hidden />
           Destination
+        </Button>
+      </div>
+      <div className="mt-2 flex gap-2">
+        <Button variant="ghost" size="sm" className="flex-1" onClick={() => void toggleSaved()}>
+          {saved ? <Check className="size-3.5 text-brand-green" aria-hidden /> : <Bookmark className="size-3.5" aria-hidden />}
+          {saved ? "Saved" : "Save"}
+        </Button>
+        <Button variant="ghost" size="sm" className="flex-1" onClick={() => void share()}>
+          <Share2 className="size-3.5" aria-hidden />
+          Share
         </Button>
       </div>
     </div>

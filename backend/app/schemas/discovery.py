@@ -28,6 +28,9 @@ class SearchResultOut(BaseModel):
     building_id: UUID | None = None
     subtitle: str | None = None
     score: float
+    # Destination key that resolves through the campus graph `labels` map
+    # (building code / node label); None when no graph node exists.
+    slug: str | None = None
 
 
 class CategoryOut(BaseModel):

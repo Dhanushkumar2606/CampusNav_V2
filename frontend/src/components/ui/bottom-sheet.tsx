@@ -28,9 +28,34 @@ export function BottomSheet({
   className,
   portal = true,
 }: BottomSheetProps) {
+  // When closed this portal used to render a transparent `absolute inset-0`
+  // layer over the whole app — an invisible wall that swallowed every
+  // button click. Unmount fully instead (the `exit` animation had no
+  // AnimatePresence to run under anyway).
   const reduceMotion = useReducedMotion();
   const dragY = useMotionValue(0);
   const opacity = useTransform(dragY, [0, 200], [1, 0]);
+  const sheetRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Escape closes the sheet; focus lands on the first interactive element
+  // when it opens so keyboard users don't lose their place.
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !e.defaultPrevented) onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    const t = window.setTimeout(() => {
+      const el = sheetRef.current?.querySelector<HTMLElement>(
+        "button, [href], input, select, textarea, [tabindex]",
+      );
+      el?.focus();
+    }, 0);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      window.clearTimeout(t);
+    };
+  }, [open, onClose]);
 
   const onDragEnd = (_: unknown, info: { offset: { y: number }; velocity: { y: number } }) => {
     if (info.offset.y > 120 || info.velocity.y > 600) {
@@ -40,8 +65,10 @@ export function BottomSheet({
     }
   };
 
+  if (!open) return null;
+
   const sheet = (
-    <div className="absolute inset-0 z-50" aria-hidden={!open}>
+    <div className="absolute inset-0 z-50">
       {/* Backdrop */}
       <motion.div
         className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
@@ -52,9 +79,11 @@ export function BottomSheet({
       />
       {/* Sheet */}
       <motion.div
+        ref={sheetRef}
         role="dialog"
         aria-modal="false"
         aria-label={title}
+        tabIndex={-1}
         initial={{ y: "100%" }}
         animate={{ y: open ? "0%" : "100%" }}
         exit={{ y: "100%" }}

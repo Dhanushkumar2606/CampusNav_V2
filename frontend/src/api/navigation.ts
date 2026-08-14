@@ -62,6 +62,28 @@ export async function listBuildings(slug: string): Promise<Building[]> {
   );
 }
 
+export interface NearestNodeOut {
+  node_id: string;
+  label: string;
+  type: string;
+  lat: number;
+  lng: number;
+  distance_m: number;
+}
+
+/** Snap a raw GPS fix to the closest walkable graph node (honest distance). */
+export async function nearestNode(
+  slug: string,
+  lat: number,
+  lng: number,
+): Promise<NearestNodeOut> {
+  return unwrap<NearestNodeOut>(
+    await fetch(
+      `/api/navigation/campuses/${encodeURIComponent(slug)}/nearest-node?lat=${lat}&lng=${lng}`,
+    ),
+  );
+}
+
 export async function postRoute(
   slug: string,
   req: RouteRequest,
@@ -121,6 +143,8 @@ export function routeErrorMessage(status: RouteStatus, fallback: string | null):
   switch (status) {
     case "no_path":
       return "No path found between those points.";
+    case "no_access_route":
+      return "No wheelchair-accessible route found between those points.";
     case "source_equals_destination":
       return "Source and destination are the same.";
     case "unknown_node":
@@ -130,6 +154,27 @@ export function routeErrorMessage(status: RouteStatus, fallback: string | null):
     default:
       return fallback ?? "Could not compute a route.";
   }
+}
+
+/**
+ * Message for a transport-level failure (NavigationApiError).
+ * Distinguishes rate-limiting and server hiccups from plain network loss
+ * so the panel can suggest a retry instead of just failing silently.
+ */
+export function transportErrorMessage(err: unknown): string {
+  if (err instanceof NavigationApiError) {
+    if (err.status === 429) return "Rate limited by the server — wait a moment and try again.";
+    if (err.status >= 500) return `The server hiccuped (${err.status}) — please retry.`;
+    return err.detail ?? err.message;
+  }
+  if (err instanceof Error) {
+    const msg = err.message.toLowerCase();
+    if (msg.includes("failed to fetch") || msg.includes("networkerror")) {
+      return "Network problem — check your connection and try again.";
+    }
+    return err.message;
+  }
+  return "Could not compute a route.";
 }
 
 /** Build a Route from a successful RouteResponse. */

@@ -3,8 +3,9 @@
 Endpoints:
   GET  /navigation/campuses
   GET  /navigation/campuses/{slug}/graph         — nodes + edges for the campus
-  POST /navigation/campuses/{slug}/route         — A* route request
+  GET  /navigation/campuses/{slug}/nearest-node  — GPS-fix snapping to the graph
   GET  /navigation/campuses/{slug}/buildings     — building centroids for the map
+  POST /navigation/campuses/{slug}/route         — A* route request
 
 The router uses `app.services.navigation` for all DB + A* logic so the A*
 implementation stays decoupled from FastAPI.
@@ -15,13 +16,14 @@ from __future__ import annotations
 import re
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.schemas.navigation import (
     BuildingOut,
     CampusOut,
+    NearestNodeOut,
     PathEdgeOut,
     PathNodeOut,
     RouteOut,
@@ -38,6 +40,9 @@ from app.services.navigation import (
     list_campus_nodes,
     list_campuses,
     request_route,
+)
+from app.services.navigation import (
+    nearest_node as nearest_campus_node,
 )
 
 router = APIRouter(prefix="/navigation", tags=["navigation"])
@@ -90,6 +95,7 @@ def campus_graph(
 
     # Pair buildings with their entrance nodes.
     from sqlalchemy import select as _select
+
     from app.models.campus import Building
 
     buildings_db = db.execute(
@@ -154,6 +160,7 @@ def campus_buildings(
         raise HTTPException(status_code=404, detail=f"campus not found: {slug}")
 
     from sqlalchemy import select as _select
+
     from app.models.campus import Building
 
     rows = db.execute(
@@ -177,6 +184,37 @@ def campus_buildings(
             )
         )
     return out
+
+
+@router.get(
+    "/campuses/{slug}/nearest-node",
+    response_model=NearestNodeOut,
+)
+def nearest_node(
+    slug: Annotated[str, Path(min_length=1, max_length=64)],
+    lat: Annotated[float, Query(ge=-90, le=90)],
+    lng: Annotated[float, Query(ge=-180, le=180)],
+    db: Session = Depends(get_db),
+) -> NearestNodeOut:
+    """Snap a raw GPS fix to the walkable graph: returns the closest node
+    and its straight-line distance to the fix (honest — never fabricates
+    a position on a path)."""
+    campus = get_campus_by_slug(db, slug)
+    if campus is None:
+        raise HTTPException(status_code=404, detail=f"campus not found: {slug}")
+    hit = nearest_campus_node(db, campus.id, lat, lng)
+    if hit is None:
+        raise HTTPException(status_code=404, detail="campus has no graph nodes")
+    node, distance_m = hit
+    node_lng, node_lat = _parse_lng_lat(node.location)
+    return NearestNodeOut(
+        node_id=node.id,
+        label=node.label,
+        type=node.kind.value,
+        lat=node_lat,
+        lng=node_lng,
+        distance_m=distance_m,
+    )
 
 
 @router.post(
@@ -242,6 +280,6 @@ def compute_route(
     # Map status → HTTP code for the standard cases; everything else is 422.
     if result.status in (RouteStatus.UNKNOWN_NODE, RouteStatus.SOURCE_EQUALS_DEST):
         raise HTTPException(status_code=400, detail=result.error)
-    if result.status == RouteStatus.NO_PATH:
+    if result.status in (RouteStatus.NO_PATH, RouteStatus.NO_ACCESS_ROUTE):
         raise HTTPException(status_code=404, detail=result.error)
     raise HTTPException(status_code=422, detail=result.error)

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -22,13 +22,14 @@ import { useToast } from "@/components/ui/toast";
 import { useAuth } from "@/auth/AuthContext";
 import { cn } from "@/lib/utils";
 import { prettyLabel } from "@/lib/brand";
-import { searchCampus, addFavorite } from "@/api/search";
-import type { SearchResult } from "@/lib/navigation-types";
+import { searchCampus, addFavorite, getCampusCategories } from "@/api/search";
+import { listCampuses } from "@/api/navigation";
+import type { SearchResult, CategoryOut } from "@/lib/navigation-types";
 
 const RECENT_SEARCHES_KEY = "campusnav:recent-searches";
 const MAX_RECENT = 8;
 
-const CATEGORIES = [
+const STATIC_CATEGORIES = [
   { key: "all", label: "All" },
   { key: "building", label: "Buildings" },
   { key: "landmark", label: "Landmarks" },
@@ -36,16 +37,23 @@ const CATEGORIES = [
   { key: "entrance", label: "Entrances" },
 ] as const;
 
+// API category labels (plural, backend-driven) -> chip keys (singular, stable).
+const API_KEY_TO_STATIC: Record<string, string> = {
+  landmarks: "landmark",
+  transport: "transit",
+};
+
 export function Explore() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const { getToken } = useAuth();
   const { toast } = useToast();
   const query = params.get("q")?.trim() ?? "";
-  const initialCategory = (params.get("category") as typeof CATEGORIES[number]["key"]) ?? "all";
+  const initialCategory = (params.get("category") as typeof STATIC_CATEGORIES[number]["key"]) ?? "all";
 
   const [debouncedQuery, setDebouncedQuery] = useState(query);
-  const [category, setCategory] = useState(initialCategory);
+  const [categoryCounts, setCategoryCounts] = useState<CategoryOut[] | null>(null);
+  const [category, setCategory] = useState<string>(initialCategory);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "empty">("idle");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -65,6 +73,51 @@ export function Explore() {
       // ignore parse errors
     }
   }, []);
+
+  // Real category counts for the chips (Phase F): uses the first campus as
+  // the default scope; falls back to label-only chips when unavailable.
+  useEffect(() => {
+    let cancelled = false;
+    listCampuses()
+      .then((campuses) => {
+        const first = campuses[0];
+        if (cancelled || !first) return;
+        return getCampusCategories(first.slug).then((cats) => {
+          if (!cancelled) setCategoryCounts(cats);
+        });
+      })
+      .catch(() => {
+        // chips stay label-only
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // API labels are merged onto the stable static keys when they overlap.
+  const categories: { key: string; label: string; count?: number }[] = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const c of categoryCounts ?? []) {
+      const key = API_KEY_TO_STATIC[c.key] ?? c.key;
+      if (key === "all") continue;
+      counts.set(key, (counts.get(key) ?? 0) + c.count);
+    }
+    return [
+      { key: "all", label: "All" },
+      ...STATIC_CATEGORIES.filter((c) => c.key !== "all").map((c) => ({
+        key: c.key,
+        label: c.label,
+        count: counts.get(c.key),
+      })),
+      ...[...counts.entries()]
+        .filter(([key]) => !STATIC_CATEGORIES.some((c) => c.key === key))
+        .map(([key, count]) => ({
+          key,
+          label: key.charAt(0).toUpperCase() + key.slice(1),
+          count,
+        })),
+    ];
+  }, [categoryCounts]);
 
   // Debounced search effect
   useEffect(() => {
@@ -232,7 +285,7 @@ export function Explore() {
 
         {/* Category chips */}
         <div className="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="Search categories">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <Chip
               key={cat.key}
               role="tab"
@@ -246,6 +299,16 @@ export function Explore() {
               )}
             >
               {cat.label}
+              {typeof cat.count === "number" ? (
+                <span
+                  className={cn(
+                    "ml-1 rounded-full px-1.5 text-[10px] font-semibold",
+                    category === cat.key ? "bg-brand-deep/20 text-brand-deep" : "bg-brand-muted text-brand-subtle"
+                  )}
+                >
+                  {cat.count}
+                </span>
+              ) : null}
             </Chip>
           ))}
         </div>

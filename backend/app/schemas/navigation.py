@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Any
 from uuid import UUID
 
@@ -10,7 +9,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.routing.astar import HeuristicKind, RouteMode
 from app.services.navigation import RouteStatus
-
 
 # ---------------------------------------------------------------------------
 # Catalog
@@ -109,3 +107,15 @@ class RouteResponse(BaseModel):
     error: str | None = None
     route: RouteOut | None = None
     alternatives: list[RouteOut] | None = None
+
+
+class NearestNodeOut(BaseModel):
+    """Closest graph node to a raw GPS fix — lets the client snap a live
+    location to the walkable graph instead of faking a position on a path."""
+
+    node_id: UUID
+    label: str
+    type: str
+    lat: float
+    lng: float
+    distance_m: float

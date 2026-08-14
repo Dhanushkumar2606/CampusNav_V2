@@ -7,6 +7,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogIn, AlertTriangle } from "lucide-react";
 
 import { useAuth } from "@/auth/AuthContext";
+import { NavigationApiError, transportErrorMessage } from "@/api/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +36,11 @@ export function Login() {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      if (err instanceof NavigationApiError && err.status === 401) {
+        setError("Invalid email or password.");
+      } else {
+        setError(transportErrorMessage(err));
+      }
     } finally {
       setSubmitting(false);
     }

@@ -1,32 +1,14 @@
 /**
- * RoutingPanel — orchestrates the left-side controls. Owns:
- *   - campuses list (fetched once)
- *   - selected campus + its graph (re-fetched on campus change)
- *   - source / destination selection
- *   - route preferences (mode, avoid stairs, accessibility)
- *   - the route request (calls /navigation/campuses/{slug}/route)
- *   - alternatives from the response (user picks which to view)
- *
- * State is split: this component owns campus + selection state (so it can
- * re-render its own cards without disturbing the parent), but the
- * resulting `Route` is lifted to the parent via `onRouteChange` so the
- * map can render the polyline.
+ * RoutingPanel — the route planner UI. All session state (campuses, graph,
+ * selection, constraints, route result + alternatives) lives in
+ * CampusRouteContext; this component is purely presentational. It renders
+ * the campus picker, source/destination pickers, route preferences, the
+ * find-route action and the result card with alternatives + steps.
  */
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Loader2, Navigation, Route as RouteIcon, AlertTriangle } from "lucide-react";
+import { useMemo } from "react";
+import { Loader2, Navigation as NavigationIcon, Route as RouteIcon, AlertTriangle } from "lucide-react";
 
-import {
-  getGraph,
-  listCampuses,
-  postRoute,
-  routeErrorMessage,
-} from "@/api/navigation";
-import type {
-  Campus,
-  GraphPayload,
-  Route,
-  RouteMode,
-} from "@/lib/navigation-types";
+import type { Route } from "@/lib/navigation-types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { prettyLabel } from "@/lib/brand";
 import { formatDistance, formatMinutes } from "@/lib/format";
+import { useCampusRoute } from "@/features/campus/CampusRouteContext";
 
 import { CampusPicker } from "./CampusPicker";
 import { EstimatedBanner } from "./EstimatedBanner";
@@ -43,135 +26,36 @@ import { NavigationSteps } from "./NavigationSteps";
 import { RoutePreferences } from "./RoutePreferences";
 import { RouteSummary } from "./RouteSummary";
 
-export type RouteStatus = "idle" | "loading" | "ok" | "error";
-
-export interface RoutingPanelProps {
-  // Forwarded selection (kept in sync with URL search params via parent).
-  sourceId: string | null;
-  destinationId: string | null;
-  onSourceChange: (id: string) => void;
-  onDestinationChange: (id: string) => void;
-  requireAccessible: boolean;
-  onRequireAccessibleChange: (next: boolean) => void;
-  // Lifted-up route state (parent renders the polyline).
-  route: Route | null;
-  onRouteChange: (route: Route | null) => void;
-  // Lifted-up graph state (parent renders the map).
-  graph: GraphPayload | null;
-  onGraphChange: (g: GraphPayload | null) => void;
-}
-
-export function RoutingPanel({
-  sourceId,
-  destinationId,
-  onSourceChange,
-  onDestinationChange,
-  requireAccessible,
-  onRequireAccessibleChange,
-  route,
-  onRouteChange,
-  graph,
-  onGraphChange,
-}: RoutingPanelProps) {
-  const [campuses, setCampuses] = useState<Campus[]>([]);
-  const [campusSlug, setCampusSlug] = useState<string | null>(null);
-  const [loadingCampuses, setLoadingCampuses] = useState(true);
-  const [loadingGraph, setLoadingGraph] = useState(false);
-  const [routeStatus, setRouteStatus] = useState<RouteStatus>("idle");
-  const [routeError, setRouteError] = useState<string | null>(null);
-  const [campusesError, setCampusesError] = useState<string | null>(null);
-  const [graphError, setGraphError] = useState<string | null>(null);
-
-  // Route preferences.
-  const [mode, setMode] = useState<RouteMode>("shortest");
-  const [avoidStairs, setAvoidStairs] = useState(false);
-  const [alternatives, setAlternatives] = useState<Route[]>([]);
-  const [activeAltIndex, setActiveAltIndex] = useState(-1);
-
-  // ---- load campuses on mount ------------------------------------------
-  useEffect(() => {
-    let cancelled = false;
-    setLoadingCampuses(true);
-    listCampuses()
-      .then((cs) => {
-        if (cancelled) return;
-        setCampuses(cs);
-        setLoadingCampuses(false);
-        if (cs.length > 0) setCampusSlug(cs[0].slug);
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        setCampusesError(err instanceof Error ? err.message : "Could not load campuses");
-        setLoadingCampuses(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // ---- re-fetch graph when campus changes ------------------------------
-  useEffect(() => {
-    if (!campusSlug) {
-      onGraphChange(null);
-      return;
-    }
-    let cancelled = false;
-    setLoadingGraph(true);
-    setGraphError(null);
-    getGraph(campusSlug)
-      .then((g) => {
-        if (cancelled) return;
-        onGraphChange(g);
-        setLoadingGraph(false);
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        setGraphError(err instanceof Error ? err.message : "Could not load graph");
-        setLoadingGraph(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [campusSlug, onGraphChange]);
-
-  // ---- fire route request ----------------------------------------------
-  const onFindRoute = useCallback(async () => {
-    if (!graph || !sourceId || !destinationId) return;
-    setRouteStatus("loading");
-    setRouteError(null);
-    setAlternatives([]);
-    setActiveAltIndex(-1);
-    try {
-      const res = await postRoute(graph.campus.slug, {
-        source_id: sourceId,
-        destination_id: destinationId,
-        require_accessible: requireAccessible,
-        heuristic: "haversine",
-        mode,
-        avoid_stairs: avoidStairs,
-        alternatives: 3,
-      });
-      if (res.status === "ok" && res.route) {
-        onRouteChange(res.route);
-        setAlternatives(res.alternatives ?? []);
-        setRouteStatus("ok");
-      } else {
-        onRouteChange(null);
-        setRouteError(routeErrorMessage(res.status, res.error));
-        setRouteStatus("error");
-      }
-    } catch (err) {
-      onRouteChange(null);
-      setRouteError(err instanceof Error ? err.message : "Could not compute route");
-      setRouteStatus("error");
-    }
-  }, [graph, sourceId, destinationId, requireAccessible, mode, avoidStairs, onRouteChange]);
-
-  const onPickAlternative = (index: number) => {
-    setActiveAltIndex(index);
-    const alt = alternatives[index];
-    if (alt) onRouteChange(alt);
-  };
+export function RoutingPanel() {
+  const {
+    campuses,
+    loadingCampuses,
+    campusesError,
+    campusSlug,
+    selectCampus,
+    graph,
+    loadingGraph,
+    graphError,
+    sourceId,
+    destinationId,
+    setSourceId,
+    setDestinationId,
+    requireAccessible,
+    setRequireAccessible,
+    mode,
+    setMode,
+    avoidStairs,
+    setAvoidStairs,
+    route,
+    alternatives,
+    activeAltIndex,
+    pickAlternative,
+    routeStatus,
+    routeError,
+    findRoute,
+    startNavigation,
+    navSession,
+  } = useCampusRoute();
 
   const canSubmit = !!graph && !!sourceId && !!destinationId && routeStatus !== "loading";
   const sourceNode = useMemo(
@@ -183,10 +67,32 @@ export function RoutingPanel({
     [graph, destinationId],
   );
 
-  const visibleRoute = activeAltIndex >= 0 ? alternatives[activeAltIndex] : route;
+  const visibleRoute: Route | null = activeAltIndex >= 0 ? alternatives[activeAltIndex] ?? null : route;
+
+  // Honest accessibility diagnosis: when an accessible route is required
+  // and the router reports no path, check whether either endpoint has ANY
+  // accessible connection in the campus graph. A negative answer means the
+  // filter (not a routing bug) is what's blocking the trip.
+  const accessibleDiagnosis = useMemo(() => {
+    if (!requireAccessible || routeStatus !== "error" || !graph) return null;
+    const hasAccessibleEdge = (id: string | null) => {
+      if (!id) return null;
+      return graph.edges.some(
+        (e) => e.from_id === id && e.accessible && !e.is_restricted,
+      );
+    };
+    const srcOk = hasAccessibleEdge(sourceId);
+    const dstOk = hasAccessibleEdge(destinationId);
+    if (srcOk === null || dstOk === null) return null;
+    const parts: string[] = [];
+    if (!srcOk) parts.push("the starting point has no wheelchair-accessible connections");
+    if (!dstOk) parts.push("the destination has no wheelchair-accessible connections");
+    if (parts.length === 0) return "The accessible filter is on and the router found no connected accessible path — try a different pair of points.";
+    return `The accessible filter is on, but ${parts.join(" and ")} on this campus.`;
+  }, [requireAccessible, routeStatus, graph, sourceId, destinationId]);
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-y-auto p-4">
+    <div className="flex flex-col gap-4 p-4">
       <EstimatedBanner />
 
       {/* Campus picker */}
@@ -208,7 +114,7 @@ export function RoutingPanel({
             <CampusPicker
               campuses={campuses}
               value={campusSlug}
-              onChange={setCampusSlug}
+              onChange={selectCampus}
             />
           )}
         </CardContent>
@@ -237,7 +143,7 @@ export function RoutingPanel({
               id="src"
               graph={graph}
               value={sourceId}
-              onChange={onSourceChange}
+              onChange={(id) => setSourceId(id)}
               placeholder={graph ? "Pick a starting point" : "Loading graph…"}
               disabled={!graph}
             />
@@ -254,7 +160,7 @@ export function RoutingPanel({
               id="dst"
               graph={graph}
               value={destinationId}
-              onChange={onDestinationChange}
+              onChange={(id) => setDestinationId(id)}
               placeholder={graph ? "Pick a destination" : "Loading graph…"}
               disabled={!graph}
             />
@@ -273,13 +179,13 @@ export function RoutingPanel({
             avoidStairs={avoidStairs}
             onAvoidStairsChange={setAvoidStairs}
             requireAccessible={requireAccessible}
-            onRequireAccessibleChange={onRequireAccessibleChange}
+            onRequireAccessibleChange={setRequireAccessible}
           />
 
           <Button
             size="lg"
             disabled={!canSubmit}
-            onClick={onFindRoute}
+            onClick={() => void findRoute()}
             className="w-full"
           >
             {routeStatus === "loading" ? (
@@ -289,14 +195,31 @@ export function RoutingPanel({
               </>
             ) : (
               <>
-                <Navigation className="size-4" />
+                <NavigationIcon className="size-4" />
                 Find route
               </>
             )}
           </Button>
 
           {routeStatus === "error" && routeError ? (
-            <ErrorAlert title="Could not compute a route" message={routeError} />
+            <div className="space-y-2">
+              <ErrorAlert title="Could not compute a route" message={routeError} />
+              {accessibleDiagnosis ? (
+                <p className="rounded-md border border-brand-amber/40 bg-brand-amber/10 px-3 py-2 text-xs text-brand-amber">
+                  {accessibleDiagnosis}
+                </p>
+              ) : null}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full"
+                disabled={!canSubmit}
+                onClick={() => void findRoute()}
+              >
+                Try again
+              </Button>
+            </div>
           ) : null}
         </CardContent>
       </Card>
@@ -310,11 +233,12 @@ export function RoutingPanel({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Alternatives picker */}
+            {/* Alternatives picker — every option shows distance + time so
+                the comparison is actually informative. */}
             {alternatives.length > 0 ? (
               <Tabs
                 value={String(activeAltIndex >= 0 ? activeAltIndex + 1 : 0)}
-                onValueChange={(v) => onPickAlternative(Number(v) - 1)}
+                onValueChange={(v) => pickAlternative(Number(v) - 1)}
               >
                 <TabsList className="w-full">
                   <TabsTrigger value="0" className="flex-1">
@@ -323,7 +247,8 @@ export function RoutingPanel({
                   </TabsTrigger>
                   {alternatives.map((a, i) => (
                     <TabsTrigger key={i} value={String(i + 1)} className="flex-1">
-                      {formatDistance(a.total_distance_m)}
+                      {formatDistance(a.total_distance_m)} ·{" "}
+                      {formatMinutes(a.estimated_walk_time_min)}
                     </TabsTrigger>
                   ))}
                 </TabsList>
@@ -331,6 +256,16 @@ export function RoutingPanel({
             ) : null}
 
             <RouteSummary route={visibleRoute} />
+            <div className="flex items-center gap-2">
+              <Button
+                className="flex-1"
+                onClick={startNavigation}
+                disabled={!visibleRoute || navSession.active}
+              >
+                <NavigationIcon className="size-4" />
+                {navSession.active ? "Navigating…" : "Start navigation"}
+              </Button>
+            </div>
             <NavigationSteps route={visibleRoute} />
           </CardContent>
         </Card>
