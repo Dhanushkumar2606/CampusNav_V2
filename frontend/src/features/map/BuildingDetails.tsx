@@ -17,6 +17,7 @@ import {
   Layers,
   Loader2,
   Navigation,
+  Orbit,
   Share2,
   TrainFront,
   X,
@@ -29,6 +30,8 @@ import { addFavorite, getBuildingDetail, listFavorites, removeFavorite } from "@
 import type { Building, BuildingDetailOut, GraphPayload, PathNode } from "@/lib/navigation-types";
 import { prettyLabel } from "@/lib/brand";
 import { cn } from "@/lib/utils";
+import { nodeImmersive } from "@/lib/immersive";
+import { ImmersiveViewer } from "@/features/immersive/ImmersiveViewer";
 
 export interface BuildingDetailsProps {
   node: PathNode;
@@ -74,6 +77,10 @@ export function BuildingDetails({
   const { toast } = useToast();
   const kind = KIND_META[node.type] ?? KIND_META.poi;
   const KindIcon = kind.icon;
+
+  // ---- Optional 360° experience (scene-linked; purely additive) ----
+  const immersive = useMemo(() => nodeImmersive(node), [node]);
+  const [viewerOpen, setViewerOpen] = useState(false);
 
   // ---- Phase G: full building record (entrances, floors, rooms) ----------
   const [detail, setDetail] = useState<BuildingDetailOut | null>(null);
@@ -276,6 +283,24 @@ export function BuildingDetails({
           Destination
         </Button>
       </div>
+      {/* Optional 360° — only when this place has immersive content. The
+          viewer is additive: it can never affect routing or navigation. */}
+      {immersive ? (
+        <div className="mt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full border-brand-cyan/40 text-brand-cyan hover:bg-brand-cyan/10"
+            onClick={() => setViewerOpen(true)}
+          >
+            <Orbit className="size-3.5" aria-hidden />
+            Explore 360°
+          </Button>
+          <p className="mt-1.5 text-center text-[11px] text-brand-subtle">
+            Official campus tour — opens outside the navigation app.
+          </p>
+        </div>
+      ) : null}
       <div className="mt-2 flex gap-2">
         <Button variant="ghost" size="sm" className="flex-1" onClick={() => void toggleSaved()}>
           {saved ? <Check className="size-3.5 text-brand-green" aria-hidden /> : <Bookmark className="size-3.5" aria-hidden />}
@@ -286,6 +311,18 @@ export function BuildingDetails({
           Share
         </Button>
       </div>
+
+      {/* 360° viewer (portal; mounted only while open). */}
+      <ImmersiveViewer
+        open={viewerOpen}
+        scene={immersive}
+        placeLabel={prettyLabel(node.label)}
+        onClose={() => setViewerOpen(false)}
+        onNavigateHere={() => {
+          setViewerOpen(false);
+          onSetDestination();
+        }}
+      />
     </div>
   );
 }

@@ -18,6 +18,7 @@ export default defineConfig({
         manualChunks: {
           // Heavy third-party libs get their own cacheable chunks.
           maplibre: ["maplibre-gl"],
+          three: ["three"],
           motion: ["framer-motion"],
           icons: ["lucide-react"],
           radix: [

@@ -25,6 +25,12 @@ class CampusOut(BaseModel):
     featured: bool = False
     center_lat: float | None = None
     center_lng: float | None = None
+    # Optional 360°/immersive provider config — scene-linked only, each
+    # scene carries its own per-block url (never a whole-site tour):
+    # ({"provider": "campus360", "url": ..., "available": true,
+    #   "label": ..., "scenes": {node_label: {"label": ..., "url": ...}}}).
+    # Null when unset.
+    immersive: dict[str, Any] | None = None
 
 
 class CampusStatsOut(BaseModel):

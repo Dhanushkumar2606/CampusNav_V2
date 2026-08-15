@@ -5,23 +5,43 @@
  * active step is highlighted and completed steps dim to a checked state.
  * Only surfaces real data (labels/distances come from the backend's route
  * response).
+ *
+ * Route-aware 360°: when a step's endpoint node carries an immersive scene
+ * (per the campus config), a small chip lets the user open that viewpoint
+ * in the ImmersiveViewer. Purely additive — the navigation state machine
+ * is untouched.
  */
-import { Check, Footprints } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Check, Footprints, Orbit } from "lucide-react";
 
-import type { Route } from "@/lib/navigation-types";
+import { ImmersiveViewer } from "@/features/immersive/ImmersiveViewer";
+import type { GraphPayload, ImmersiveScene, Route } from "@/lib/navigation-types";
 import { formatMinutes } from "@/lib/format";
+import { routeImmersiveViewpoints } from "@/lib/immersive";
 import { cn } from "@/lib/utils";
 
 export function NavigationSteps({
   route,
   currentIndex,
+  graph,
 }: {
   route: Route;
   currentIndex?: number;
+  graph?: GraphPayload | null;
 }) {
   const navigating = currentIndex !== undefined && currentIndex >= 0;
+  const viewpointByNode = useMemo(() => {
+    const map = new Map<string, { stepIndex: number; label: string; scene: ImmersiveScene }>();
+    for (const v of routeImmersiveViewpoints(route, graph ?? null)) {
+      map.set(v.nodeId, v);
+    }
+    return map;
+  }, [route, graph]);
+  const [activeScene, setActiveScene] = useState<ImmersiveScene | null>(null);
+  const [activeLabel, setActiveLabel] = useState<string>("");
   return (
-    <ol className="relative space-y-3 pl-1" aria-label="Navigation steps">
+    <>
+      <ol className="relative space-y-3 pl-1" aria-label="Navigation steps">
       {route.steps.map((step, i) => {
         const isLast = i === route.steps.length - 1;
         const isArrival = step.instruction?.startsWith("Arrive") ?? isLast;
@@ -75,10 +95,38 @@ export function NavigationSteps({
                 {Math.round(step.distance_m)} m
                 {step.walk_time_min != null ? ` · ${formatMinutes(step.walk_time_min)}` : ""}
               </p>
+              {(() => {
+                const viewpoint = viewpointByNode.get(step.to_node_id);
+                if (!viewpoint) return null;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveScene(viewpoint.scene);
+                      setActiveLabel(viewpoint.label);
+                    }}
+                    className="mt-1.5 inline-flex max-w-full items-center gap-1 rounded-md border border-brand-cyan/40 bg-brand-cyan/10 px-1.5 py-0.5 text-[11px] font-medium text-brand-cyan transition-colors hover:bg-brand-cyan/20"
+                    aria-label={`View 360° at ${viewpoint.label}`}
+                  >
+                    <Orbit className="size-3 shrink-0" aria-hidden />
+                    <span className="truncate">{viewpoint.label}</span>
+                  </button>
+                );
+              })()}
             </div>
           </li>
         );
       })}
     </ol>
+    <ImmersiveViewer
+      open={activeScene !== null}
+      scene={activeScene}
+      placeLabel={activeLabel}
+      onClose={() => {
+        setActiveScene(null);
+        setActiveLabel("");
+      }}
+    />
+    </>
   );
 }

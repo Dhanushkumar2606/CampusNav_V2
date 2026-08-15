@@ -166,11 +166,31 @@ def campus_graph(
     building_by_code = {b.code.casefold(): b for b in buildings_db}
 
     out_nodes: list[PathNodeOut] = []
+    # Optional per-node immersive info from the campus-level config:
+    # {"provider", "url", "label", "available"} merged from `scenes` keyed by
+    # the node's seed label; "media_id" carries the 360° scene id when the
+    # provider renders scene tiles in-app (e.g. the SRM tour's cube scenes).
+    # Scene-linked only: a node carries immersive metadata solely when ITS
+    # OWN scene has a real url or media_id — never a whole-site tour.
+    # Purely additive — navigation ignores it.
+    campus_immersive = campus.immersive or {}
+    campus_scenes = campus_immersive.get("scenes") or {}
     for n in nodes:
         lng, lat = _parse_lng_lat(n.location)
         building_id = None
         if n.label.casefold() in building_by_code:
             building_id = building_by_code[n.label.casefold()].id
+        metadata: dict = {"campus_id": str(n.campus_id)}
+        scene = campus_scenes.get(n.label)
+        if isinstance(scene, dict) and scene and (scene.get("url") or scene.get("media_id")):
+            metadata["immersive"] = {
+                "provider": scene.get("provider")
+                or campus_immersive.get("provider", "campus360"),
+                "url": scene.get("url"),
+                "mediaId": scene.get("media_id"),
+                "available": bool(scene.get("available", True)),
+                "label": scene.get("label") or n.label,
+            }
         out_nodes.append(
             PathNodeOut(
                 id=n.id,
@@ -179,7 +199,7 @@ def campus_graph(
                 lat=lat,
                 lng=lng,
                 building_id=building_id,
-                metadata={"campus_id": str(n.campus_id)},
+                metadata=metadata,
             )
         )
 

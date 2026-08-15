@@ -13,7 +13,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import __version__
 from app.config import get_settings
-from app.routers import admin, assistant, auth, discovery, favorites, health, navigation, preferences
+from app.routers import admin, assistant, auth, discovery, favorites, health, navigation, panorama, preferences
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
@@ -48,6 +48,7 @@ _BARE_ROUTERS = [
     preferences.router,
     admin.router,
     assistant.router,
+    panorama.router,
 ]
 for router in _BARE_ROUTERS:
     app.include_router(router)
@@ -68,8 +69,13 @@ class SPAStaticFiles(StaticFiles):
             return await super().get_response("index.html", scope)
 
 
-if os.path.isdir("frontend/dist"):
-    app.mount("/", SPAStaticFiles(directory="frontend/dist", html=True), name="static")
+# Resolve the built SPA relative to the repo root (backend/../frontend/dist),
+# independent of the process CWD — uvicorn is commonly started from backend/.
+# main.py lives at backend/app/main.py, so three parent dirs up is the root.
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_DIST = os.path.join(_REPO_ROOT, "frontend", "dist")
+if os.path.isdir(_DIST):
+    app.mount("/", SPAStaticFiles(directory=_DIST, html=True), name="static")
 
 
 @app.get("/api/root", tags=["root"])

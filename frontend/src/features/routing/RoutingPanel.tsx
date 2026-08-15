@@ -262,6 +262,7 @@ export function RoutingPanel() {
             <NavigationSteps
               route={visibleRoute}
               currentIndex={navSession.active ? navSession.stepIndex : undefined}
+              graph={graph}
             />
           </CardContent>
         </Card>

@@ -9,6 +9,7 @@ Phase 2 will add GIST indexes via a follow-up migration.
 from __future__ import annotations
 
 import enum
+import json
 from datetime import datetime
 from uuid import UUID, uuid4
 
@@ -56,11 +57,25 @@ class Campus(Base):
     featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     center_lat: Mapped[float | None] = mapped_column(Float, nullable=True)
     center_lng: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # Optional immersive layer configuration, stored as JSON text. Never read
+    # by the navigation engine — routing/accessibility/AI work without it.
+    immersive_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
     )
+
+    @property
+    def immersive(self) -> dict | None:
+        """Parsed immersive config, or None when the campus has none."""
+        if not self.immersive_json:
+            return None
+        try:
+            value = json.loads(self.immersive_json)
+            return value if isinstance(value, dict) else None
+        except (TypeError, ValueError):
+            return None
 
     buildings: Mapped[list["Building"]] = relationship(
         back_populates="campus", cascade="all, delete-orphan"

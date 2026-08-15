@@ -7,6 +7,46 @@
  * UUID arrives as a string — that's the shape this file models.
  */
 
+/* ----- Immersive (360°) layer ----- */
+
+/** A single 360° viewpoint/venue, resolved per node via the campus config. */
+export interface ImmersiveScene {
+  /** Provider id, e.g. "srm-cube" | "campus360". */
+  provider: string;
+  /** URL to embed/open. Absent when the provider has no viewable page. */
+  url: string | null;
+  /** Human label for the scene, e.g. "Central Library". */
+  label: string;
+  /** False hides the 360° action entirely for this node. */
+  available: boolean;
+  /**
+   * Provider scene id (e.g. the SRM tour's panorama GUID). Tile-based
+   * providers ("srm-cube") render this scene's cube tiles directly —
+   * exactly one block's panorama, never a whole-site tour.
+   */
+  mediaId?: string | null;
+  /** Initial look direction — degrees; 0 looks at the front face (+z). */
+  initialHeading?: number;
+  /** Initial look elevation — degrees; positive looks down. */
+  initialPitch?: number;
+  /** Initial vertical field of view — degrees, clamped to 35–105. */
+  initialFov?: number;
+}
+
+/**
+ * Campus-level immersive configuration (persisted on the campus row).
+ * The navigation engine never reads it — the frontend uses it only to
+ * offer the optional 360° experience.
+ */
+export interface ImmersiveConfig {
+  provider: string;
+  url: string | null;
+  label: string | null;
+  available: boolean;
+  /** Optional per-node scenes keyed by the node's seed label. */
+  scenes?: Record<string, Partial<ImmersiveScene>>;
+}
+
 export interface Campus {
   id: string;
   name: string;
@@ -17,6 +57,8 @@ export interface Campus {
   /** Catalog centroid for geo-ranking (null when the loader had no data). */
   center_lat: number | null;
   center_lng: number | null;
+  /** Optional 360°/immersive provider config; null hides the feature. */
+  immersive: ImmersiveConfig | null;
 }
 
 export interface CampusNear extends Campus {

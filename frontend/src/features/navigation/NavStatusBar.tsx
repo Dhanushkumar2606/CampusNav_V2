@@ -9,8 +9,12 @@
  * shows the arrival screen when the engine reports the route is done.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Orbit } from "lucide-react";
 import { useCampusRoute } from "../campus/CampusRouteContext";
 import { bearingDegrees, boundsFromNodes } from "../../lib/geo";
+import { nodeImmersive } from "../../lib/immersive";
+import type { ImmersiveScene } from "../../lib/navigation-types";
+import { ImmersiveViewer } from "../immersive/ImmersiveViewer";
 
 const CAMERA_FOLLOW_ZOOM = 17;
 const VOICE_KEY = "campusnav:voice";
@@ -67,6 +71,25 @@ export function NavStatusBar() {
     if (!graph || !route) return null;
     return graph.nodes.find((n) => n.id === route.destination)?.label ?? null;
   }, [graph, route]);
+
+  /**
+   * Route-aware 360°: the node the walker is heading toward right now
+   * (current step's endpoint, or the destination when the route is done).
+   * Purely additive — the viewer never touches navigation state.
+   */
+  const currentViewpoint = useMemo(() => {
+    if (!navSession.active || !route || !graph) return null;
+    const steps = route.steps;
+    const idx = navSession.stepIndex;
+    const nodeId = idx >= 0 && idx < steps.length ? steps[idx].to_node_id : route.destination;
+    const node = graph.nodes.find((n) => n.id === nodeId);
+    if (!node) return null;
+    const scene = nodeImmersive(node);
+    return scene ? { label: scene.label ?? node.label, scene } : null;
+  }, [navSession.active, navSession.stepIndex, route, graph]);
+
+  const [viewerScene, setViewerScene] = useState<ImmersiveScene | null>(null);
+  const [viewerLabel, setViewerLabel] = useState<string>("");
 
   const step = navSession.active ? (route?.steps ?? null) : null;
   const arrived = navSession.active && navSession.phase === "arrived";
@@ -198,14 +221,15 @@ export function NavStatusBar() {
   })();
 
   return (
-    <div
-      className={
-        "pointer-events-auto absolute bottom-24 left-1/2 z-30 w-[min(92vw,420px)] -translate-x-1/2 rounded-xl border shadow-lg backdrop-blur md:bottom-4 " +
-        (arrived
-          ? "border-brand-green/50 bg-brand-navy/95"
-          : navSession.offRoute
-            ? "border-brand-amber/60 bg-brand-navy/95"
-            : "border-brand-muted bg-brand-navy/95")
+    <>
+      <div
+        className={
+          "pointer-events-auto absolute bottom-24 left-1/2 z-30 w-[min(92vw,420px)] -translate-x-1/2 rounded-xl border shadow-lg backdrop-blur md:bottom-4 " +
+          (arrived
+            ? "border-brand-green/50 bg-brand-navy/95"
+            : navSession.offRoute
+              ? "border-brand-amber/60 bg-brand-navy/95"
+              : "border-brand-muted bg-brand-navy/95")
       }
     >
       <div className="flex items-start gap-3 p-3">
@@ -247,6 +271,20 @@ export function NavStatusBar() {
               GPS signal lost — steps won't advance until it returns.
             </p>
           )}
+          {currentViewpoint ? (
+            <button
+              type="button"
+              onClick={() => {
+                setViewerScene(currentViewpoint.scene);
+                setViewerLabel(currentViewpoint.label);
+              }}
+              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-brand-cyan/40 bg-brand-cyan/10 py-1.5 text-xs font-medium text-brand-cyan transition-colors hover:bg-brand-cyan/20"
+              aria-label={`See ${currentViewpoint.label} in 360°`}
+            >
+              <Orbit className="size-3.5" aria-hidden />
+              See {currentViewpoint.label} in 360°
+            </button>
+          ) : null}
         </div>
         <div className="flex shrink-0 flex-col gap-1.5">
           <button
@@ -321,5 +359,15 @@ export function NavStatusBar() {
         </div>
       ) : null}
     </div>
+    <ImmersiveViewer
+      open={viewerScene !== null}
+      scene={viewerScene}
+      placeLabel={viewerLabel}
+      onClose={() => {
+        setViewerScene(null);
+        setViewerLabel("");
+      }}
+    />
+    </>
   );
 }

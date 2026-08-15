@@ -242,6 +242,15 @@ def load_campus(session: Session, payload: dict[str, Any]) -> Campus:
     center = payload.get("center") or {}
     center_lat = center.get("lat")
     center_lng = center.get("lng")
+    # Optional immersive layer (360° provider config). Pure metadata — the
+    # navigation engine never reads it; an absent/malformed value leaves the
+    # previous config untouched rather than wiping it on re-seed.
+    immersive = payload.get("immersive")
+    immersive_json = None
+    if isinstance(immersive, dict) and immersive:
+        import json as _json
+
+        immersive_json = _json.dumps(immersive)
     if existing is None:
         c = Campus(
             name=name,
@@ -250,6 +259,7 @@ def load_campus(session: Session, payload: dict[str, Any]) -> Campus:
             featured=featured,
             center_lat=center_lat,
             center_lng=center_lng,
+            immersive_json=immersive_json,
         )
         session.add(c)
         session.flush()
@@ -258,6 +268,8 @@ def load_campus(session: Session, payload: dict[str, Any]) -> Campus:
         existing.name = name
         existing.slug = slug
         existing.featured = featured
+        if immersive_json is not None:
+            existing.immersive_json = immersive_json
         if center_lat is not None and center_lng is not None:
             existing.center_lat = center_lat
             existing.center_lng = center_lng

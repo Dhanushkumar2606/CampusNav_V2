@@ -5,7 +5,8 @@
   "node_names_and_floors": "SRM official facilities PDF (webstor.srmist.edu.in ktr-campus-building-area-details.pdf)",
   "node_coordinates": "Google Places, geocoded (real, verified)",
   "edges": "routing graph rebuilt from the OpenStreetMap walkable network (389 edges: junction-to-junction ways with full geometry, plus short entrance connectors). Distances measured along the shapes.",
-  "graph": "junction nodes where walkable ways meet/split (Overpass), split nodes at the nearest network point to each entrance, straight estimated connectors from entrances to the network."
+  "graph": "junction nodes where walkable ways meet/split (Overpass), split nodes at the nearest network point to each entrance, straight estimated connectors from entrances to the network.",
+  "immersive": "scene-linked only: each of our blocks maps to one panorama scene (media_id GUID) of the official SRM virtual tour and its cube tiles are streamed at view time; the whole-site tour is never embedded and no imagery is stored/mirrored."
  },
  "nodes": [
   {
@@ -11651,5 +11652,49 @@
    "note": "entrance connector to the walkway network (short, straight)",
    "geometry": null
   }
- ]
+ ],
+ "immersive": {
+  "provider": "srm-cube",
+  "url": null,
+  "label": "SRM 360° Tour — building scenes",
+  "available": true,
+  "note": "Scene-linked only: each block maps to ONE panorama scene of the official SRM virtual tour (media_id = the tour's panorama GUID). CampusNav never stores imagery — at view time it streams that single scene's cube tiles and renders them in-app; the whole-site tour is never embedded. Blocks without a media_id get no 360° action.",
+  "scenes": {
+   "central_library": {
+    "label": "Central Library",
+    "available": true,
+    "media_id": "94652D98_145D_D693_419A_9AE6E084796B"
+   },
+   "tech_park": {
+    "label": "Tech Park Entrance",
+    "available": true,
+    "media_id": "1FF1BDF7_B611_4E76_41E0_09F5FAE2913E"
+   },
+   "auditorium": {
+    "label": "T.P. Ganesan Auditorium",
+    "available": true,
+    "media_id": "1FF19650_B610_DD8A_41C8_F03127ADA2BB"
+   },
+   "main_gate": {
+    "label": "Arch Gate",
+    "available": true,
+    "media_id": "376DF872_2734_77E8_41BE_53A2EB32FDD1"
+   },
+   "univ_building": {
+    "label": "UB Main Entrance",
+    "available": true,
+    "media_id": "78E1DFC8_2754_4938_41AE_01C343A2EAB6"
+   },
+   "boys_hostel": {
+    "label": "Men's Hostel",
+    "available": true,
+    "media_id": "36C2700C_2387_11BE_4188_8FE1A1518355"
+   },
+   "hitech_block": {
+    "label": "HI-Tech",
+    "available": true,
+    "media_id": "73C4F6A7_6046_5D8D_41B3_CEA0E6CA64A4"
+   }
+  }
+ }
 }
