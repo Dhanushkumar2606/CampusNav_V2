@@ -4,7 +4,7 @@
  */
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LogIn, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { LogIn, AlertTriangle, CheckCircle2, Loader2, Mail } from "lucide-react";
 
 import { useAuth } from "@/auth/AuthContext";
 import { NavigationApiError, transportErrorMessage } from "@/api/navigation";
@@ -12,6 +12,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
+import { PremiumBadge } from "@/components/ui/premium-badge";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface LocationState {
   from?: string;
@@ -57,22 +60,32 @@ export function Login() {
     <main className="relative min-h-screen overflow-hidden bg-brand-deep text-brand-text">
       <div
         aria-hidden
-        className="brand-gradient pointer-events-none absolute inset-x-0 top-0 h-72 opacity-50"
+        className="brand-gradient pointer-events-none absolute inset-x-0 top-0 h-96 opacity-60"
       />
 
+      <div className="absolute right-4 top-4 z-10">
+        <ThemeToggle />
+      </div>
+
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 py-16">
-        <header className="mb-8 flex items-center gap-3">
-          <div className="size-2.5 rounded-full bg-brand-green shadow-[0_0_12px_2px_rgba(16,185,129,0.6)]" />
-          <span className="text-sm uppercase tracking-[0.2em] text-brand-subtle">
-            CampusNav · v1.0.0-premium
+        <header className="mb-8 flex items-center gap-2.5">
+          <span className="size-2.5 rounded-full bg-brand-green shadow-glow" aria-hidden />
+          <span className="text-base font-semibold tracking-wide text-brand-text">
+            CampusNav
           </span>
+          <PremiumBadge />
         </header>
 
         <form
           onSubmit={onSubmit}
-          className="w-full rounded-xl border border-brand-muted bg-brand-navy/60 p-6 shadow-xl backdrop-blur"
+          className="w-full rounded-xl border border-brand-muted bg-brand-navy/60 p-6 shadow-card backdrop-blur sm:p-8"
         >
-          <h1 className="text-2xl font-semibold">Sign in</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Welcome{" "}
+            <span className="bg-gradient-to-r from-brand-green via-brand-cyan to-brand-purple bg-clip-text text-transparent">
+              back
+            </span>
+          </h1>
           <p className="mt-1 text-sm text-brand-subtle">
             Use your CampusNav account to plan routes across campuses.
           </p>
@@ -80,27 +93,32 @@ export function Login() {
           <div className="mt-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="username"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="bg-brand-deep/60"
-              />
+              <div className="relative">
+                <Mail
+                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand-subtle"
+                  aria-hidden
+                />
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="h-11 bg-brand-deep/60 pl-9"
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="bg-brand-deep/60"
+                className="h-11 bg-brand-deep/60 pl-4"
               />
             </div>
           </div>
@@ -129,7 +147,11 @@ export function Login() {
             disabled={submitting}
             className="mt-6 w-full"
           >
-            <LogIn className="size-4" />
+            {submitting ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <LogIn className="size-4" aria-hidden />
+            )}
             {submitting ? "Signing in…" : "Sign in"}
           </Button>
 

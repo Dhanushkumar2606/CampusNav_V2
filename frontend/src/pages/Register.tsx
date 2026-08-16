@@ -5,13 +5,16 @@
  */
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AlertTriangle, UserPlus } from "lucide-react";
+import { AlertTriangle, AlertCircle, Loader2, Mail, User, UserPlus } from "lucide-react";
 
 import { NavigationApiError, register as apiRegister, transportErrorMessage } from "@/api/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
+import { PremiumBadge } from "@/components/ui/premium-badge";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 type FieldError = string | null;
 
@@ -103,23 +106,33 @@ export function Register() {
     <main className="relative min-h-screen overflow-hidden bg-brand-deep text-brand-text">
       <div
         aria-hidden
-        className="brand-gradient pointer-events-none absolute inset-x-0 top-0 h-72 opacity-50"
+        className="brand-gradient pointer-events-none absolute inset-x-0 top-0 h-96 opacity-60"
       />
 
+      <div className="absolute right-4 top-4 z-10">
+        <ThemeToggle />
+      </div>
+
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 py-16">
-        <header className="mb-8 flex items-center gap-3">
-          <div className="size-2.5 rounded-full bg-brand-green shadow-[0_0_12px_2px_rgba(16,185,129,0.6)]" />
-          <span className="text-sm uppercase tracking-[0.2em] text-brand-subtle">
-            CampusNav · v1.0.0-premium
+        <header className="mb-8 flex items-center gap-2.5">
+          <span className="size-2.5 rounded-full bg-brand-green shadow-glow" aria-hidden />
+          <span className="text-base font-semibold tracking-wide text-brand-text">
+            CampusNav
           </span>
+          <PremiumBadge />
         </header>
 
         <form
           onSubmit={onSubmit}
           noValidate
-          className="w-full rounded-xl border border-brand-muted bg-brand-navy/60 p-6 shadow-xl backdrop-blur"
+          className="w-full rounded-xl border border-brand-muted bg-brand-navy/60 p-6 shadow-card backdrop-blur sm:p-8"
         >
-          <h1 className="text-2xl font-semibold">Create your account</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Create your{" "}
+            <span className="bg-gradient-to-r from-brand-green via-brand-cyan to-brand-purple bg-clip-text text-transparent">
+              account
+            </span>
+          </h1>
           <p className="mt-1 text-sm text-brand-subtle">
             Join CampusNav to plan routes across campuses.
           </p>
@@ -127,19 +140,29 @@ export function Register() {
           <div className="mt-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="full-name">Full Name</Label>
-              <Input
-                id="full-name"
-                type="text"
-                autoComplete="name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                aria-invalid={errors.fullName ? true : undefined}
-                aria-describedby={errors.fullName ? "full-name-error" : undefined}
-                className="bg-brand-deep/60"
-              />
+              <div className="relative">
+                <User
+                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand-subtle"
+                  aria-hidden
+                />
+                <Input
+                  id="full-name"
+                  type="text"
+                  autoComplete="name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  aria-invalid={errors.fullName ? true : undefined}
+                  aria-describedby={errors.fullName ? "full-name-error" : undefined}
+                  className="h-11 bg-brand-deep/60 pl-9"
+                />
+              </div>
               {errors.fullName ? (
-                <p id="full-name-error" className="text-xs text-brand-danger">
+                <p
+                  id="full-name-error"
+                  className="flex items-center gap-1.5 text-xs text-brand-danger"
+                >
+                  <AlertCircle className="size-3 shrink-0" aria-hidden />
                   {errors.fullName}
                 </p>
               ) : null}
@@ -147,19 +170,29 @@ export function Register() {
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                aria-invalid={errors.email ? true : undefined}
-                aria-describedby={errors.email ? "email-error" : undefined}
-                className="bg-brand-deep/60"
-              />
+              <div className="relative">
+                <Mail
+                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand-subtle"
+                  aria-hidden
+                />
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  aria-invalid={errors.email ? true : undefined}
+                  aria-describedby={errors.email ? "email-error" : undefined}
+                  className="h-11 bg-brand-deep/60 pl-9"
+                />
+              </div>
               {errors.email ? (
-                <p id="email-error" className="text-xs text-brand-danger">
+                <p
+                  id="email-error"
+                  className="flex items-center gap-1.5 text-xs text-brand-danger"
+                >
+                  <AlertCircle className="size-3 shrink-0" aria-hidden />
                   {errors.email}
                 </p>
               ) : null}
@@ -167,9 +200,8 @@ export function Register() {
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -177,10 +209,14 @@ export function Register() {
                 minLength={8}
                 aria-invalid={errors.password ? true : undefined}
                 aria-describedby={errors.password ? "password-error" : undefined}
-                className="bg-brand-deep/60"
+                className="h-11 bg-brand-deep/60"
               />
               {errors.password ? (
-                <p id="password-error" className="text-xs text-brand-danger">
+                <p
+                  id="password-error"
+                  className="flex items-center gap-1.5 text-xs text-brand-danger"
+                >
+                  <AlertCircle className="size-3 shrink-0" aria-hidden />
                   {errors.password}
                 </p>
               ) : null}
@@ -188,19 +224,22 @@ export function Register() {
 
             <div className="space-y-2">
               <Label htmlFor="confirm-password">Confirm Password</Label>
-              <Input
+              <PasswordInput
                 id="confirm-password"
-                type="password"
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 aria-invalid={errors.confirmPassword ? true : undefined}
                 aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
-                className="bg-brand-deep/60"
+                className="h-11 bg-brand-deep/60"
               />
               {errors.confirmPassword ? (
-                <p id="confirm-password-error" className="text-xs text-brand-danger">
+                <p
+                  id="confirm-password-error"
+                  className="flex items-center gap-1.5 text-xs text-brand-danger"
+                >
+                  <AlertCircle className="size-3 shrink-0" aria-hidden />
                   {errors.confirmPassword}
                 </p>
               ) : null}
@@ -221,7 +260,11 @@ export function Register() {
             disabled={submitting}
             className="mt-6 w-full"
           >
-            <UserPlus className="size-4" />
+            {submitting ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <UserPlus className="size-4" aria-hidden />
+            )}
             {submitting ? "Creating account…" : "Create Account"}
           </Button>
 
