@@ -24,6 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getCampusesNear, getCampusStats, listCampuses } from "@/api/navigation";
 import type { Campus, CampusNear, CampusStats } from "@/lib/navigation-types";
 import { cn } from "@/lib/utils";
+import { getLocationSource } from "@/lib/locationSource";
 
 const NEAR_RADIUS_M = 200_000;
 
@@ -85,12 +86,13 @@ export function CampusHub({ onNavigate }: { onNavigate: (slug: string) => void }
   }, [retryTick]);
 
   const locate = useCallback(() => {
-    if (!("geolocation" in navigator)) {
+    const source = getLocationSource();
+    if (!source) {
       setGeo({ status: "unsupported" });
       return;
     }
     setGeo({ status: "locating" });
-    navigator.geolocation.getCurrentPosition(
+    source.getCurrentPosition(
       (pos) => {
         getCampusesNear(pos.coords.latitude, pos.coords.longitude, {
           radiusM: NEAR_RADIUS_M,

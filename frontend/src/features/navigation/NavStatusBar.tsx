@@ -67,6 +67,18 @@ export function NavStatusBar() {
   const announcedRef = useRef(-1);
   const headedToRef = useRef<string | null>(null);
 
+  // Fix freshness: a real GPS loss mid-walk often delivers neither a fix nor
+  // an error — the watch simply goes silent. Without a staleness gate the
+  // bar would keep the last fix (and its "has fix" badge) forever.
+  const lastFixAtRef = useRef(0);
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!navSession.active) return;
+    const t = window.setInterval(() => setTick((n) => n + 1), 1000);
+    return () => window.clearInterval(t);
+  }, [navSession.active]);
+  const GPS_STALE_MS = 12_000;
+
   const destinationLabel = useMemo(() => {
     if (!graph || !route) return null;
     return graph.nodes.find((n) => n.id === route.destination)?.label ?? null;
@@ -171,6 +183,11 @@ export function NavStatusBar() {
     }
   }, [locate, checkPosition]);
 
+  // Stamp freshness only when the fix actually changes.
+  useEffect(() => {
+    if (locate.coords) lastFixAtRef.current = Date.now();
+  }, [locate.coords?.lat, locate.coords?.lng]);
+
   // Navigation needs a live fix — request one when the session starts and
   // the user hasn't locked geolocation to denied/ok this page-lifetime yet.
   useEffect(() => {
@@ -197,7 +214,7 @@ export function NavStatusBar() {
 
   if (!navSession.active || !step) return null;
 
-  const hasFix = locate.status === "ok" && !!locate.coords;
+  const hasFix = locate.status === "ok" && !!locate.coords && Date.now() - lastFixAtRef.current < GPS_STALE_MS;
   const total = step.length;
   const idx = navSession.stepIndex;
   const current = idx < total ? step[idx] : null;

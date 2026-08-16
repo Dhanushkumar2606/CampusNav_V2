@@ -30,6 +30,7 @@ import { RoutingPanel } from "@/features/routing/RoutingPanel";
 import { RouteChips } from "@/features/routing/RouteChips";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { MapAssistantPanel } from "@/features/assistant/MapAssistant";
+import { SimulatorPanel } from "@/sim/SimulatorPanel";
 import { SRM_KTR_BOUNDS } from "@/features/map/mapStyle";
 import { boundsFromCenter, boundsFromNodes, isSafari } from "@/lib/geo";
 
@@ -152,6 +153,9 @@ export function MapView() {
 
       {/* Live turn-by-turn status while navigation is running. */}
       <NavStatusBar />
+
+      {/* Dev-only deterministic GPS simulator (VITE_SIMULATED_GPS=true). */}
+      <SimulatorPanel />
 
       {/* Idle hint — desktop only. */}
       {showHint ? (

@@ -1,0 +1,192 @@
+{
+ "status": "ok",
+ "error": null,
+ "route": {
+  "source": "f64b5bcb-ce36-4e87-b9ac-fbdd09f8dbd2",
+  "destination": "e83683dd-da9b-4705-a9e2-f03bb733a190",
+  "steps": [
+   {
+    "from_node_id": "f64b5bcb-ce36-4e87-b9ac-fbdd09f8dbd2",
+    "to_node_id": "efdd1aac-ed76-4ae9-9a49-35b49bbf494e",
+    "edge_id": "749b4e2b-af29-493d-915f-fc19c6750843",
+    "distance_m": 41.3,
+    "estimated": true,
+    "walk_time_min": 0.6,
+    "instruction": "Walk toward junction_219 · 41 m",
+    "geometry": null
+   },
+   {
+    "from_node_id": "efdd1aac-ed76-4ae9-9a49-35b49bbf494e",
+    "to_node_id": "e37546ff-1edc-4c53-bdfb-f785ced5f08c",
+    "edge_id": "35458688-02c7-4e05-9280-9f669dc58465",
+    "distance_m": 43,
+    "estimated": false,
+    "walk_time_min": 0.6,
+    "instruction": "Walk toward junction_218 · 43 m",
+    "geometry": [
+     [
+      80.04443330571644,
+      12.82088052983904
+     ],
+     [
+      80.0448298,
+      12.8208739
+     ]
+    ]
+   },
+   {
+    "from_node_id": "e37546ff-1edc-4c53-bdfb-f785ced5f08c",
+    "to_node_id": "0b9c9bbe-2f91-4779-81a8-a83a422bd51a",
+    "edge_id": "e28cff5e-2b45-4b57-8bf4-3c621b3eefc5",
+    "distance_m": 59.8,
+    "estimated": false,
+    "walk_time_min": 0.8,
+    "instruction": "Walk toward junction_167 · 60 m",
+    "geometry": [
+     [
+      80.0448298,
+      12.8208739
+     ],
+     [
+      80.045053,
+      12.8208689
+     ],
+     [
+      80.0450483,
+      12.8211893
+     ]
+    ]
+   },
+   {
+    "from_node_id": "0b9c9bbe-2f91-4779-81a8-a83a422bd51a",
+    "to_node_id": "cd5c6dce-27de-4aab-80c8-521422f0c3ab",
+    "edge_id": "3b1f0b15-8be9-47d8-b357-075ec02c9052",
+    "distance_m": 26.7,
+    "estimated": false,
+    "walk_time_min": 0.4,
+    "instruction": "Walk toward junction_221 · 27 m",
+    "geometry": [
+     [
+      80.0450483,
+      12.8211893
+     ],
+     [
+      80.0450535,
+      12.8214293
+     ]
+    ]
+   },
+   {
+    "from_node_id": "cd5c6dce-27de-4aab-80c8-521422f0c3ab",
+    "to_node_id": "8d036aa6-b86e-4a5e-a156-2b6660bd1dfe",
+    "edge_id": "d0dd3f2a-37c3-4b11-a292-0523c88d758b",
+    "distance_m": 75.7,
+    "estimated": false,
+    "walk_time_min": 1,
+    "instruction": "Walk toward junction_216 · 76 m",
+    "geometry": [
+     [
+      80.0450535,
+      12.8214293
+     ],
+     [
+      80.045751,
+      12.8214102
+     ]
+    ]
+   },
+   {
+    "from_node_id": "8d036aa6-b86e-4a5e-a156-2b6660bd1dfe",
+    "to_node_id": "faaa8cb7-a748-4c81-bfa1-702521326e3e",
+    "edge_id": "379086bf-c0cb-4a0e-ad89-9e5385e5c310",
+    "distance_m": 162.4,
+    "estimated": false,
+    "walk_time_min": 2.2,
+    "instruction": "Walk toward junction_36 · 162 m",
+    "geometry": [
+     [
+      80.045751,
+      12.8214102
+     ],
+     [
+      80.0472489,
+      12.8213786
+     ]
+    ]
+   },
+   {
+    "from_node_id": "faaa8cb7-a748-4c81-bfa1-702521326e3e",
+    "to_node_id": "51ce394f-bdc1-4d33-9cc4-b383e6a25cb5",
+    "edge_id": "2b6d751b-fcff-4645-8ddd-3e6d55c356a5",
+    "distance_m": 18,
+    "estimated": false,
+    "walk_time_min": 0.2,
+    "instruction": "Walk toward junction_214 · 18 m",
+    "geometry": [
+     [
+      80.0472489,
+      12.8213786
+     ],
+     [
+      80.0473979,
+      12.8214495
+     ]
+    ]
+   },
+   {
+    "from_node_id": "51ce394f-bdc1-4d33-9cc4-b383e6a25cb5",
+    "to_node_id": "b818f2ce-3f73-406c-bb4b-e0bb91317d45",
+    "edge_id": "1ae8e720-cecf-402c-9ebb-5df9447cc829",
+    "distance_m": 33.7,
+    "estimated": false,
+    "walk_time_min": 0.4,
+    "instruction": "Walk toward junction_212 · 34 m",
+    "geometry": [
+     [
+      80.0473979,
+      12.8214495
+     ],
+     [
+      80.0476159,
+      12.8212334
+     ]
+    ]
+   },
+   {
+    "from_node_id": "b818f2ce-3f73-406c-bb4b-e0bb91317d45",
+    "to_node_id": "fd5dc1de-2c3d-4aea-abdb-02c3eae95c6c",
+    "edge_id": "38e571e2-2c52-48bd-8f95-b07451375e40",
+    "distance_m": 42.9,
+    "estimated": false,
+    "walk_time_min": 0.6,
+    "instruction": "Walk toward junction_213 · 43 m",
+    "geometry": [
+     [
+      80.0476159,
+      12.8212334
+     ],
+     [
+      80.0476351,
+      12.8208476
+     ]
+    ]
+   },
+   {
+    "from_node_id": "fd5dc1de-2c3d-4aea-abdb-02c3eae95c6c",
+    "to_node_id": "e83683dd-da9b-4705-a9e2-f03bb733a190",
+    "edge_id": "b5c91b1e-fc45-4e3e-bced-86c83285e52c",
+    "distance_m": 68.4,
+    "estimated": true,
+    "walk_time_min": 0.9,
+    "instruction": "Arrive at medical_auditorium · 68 m",
+    "geometry": null
+   }
+  ],
+  "total_distance_m": 571.9,
+  "estimated_walk_time_min": 7.7,
+  "step_count": 10,
+  "all_estimated": false,
+  "summary": "572 m · 8 min walk · 10 steps"
+ },
+ "alternatives": []
+}

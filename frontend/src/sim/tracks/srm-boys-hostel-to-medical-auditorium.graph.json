@@ -1,0 +1,447 @@
+{
+ "campus": {
+  "id": "e7587c23-6876-45f8-a0d4-6d2acf52cf95",
+  "name": "SRM Institute of Science and Technology, Kattankulathur",
+  "slug": "srm-institute-of-science-and-technology-kattankulathur",
+  "description": "Seeded from user-provided JSON (see data_provenance).",
+  "featured": true,
+  "center_lat": 12.822478,
+  "center_lng": 80.043848,
+  "immersive": {
+   "provider": "srm-cube",
+   "url": null,
+   "label": "SRM 360° Tour — building scenes",
+   "available": true,
+   "note": "Scene-linked only: each block maps to ONE panorama scene of the official SRM virtual tour (media_id = the tour's panorama GUID). CampusNav never stores imagery — at view time it streams that single scene's cube tiles and renders them in-app; the whole-site tour is never embedded. Blocks without a media_id get no 360° action.",
+   "scenes": {
+    "central_library": {
+     "label": "Central Library",
+     "available": true,
+     "media_id": "94652D98_145D_D693_419A_9AE6E084796B"
+    },
+    "tech_park": {
+     "label": "Tech Park Entrance",
+     "available": true,
+     "media_id": "1FF1BDF7_B611_4E76_41E0_09F5FAE2913E"
+    },
+    "auditorium": {
+     "label": "T.P. Ganesan Auditorium",
+     "available": true,
+     "media_id": "1FF19650_B610_DD8A_41C8_F03127ADA2BB"
+    },
+    "main_gate": {
+     "label": "Arch Gate",
+     "available": true,
+     "media_id": "376DF872_2734_77E8_41BE_53A2EB32FDD1"
+    },
+    "univ_building": {
+     "label": "UB Main Entrance",
+     "available": true,
+     "media_id": "78E1DFC8_2754_4938_41AE_01C343A2EAB6"
+    },
+    "boys_hostel": {
+     "label": "Men's Hostel",
+     "available": true,
+     "media_id": "36C2700C_2387_11BE_4188_8FE1A1518355"
+    },
+    "hitech_block": {
+     "label": "HI-Tech",
+     "available": true,
+     "media_id": "73C4F6A7_6046_5D8D_41B3_CEA0E6CA64A4"
+    }
+   }
+  }
+ },
+ "nodes": [
+  {
+   "id": "e83683dd-da9b-4705-a9e2-f03bb733a190",
+   "label": "medical_auditorium",
+   "type": "landmark",
+   "lat": 12.8206165,
+   "lng": 80.04822,
+   "building_id": null,
+   "metadata": {
+    "campus_id": "e7587c23-6876-45f8-a0d4-6d2acf52cf95"
+   }
+  },
+  {
+   "id": "f64b5bcb-ce36-4e87-b9ac-fbdd09f8dbd2",
+   "label": "boys_hostel",
+   "type": "poi",
+   "lat": 12.8205094,
+   "lng": 80.0444271,
+   "building_id": null,
+   "metadata": {
+    "campus_id": "e7587c23-6876-45f8-a0d4-6d2acf52cf95",
+    "immersive": {
+     "provider": "srm-cube",
+     "url": null,
+     "mediaId": "36C2700C_2387_11BE_4188_8FE1A1518355",
+     "available": true,
+     "label": "Men's Hostel"
+    }
+   }
+  },
+  {
+   "id": "faaa8cb7-a748-4c81-bfa1-702521326e3e",
+   "label": "junction_36",
+   "type": "junction",
+   "lat": 12.821379,
+   "lng": 80.047249,
+   "building_id": null,
+   "metadata": {
+    "campus_id": "e7587c23-6876-45f8-a0d4-6d2acf52cf95"
+   }
+  },
+  {
+   "id": "0b9c9bbe-2f91-4779-81a8-a83a422bd51a",
+   "label": "junction_167",
+   "type": "junction",
+   "lat": 12.821189,
+   "lng": 80.045048,
+   "building_id": null,
+   "metadata": {
+    "campus_id": "e7587c23-6876-45f8-a0d4-6d2acf52cf95"
+   }
+  },
+  {
+   "id": "b818f2ce-3f73-406c-bb4b-e0bb91317d45",
+   "label": "junction_212",
+   "type": "junction",
+   "lat": 12.821233,
+   "lng": 80.047616,
+   "building_id": null,
+   "metadata": {
+    "campus_id": "e7587c23-6876-45f8-a0d4-6d2acf52cf95"
+   }
+  },
+  {
+   "id": "fd5dc1de-2c3d-4aea-abdb-02c3eae95c6c",
+   "label": "junction_213",
+   "type": "junction",
+   "lat": 12.820848,
+   "lng": 80.047635,
+   "building_id": null,
+   "metadata": {
+    "campus_id": "e7587c23-6876-45f8-a0d4-6d2acf52cf95"
+   }
+  },
+  {
+   "id": "51ce394f-bdc1-4d33-9cc4-b383e6a25cb5",
+   "label": "junction_214",
+   "type": "junction",
+   "lat": 12.821449,
+   "lng": 80.047398,
+   "building_id": null,
+   "metadata": {
+    "campus_id": "e7587c23-6876-45f8-a0d4-6d2acf52cf95"
+   }
+  },
+  {
+   "id": "8d036aa6-b86e-4a5e-a156-2b6660bd1dfe",
+   "label": "junction_216",
+   "type": "junction",
+   "lat": 12.82141,
+   "lng": 80.045751,
+   "building_id": null,
+   "metadata": {
+    "campus_id": "e7587c23-6876-45f8-a0d4-6d2acf52cf95"
+   }
+  },
+  {
+   "id": "e37546ff-1edc-4c53-bdfb-f785ced5f08c",
+   "label": "junction_218",
+   "type": "junction",
+   "lat": 12.820874,
+   "lng": 80.04483,
+   "building_id": null,
+   "metadata": {
+    "campus_id": "e7587c23-6876-45f8-a0d4-6d2acf52cf95"
+   }
+  },
+  {
+   "id": "efdd1aac-ed76-4ae9-9a49-35b49bbf494e",
+   "label": "junction_219",
+   "type": "junction",
+   "lat": 12.820881,
+   "lng": 80.044433,
+   "building_id": null,
+   "metadata": {
+    "campus_id": "e7587c23-6876-45f8-a0d4-6d2acf52cf95"
+   }
+  },
+  {
+   "id": "cd5c6dce-27de-4aab-80c8-521422f0c3ab",
+   "label": "junction_221",
+   "type": "junction",
+   "lat": 12.821429,
+   "lng": 80.045053,
+   "building_id": null,
+   "metadata": {
+    "campus_id": "e7587c23-6876-45f8-a0d4-6d2acf52cf95"
+   }
+  }
+ ],
+ "edges": [
+  {
+   "id": "b5c91b1e-fc45-4e3e-bced-86c83285e52c",
+   "from_id": "e83683dd-da9b-4705-a9e2-f03bb733a190",
+   "to_id": "fd5dc1de-2c3d-4aea-abdb-02c3eae95c6c",
+   "distance_m": 68.4,
+   "estimated": true,
+   "accessible": true,
+   "type": "walk",
+   "walk_time_min": 0.9,
+   "has_stairs": false,
+   "is_restricted": false,
+   "is_indoor": false,
+   "is_outdoor": true,
+   "surface_type": null,
+   "slope": null,
+   "accessibility_verified": false,
+   "geometry": null
+  },
+  {
+   "id": "e28cff5e-2b45-4b57-8bf4-3c621b3eefc5",
+   "from_id": "0b9c9bbe-2f91-4779-81a8-a83a422bd51a",
+   "to_id": "e37546ff-1edc-4c53-bdfb-f785ced5f08c",
+   "distance_m": 59.8,
+   "estimated": false,
+   "accessible": true,
+   "type": "walk",
+   "walk_time_min": 0.8,
+   "has_stairs": false,
+   "is_restricted": false,
+   "is_indoor": false,
+   "is_outdoor": true,
+   "surface_type": null,
+   "slope": null,
+   "accessibility_verified": false,
+   "geometry": [
+    [
+     80.0450483,
+     12.8211893
+    ],
+    [
+     80.045053,
+     12.8208689
+    ],
+    [
+     80.0448298,
+     12.8208739
+    ]
+   ]
+  },
+  {
+   "id": "3b1f0b15-8be9-47d8-b357-075ec02c9052",
+   "from_id": "0b9c9bbe-2f91-4779-81a8-a83a422bd51a",
+   "to_id": "cd5c6dce-27de-4aab-80c8-521422f0c3ab",
+   "distance_m": 26.7,
+   "estimated": false,
+   "accessible": true,
+   "type": "walk",
+   "walk_time_min": 0.4,
+   "has_stairs": false,
+   "is_restricted": false,
+   "is_indoor": false,
+   "is_outdoor": true,
+   "surface_type": null,
+   "slope": null,
+   "accessibility_verified": false,
+   "geometry": [
+    [
+     80.0450483,
+     12.8211893
+    ],
+    [
+     80.0450535,
+     12.8214293
+    ]
+   ]
+  },
+  {
+   "id": "38e571e2-2c52-48bd-8f95-b07451375e40",
+   "from_id": "b818f2ce-3f73-406c-bb4b-e0bb91317d45",
+   "to_id": "fd5dc1de-2c3d-4aea-abdb-02c3eae95c6c",
+   "distance_m": 42.9,
+   "estimated": false,
+   "accessible": true,
+   "type": "walk",
+   "walk_time_min": 0.6,
+   "has_stairs": false,
+   "is_restricted": false,
+   "is_indoor": false,
+   "is_outdoor": true,
+   "surface_type": null,
+   "slope": null,
+   "accessibility_verified": false,
+   "geometry": [
+    [
+     80.0476159,
+     12.8212334
+    ],
+    [
+     80.0476351,
+     12.8208476
+    ]
+   ]
+  },
+  {
+   "id": "1ae8e720-cecf-402c-9ebb-5df9447cc829",
+   "from_id": "51ce394f-bdc1-4d33-9cc4-b383e6a25cb5",
+   "to_id": "b818f2ce-3f73-406c-bb4b-e0bb91317d45",
+   "distance_m": 33.7,
+   "estimated": false,
+   "accessible": true,
+   "type": "walk",
+   "walk_time_min": 0.4,
+   "has_stairs": false,
+   "is_restricted": false,
+   "is_indoor": false,
+   "is_outdoor": true,
+   "surface_type": null,
+   "slope": null,
+   "accessibility_verified": false,
+   "geometry": [
+    [
+     80.0473979,
+     12.8214495
+    ],
+    [
+     80.0476159,
+     12.8212334
+    ]
+   ]
+  },
+  {
+   "id": "2b6d751b-fcff-4645-8ddd-3e6d55c356a5",
+   "from_id": "51ce394f-bdc1-4d33-9cc4-b383e6a25cb5",
+   "to_id": "faaa8cb7-a748-4c81-bfa1-702521326e3e",
+   "distance_m": 18,
+   "estimated": false,
+   "accessible": true,
+   "type": "walk",
+   "walk_time_min": 0.2,
+   "has_stairs": false,
+   "is_restricted": false,
+   "is_indoor": false,
+   "is_outdoor": true,
+   "surface_type": null,
+   "slope": null,
+   "accessibility_verified": false,
+   "geometry": [
+    [
+     80.0473979,
+     12.8214495
+    ],
+    [
+     80.0472489,
+     12.8213786
+    ]
+   ]
+  },
+  {
+   "id": "d0dd3f2a-37c3-4b11-a292-0523c88d758b",
+   "from_id": "8d036aa6-b86e-4a5e-a156-2b6660bd1dfe",
+   "to_id": "cd5c6dce-27de-4aab-80c8-521422f0c3ab",
+   "distance_m": 75.7,
+   "estimated": false,
+   "accessible": true,
+   "type": "walk",
+   "walk_time_min": 1,
+   "has_stairs": false,
+   "is_restricted": false,
+   "is_indoor": false,
+   "is_outdoor": true,
+   "surface_type": null,
+   "slope": null,
+   "accessibility_verified": false,
+   "geometry": [
+    [
+     80.045751,
+     12.8214102
+    ],
+    [
+     80.0450535,
+     12.8214293
+    ]
+   ]
+  },
+  {
+   "id": "379086bf-c0cb-4a0e-ad89-9e5385e5c310",
+   "from_id": "8d036aa6-b86e-4a5e-a156-2b6660bd1dfe",
+   "to_id": "faaa8cb7-a748-4c81-bfa1-702521326e3e",
+   "distance_m": 162.4,
+   "estimated": false,
+   "accessible": true,
+   "type": "walk",
+   "walk_time_min": 2.2,
+   "has_stairs": false,
+   "is_restricted": false,
+   "is_indoor": false,
+   "is_outdoor": true,
+   "surface_type": null,
+   "slope": null,
+   "accessibility_verified": false,
+   "geometry": [
+    [
+     80.045751,
+     12.8214102
+    ],
+    [
+     80.0472489,
+     12.8213786
+    ]
+   ]
+  },
+  {
+   "id": "35458688-02c7-4e05-9280-9f669dc58465",
+   "from_id": "e37546ff-1edc-4c53-bdfb-f785ced5f08c",
+   "to_id": "efdd1aac-ed76-4ae9-9a49-35b49bbf494e",
+   "distance_m": 43,
+   "estimated": false,
+   "accessible": true,
+   "type": "walk",
+   "walk_time_min": 0.6,
+   "has_stairs": false,
+   "is_restricted": false,
+   "is_indoor": false,
+   "is_outdoor": true,
+   "surface_type": null,
+   "slope": null,
+   "accessibility_verified": false,
+   "geometry": [
+    [
+     80.0448298,
+     12.8208739
+    ],
+    [
+     80.04443330571644,
+     12.82088052983904
+    ]
+   ]
+  },
+  {
+   "id": "749b4e2b-af29-493d-915f-fc19c6750843",
+   "from_id": "efdd1aac-ed76-4ae9-9a49-35b49bbf494e",
+   "to_id": "f64b5bcb-ce36-4e87-b9ac-fbdd09f8dbd2",
+   "distance_m": 41.3,
+   "estimated": true,
+   "accessible": true,
+   "type": "walk",
+   "walk_time_min": 0.6,
+   "has_stairs": false,
+   "is_restricted": false,
+   "is_indoor": false,
+   "is_outdoor": true,
+   "surface_type": null,
+   "slope": null,
+   "accessibility_verified": false,
+   "geometry": null
+  }
+ ],
+ "labels": {
+  "boys_hostel": "f64b5bcb-ce36-4e87-b9ac-fbdd09f8dbd2",
+  "medical_auditorium": "e83683dd-da9b-4705-a9e2-f03bb733a190"
+ }
+}

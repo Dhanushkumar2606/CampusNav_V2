@@ -33,7 +33,11 @@ export function buildRouteGeometryModel(
   graph: GraphPayload,
 ): RouteGeometryModel {
   const polyline: [number, number][] = [];
-  const cum: number[] = [0];
+  // One cumulative entry per polyline vertex (cum[0] === 0). Do NOT seed
+  // this with a leading zero: the loop pushes 0 for the first vertex too,
+  // and a duplicated entry shifts every later lookup by one vertex, which
+  // under-reports remaining distance and can make arrival unreachable.
+  const cum: number[] = [];
   const steps: RouteStepBoundary[] = [];
   let walked = 0;
 

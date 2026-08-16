@@ -8,8 +8,13 @@
  * A `denied` result stops watching (permission is final for the session),
  * while a transient error (timeout) keeps the watch alive for the next
  * fix. Never fabricates coordinates.
+ *
+ * The browser API is reached through the locationSource seam, so tests and
+ * the dev-only simulated GPS can drive the same state machine without the
+ * real sensors.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getLocationSource } from "@/lib/locationSource";
 
 export type LocateStatus = "idle" | "locating" | "ok" | "denied" | "unavailable";
 
@@ -32,7 +37,7 @@ export function useLiveLocation(): LiveLocation {
 
   const stopWatch = useCallback(() => {
     if (watchIdRef.current !== null) {
-      navigator.geolocation.clearWatch(watchIdRef.current);
+      getLocationSource()?.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
   }, []);
@@ -42,7 +47,8 @@ export function useLiveLocation(): LiveLocation {
     stopWatch();
     setResult(INITIAL);
 
-    if (!("geolocation" in navigator)) {
+    const source = getLocationSource();
+    if (!source) {
       setResult({
         status: "unavailable",
         coords: null,
@@ -82,10 +88,10 @@ export function useLiveLocation(): LiveLocation {
       timeout: 10000,
       maximumAge: 5000,
     };
-    if (typeof navigator.geolocation.watchPosition === "function") {
-      watchIdRef.current = navigator.geolocation.watchPosition(success, failure, opts);
+    if (typeof source.watchPosition === "function") {
+      watchIdRef.current = source.watchPosition(success, failure, opts);
     } else {
-      navigator.geolocation.getCurrentPosition(success, failure, opts);
+      source.getCurrentPosition(success, failure, opts);
     }
   }, [stopWatch]);
 

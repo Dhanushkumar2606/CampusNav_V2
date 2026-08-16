@@ -25,6 +25,7 @@ import type { Building, Campus, GraphPayload, Route, RouteMode } from "@/lib/nav
 import { nearestNode, type NearestNodeOut } from "@/api/navigation";
 import { boundsFromNodes } from "@/lib/geo";
 import { useLiveLocation, type LocateResult } from "@/features/map/useLiveLocation";
+import { getLocationSource } from "@/lib/locationSource";
 import { buildRouteGeometryModel, projectOnRoute } from "@/features/navigation/routeProgress";
 
 export type Bounds2D = [[number, number], [number, number]];
@@ -301,14 +302,15 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
   // campuses load resolves, so it can't be cancelled by that state change.
   useEffect(() => {
     if (campusSlug || explicitCampusRef.current) return;
-    if (!("geolocation" in navigator)) return;
+    const source = getLocationSource();
+    if (!source) return;
     try {
       if (localStorage.getItem(LAST_CAMPUS_KEY)) return;
     } catch {
       // ignore storage errors
     }
     let cancelled = false;
-    navigator.geolocation.getCurrentPosition(
+    source.getCurrentPosition(
       (pos) => {
         if (cancelled) return;
         getCampusesNear(pos.coords.latitude, pos.coords.longitude, { radiusM: NEAR_RADIUS_M })
@@ -506,10 +508,17 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
   const recalcKey = `${campusSlug}|${sourceId ?? ""}|${destinationId ?? ""}|${mode}|${requireAccessible}|${avoidStairs}`;
   useEffect(() => {
     if (!graph || !sourceId || !destinationId || navSession.active) return;
-    // No route yet and no failed attempt: wait for the Find button or the
-    // one-shot deep-link auto-route. Once a route exists (or the last
-    // request failed) an input change re-runs the calculation.
-    if (route === null && routeStatus !== "error") return;
+    // No route yet and no failed attempt: only the Find button / deep-link
+    // auto-route may start a request, and there is nothing to update on an
+    // input change. Record the key anyway — otherwise the key stays
+    // unrecorded through the Find request's loading->ok transition and the
+    // effect fires one REDUNDANT second request once the route lands (a
+    // duplicate POST per Find click, plus a session-affecting reset when
+    // the re-route path is active).
+    if (route === null && routeStatus !== "error") {
+      recalcKeyRef.current = recalcKey;
+      return;
+    }
     if (recalcKeyRef.current === recalcKey) return;
     recalcKeyRef.current = recalcKey;
     // Drop the stale route and its alternatives so the map never shows the
@@ -533,9 +542,17 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
     // snapped node so the session and the walker share the user's real
     // origin instead of the last planned source. The route response lands
     // before the next fix and restarts the walker at step 0 (findRoute
-    // resets the session phase when active).
+    // resets the session phase when active). The snap must not be the
+    // destination itself — that request would 400 (same source/destination)
+    // and destroy the route mid-session.
     const snap = nearestNodeHit;
-    if (snap && sourceId && destinationId && snap.node_id !== sourceId) {
+    if (
+      snap &&
+      sourceId &&
+      destinationId &&
+      snap.node_id !== sourceId &&
+      snap.node_id !== destinationId
+    ) {
       void findRouteRef.current?.({ sourceId: snap.node_id });
     }
     setNavSession({
@@ -589,7 +606,7 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
   }, [navSession.active]);
 
   useEffect(() => {
-    if (!navSession.active || navSession.phase === "arrived" || !route || !graph) return;
+    if (!navSession.active || !route || !graph) return;
     const fix = locate.coords;
     if (locate.status !== "ok" || !fix) return;
     // Two-tier accuracy gate: a coarse fix (40-80 m — typical phone GPS in
@@ -603,6 +620,24 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
     const model = buildRouteGeometryModel(route, graph);
     if (model.totalM <= 0 || model.polyline.length < 2) return;
     const proj = projectOnRoute(fix.lat, fix.lng, model);
+
+    if (navSession.phase === "arrived") {
+      // A session stays on "arrived" unless a fine, honest fix shows the
+      // walker has clearly LEFT the destination zone — the arrival gate in
+      // reverse, with margin so one fix near the boundary can't flap the
+      // phase. Covers a multipath glitch that falsely triggered arrival and
+      // walking past the destination: guidance must resume either way.
+      if (coarse || model.totalM - proj.distM <= NAV_ARRIVED_M + 50) return;
+      crossedRef.current = null;
+      updateNavSession({
+        phase: "navigating",
+        offRoute: false,
+        // A departure is a fresh context like a re-snap: the step is the
+        // honest projection of the current fix, not a continuation of the
+        // finished walk.
+        stepIndex: Math.max(0, proj.stepIndex),
+      });
+    }
 
     // Arrival: the projection has effectively reached the end of the route.
     if (!coarse && (model.totalM - proj.distM <= NAV_ARRIVED_M || proj.frac >= 0.99)) {
@@ -660,7 +695,15 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
     const cleared = proj.offRouteM < NAV_OFFROUTE_CLEAR_M;
     if (offNow && !navSession.offRoute) {
       updateNavSession({ offRoute: true, remainingM, etaSec });
-      if (nearestNodeHit && !reRouteInFlightRef.current) {
+      // Never re-route INTO the destination: the backend rejects a route
+      // with source == destination (400), and re-routing is meaningless
+      // when the walker is already at the target. The snap may also be
+      // stale (it updates on a quiet-position debounce) — same guard.
+      if (
+        nearestNodeHit &&
+        nearestNodeHit.node_id !== destinationId &&
+        !reRouteInFlightRef.current
+      ) {
         reRouteInFlightRef.current = true;
         findRouteRef.current?.({ sourceId: nearestNodeHit.node_id })?.finally(() => {
           reRouteInFlightRef.current = false;
