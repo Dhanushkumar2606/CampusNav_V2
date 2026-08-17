@@ -275,12 +275,17 @@ export function MapCanvas({
       }
       window.clearTimeout(retryTimerRef.current);
       retryTimerRef.current = window.setTimeout(() => {
-        if (m.isStyleLoaded()) {
-          reloadRasterSource();
-        } else {
+        if (!m.isStyleLoaded()) {
           // Style never finished loading — retrying tiles won't help yet.
           setTileBanner(true);
+          return;
         }
+        // Only rebuild the source once the current batch has settled:
+        // removeSource aborts every in-flight tile request, so a mid-batch
+        // reload just restarts the whole set (thrash on slow links and
+        // software renderers). While tiles are still in flight we do
+        // nothing — the escalate path above handles persistent failure.
+        if (m.areTilesLoaded()) reloadRasterSource();
       }, RETRY_COALESCE_MS);
     };
     m.on("error", onError);
