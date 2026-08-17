@@ -63,6 +63,7 @@ def main() -> int:
             "app.seed.csv_loader",
             "--data-dir",
             os.path.join(os.getcwd(), "seed_data"),
+            "--skip-if-seeded",
         ]
     )
     print("prod_bootstrap: done — database migrated and seeded")

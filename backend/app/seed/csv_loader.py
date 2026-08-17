@@ -597,6 +597,36 @@ def load_one(
     return 0
 
 
+def _is_seeded(session: Session, target: Path) -> bool:
+    """True when a payload's campus already has its path graph seeded.
+
+    Cheap existence probe (== 3 round trips) so production boots after the
+    first deploy skip the full idempotent upsert instead of paying it on
+    every restart/cold start.
+    """
+    try:
+        payload = _read_payload(target)
+    except (json.JSONDecodeError, OSError):
+        return False
+    if not isinstance(payload, dict) or not isinstance(payload.get("campus"), str):
+        return False
+    campus = session.execute(
+        select(Campus).where(Campus.name == payload["campus"])
+    ).scalar_one_or_none()
+    if campus is None:
+        return False
+    has_nodes = session.execute(
+        select(PathNode.id).where(PathNode.campus_id == campus.id).limit(1)
+    ).first()
+    has_edges = session.execute(
+        select(PathEdge.id)
+        .join(PathNode, PathEdge.from_node_id == PathNode.id)
+        .where(PathNode.campus_id == campus.id)
+        .limit(1)
+    ).first()
+    return has_nodes is not None and has_edges is not None
+
+
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     parser = argparse.ArgumentParser(description="CampusNav seed loader (JSON)")
@@ -607,6 +637,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Either a directory containing *.json files or a single .json file",
     )
     parser.add_argument("--reset", action="store_true", help="Wipe seeded tables first")
+    parser.add_argument(
+        "--skip-if-seeded",
+        action="store_true",
+        help="Skip campuses whose path graph already exists (fast production boots)",
+    )
     args = parser.parse_args(argv)
 
     target: Path = args.data_dir
@@ -625,6 +660,11 @@ def main(argv: list[str] | None = None) -> int:
             session.commit()
 
         for file in json_files:
+            if not file.exists():
+                continue
+            if args.skip_if_seeded and _is_seeded(session, file):
+                log.info("skipping %s: campus already seeded", file.name)
+                continue
             if load_one(session, file) != 0:
                 return 1
         session.commit()
