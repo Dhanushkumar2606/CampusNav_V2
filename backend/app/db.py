@@ -21,7 +21,7 @@ _connect_args: dict = {"check_same_thread": False} if _settings.is_sqlite else {
 
 
 engine = create_engine(
-    _settings.database_url,
+    _settings.sqlalchemy_database_url,
     connect_args=_connect_args,
     pool_pre_ping=True,
     future=True,

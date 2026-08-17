@@ -22,7 +22,9 @@ import sys
 def _postgres_url() -> str | None:
     url = os.environ.get("DATABASE_URL", "")
     if url.startswith("postgresql") or url.startswith("postgres+"):
-        return url
+        return url.replace("postgresql://", "postgresql+psycopg://", 1).replace(
+            "postgres://", "postgresql+psycopg://", 1
+        )
     return None
 
 

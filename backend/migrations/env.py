@@ -28,7 +28,7 @@ if config.config_file_name is not None:
 
 
 def _resolve_url() -> str:
-    return os.getenv("DATABASE_URL") or get_settings().database_url
+    return get_settings().sqlalchemy_database_url
 
 
 config.set_main_option("sqlalchemy.url", _resolve_url())

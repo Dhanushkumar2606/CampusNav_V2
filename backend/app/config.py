@@ -64,6 +64,21 @@ class Settings(BaseSettings):
         return self.database_url.startswith("sqlite")
 
     @property
+    def sqlalchemy_database_url(self) -> str:
+        """DATABASE_URL mapped onto the installed driver.
+
+        psycopg3 is the project's Postgres driver; SQLAlchemy's default
+        ``postgresql://`` dialect expects psycopg2, so pin the explicit
+        ``+psycopg`` scheme (SQLite URLs are passed through unchanged).
+        """
+        url = self.database_url
+        if url.startswith("postgres://") or url.startswith("postgresql://"):
+            return url.replace("postgresql://", "postgresql+psycopg://", 1).replace(
+                "postgres://", "postgresql+psycopg://", 1
+            )
+        return url
+
+    @property
     def is_premium(self) -> bool:
         return self.premium
 
