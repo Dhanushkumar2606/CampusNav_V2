@@ -35,6 +35,22 @@ function isTileError(msg: string): boolean {
   return /could not load image/i.test(msg);
 }
 
+/** DEV-only structured diagnostics — what failed, on what canvas, in what
+ *  viewport, with which renderer. Tree-shaken from production bundles, so
+ *  normal users never see internals (they keep the honest panels/banners). */
+function logMapDiagnostics(trigger: string, detail: string): void {
+  const canvas = document.querySelector(".maplibregl-canvas");
+  const mapEl = document.querySelector(".maplibregl-map");
+  console.info(
+    `[CampusNav map] diagnostic (${trigger}): provider=maplibre-gl ` +
+      `webgl2=${webglSupported()} viewport=${window.innerWidth}x${window.innerHeight} ` +
+      `container=${mapEl?.clientWidth ?? "?"}x${mapEl?.clientHeight ?? "?"} ` +
+      `canvas=${canvas ? `${canvas.clientWidth}x${canvas.clientHeight}` : "none"} ` +
+      `style=${document.querySelectorAll(".maplibregl-missing-css").length ? "css-missing" : "css-ok"} ` +
+      `detail="${detail.slice(0, 160)}"`,
+  );
+}
+
 export function MapCanvas({
   children,
   onFallback,
@@ -105,6 +121,49 @@ export function MapCanvas({
       attributionControl: { compact: true },
     });
 
+    // ---- container-size reconciliation ----------------------------------
+    // MapLibre reads the container size once at construction and afterwards
+    // only on window resize (trackResize). Browsers resize the map container
+    // without a window event all the time — mobile URL-bar collapse, bottom
+    // nav / sheet animations, tab switches, orientation, layout settling
+    // right after mount (the container can even be mid-layout when the map
+    // is constructed, which pins the canvas to a stale/fractional height and
+    // leaves the rest of the map blank). Watch the container directly with a
+    // ResizeObserver and re-measure the map, coalesced through one rAF so a
+    // burst of layout churn costs a single resize per frame — never a loop.
+    let lastW = -1;
+    let lastH = -1;
+    let pendingResize: number | undefined = undefined;
+    const resize = () => {
+      pendingResize = undefined;
+      const c = ref.current;
+      if (!c) return;
+      const w = c.clientWidth;
+      const h = c.clientHeight;
+      if (w === lastW && h === lastH) return;
+      if (w <= 0 || h <= 0) return;
+      lastW = w;
+      lastH = h;
+      try {
+        m.resize();
+      } catch {
+        // Map may be mid-construction removal; the next observation retries.
+      }
+    };
+    const scheduleResize = () => {
+      if (pendingResize !== undefined) return;
+      pendingResize = window.requestAnimationFrame(resize);
+    };
+    const resizeObs =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(scheduleResize)
+        : null;
+    if (resizeObs) resizeObs.observe(ref.current);
+    // Reconcile right after mount: the constructor may have measured the
+    // container before it had its real size (observed on Android Chrome —
+    // canvas pinned to a stale height while the layout grew underneath it).
+    scheduleResize();
+
     const reloadRasterSource = () => {
       try {
         if (m.getSource(RASTER_SOURCE_ID)) {
@@ -126,6 +185,7 @@ export function MapCanvas({
       const msg = err && typeof err === "object" && "message" in err
         ? String((err as { message?: string }).message ?? "")
         : String(e?.message ?? "");
+      if (import.meta.env.DEV) logMapDiagnostics("error", msg);
       if (/webgl|context/i.test(msg)) {
         if (onFallbackRef.current) {
           // MapLibre can't render on this context — switch to the Leaflet
@@ -277,6 +337,8 @@ export function MapCanvas({
 
     return () => {
       window.clearTimeout(retryTimerRef.current);
+      if (pendingResize !== undefined) window.cancelAnimationFrame(pendingResize);
+      if (resizeObs) resizeObs.disconnect();
       m.off("error", onError);
       m.off("tileload", onTileLoad);
       m.off("sourcedata", onSourceData);
