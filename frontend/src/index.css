@@ -141,6 +141,16 @@
 }
 
 /* MapLibre overrides — match the brand dark theme. */
+/* The map container is `absolute inset-0` (Tailwind) AND `.maplibregl-map`
+   (maplibre-gl.css). maplibre's CSS is unlayered, and unlayered styles beat
+   CSS-cascade-layer styles no matter the order — so the vendor
+   `position: relative` wins over the Tailwind `absolute` utility and the
+   container collapses to 0px high (map cut off / invisible on Windows and
+   Android). Pin the fill explicitly (3 selectors beat the vendor's 1). */
+.absolute.inset-0.maplibregl-map {
+  position: absolute;
+  inset: 0;
+}
 .maplibregl-popup-content {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
