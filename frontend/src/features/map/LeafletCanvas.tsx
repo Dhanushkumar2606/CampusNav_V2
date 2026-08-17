@@ -94,12 +94,10 @@ export function LeafletCanvas({
 
   const makeTiles = (idx: number) => {
     const p = TILE_PROVIDERS[idx];
-    const opts: L.TileLayerOptions = {
+    const tl = L.tileLayer(p.tiles[0], {
       attribution: p.attribution,
       maxZoom: p.maxZoom,
-    };
-    if (p.subdomains) opts.subdomains = p.subdomains;
-    const tl = L.tileLayer(p.tiles[0], opts);
+    });
     tl.on("tileload", () => {
       tileOkRef.current = true;
       tileErrorCount.current = 0;

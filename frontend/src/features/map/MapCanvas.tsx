@@ -41,7 +41,11 @@ const ACCURACY_SOURCE_ID = "user-accuracy";
 const ACCURACY_LAYER_ID = "user-accuracy-halo";
 
 function isTileError(msg: string): boolean {
-  return /could not load image/i.test(msg);
+  // Broken-tile marker ("could not load image" / "Image could not be
+  // loaded") plus generic fetch failures ("Failed to fetch"/"Failed to
+  // load") — DNS/network-level tile errors must also rotate the provider
+  // chain, not just decode failures inside the tile bytes.
+  return /could not load image|failed to (load|fetch)/i.test(msg);
 }
 
 /** DEV-only structured diagnostics — what failed, on what canvas, in what

@@ -19,11 +19,12 @@ export const SRM_KTR_BOUNDS: [[number, number], [number, number]] = [
 export interface TileProviderSpec {
   id: string;
   label: string;
+  /**
+   * One URL template per host, rotated by MapLibre across the array
+   * (tile-coordinate based); Leaflet uses `tiles[0]`. IMPORTANT: keep
+   * hosts literal — maplibre-gl v4 does NOT substitute {s} subdomains.
+   */
   tiles: string[];
-  /** Optional host subdomains (`{s}` must appear in `tiles[0]`). Leaflet
-   *  only supports one URL template per layer, so multi-host providers use
-   *  `{s}` + subdomains instead of multiple URLs (MapLibre handles both). */
-  subdomains?: string[];
   attribution: string;
   maxZoom: number;
 }
@@ -37,8 +38,11 @@ export const TILE_PROVIDERS: TileProviderSpec[] = [
   {
     id: "osm",
     label: "OpenStreetMap",
-    tiles: ["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"],
-    subdomains: ["a", "b", "c"],
+    tiles: [
+      "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    ],
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19,
   },
