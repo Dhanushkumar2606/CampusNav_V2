@@ -17,7 +17,7 @@ import { ChevronDown, ChevronUp, MapPin, Route as RouteIcon } from "lucide-react
 import type { MapController } from "@/features/campus/CampusRouteContext";
 import { useCampusRoute } from "@/features/campus/CampusRouteContext";
 import { MapCanvas } from "@/features/map/MapCanvas";
-import { LeafletCanvas, CAN_USE_WEBGL } from "@/features/map/LeafletCanvas";
+import { LeafletCanvas } from "@/features/map/LeafletCanvas";
 import { MapErrorBoundary } from "@/components/ui/map-error-boundary";
 import { useGraphSources } from "@/features/map/useGraphSources";
 import { useNodeMarkers } from "@/features/map/useNodeMarkers";

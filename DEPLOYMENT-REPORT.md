@@ -30,7 +30,7 @@ mount + sessions; no managed DB). No functional application code was rewritten.
 
 ## B. Frontend — live verification
 - URL: `https://campusnav-v2.vercel.app` — `GET /` → **200** `text/html`, title `CampusNav — AI Campus Navigation`.
-- Deployed bundle (`/assets/index-DwZFrEMh.js`) verified to reference `https://campusnav-api.onrender.com` (grep of the live asset; 0 localhost URLs).
+- Deployed bundle (`/assets/index-DZlz70RD.js`, 2026-08-17 redeploy) verified to reference `https://campusnav-api.onrender.com` (grep of the live asset; 0 localhost URLs).
 
 ## C. Backend — live verification
 - URL: `https://campusnav-api.onrender.com`; commit `4a0db02` deploy **Live**.
@@ -109,6 +109,22 @@ No AI provider key (NOVA is rule-based), no map key (public OSM), no OAuth/email
 battery on 2026-08-17: health, campuses, graph, stats, A* route, search, GPS/near, panorama
 relay, NOVA, auth (register/login), favorites, preferences, CORS, and DB persistence — all
 200/expected, evidence in sections B–M.
+
+## R. Vercel deployment — `vite: command not found` fix (2026-08-17)
+
+- **Symptom:** `sh: line 1: vite: command not found` / `Command "vite build" exited with 127` on Vercel.
+- **Root cause:** the Vercel project (`campusnav-v2`) had **no Root Directory set** (`rootDirectory: null`) with framework auto-detected as `vite` and **no explicit build command**. Git-integration/dashboard deploys therefore ran at the repository **root**, where no `package.json` exists: the install step installed nothing and Vercel fell back to the Vite preset default build command — a bare `vite build` — which cannot find the binary. (Earlier CLI deploys from `frontend/` succeeded only because directory-based CLI deploys bypass the project Root Directory setting.) No `vercel.json` conflict was present (the `frontend/vercel.json` only contains SPA `rewrites`; Vercel project settings cannot be set from `vercel.json`).
+- **Vercel configuration** (set via `PATCH /v9/projects/campusnav-v2`, the project settings Vercel applies to every git/dashboard deploy):
+  - **Frontend root directory:** `frontend`
+  - **Framework:** `vite`
+  - **Install command:** `npm install`
+  - **Build command:** `npm run build` (→ `tsc -b && vite build`)
+  - **Output directory:** `dist`
+- **Environment variables required:** `VITE_API_URL=https://campusnav-api.onrender.com` (Production target on the project; baked at build time by `frontend/src/lib/apiBase.ts` — unset means relative `/api` for local dev proxy).
+- **Local build result:** `npm install` → clean; `npm run build` → `tsc -b && vite build` **✓ built in 4.09 s** (vite 5.4.21; chunk-size warnings only). `dist/` contains `index.html`, `assets/*` (incl. `index-*.js`, page chunks, `campusverse_ai_icon_compass_1024.png`).
+- **TypeScript result:** `npx tsc -b` → **passes** (fixed one blocker: unused `CAN_USE_WEBGL` import removed from `frontend/src/pages/MapView.tsx`, TS6133).
+- **Final Vercel deployment status:** redeployed 2026-08-17 via `vercel --prod` (root-dir deploy) → **Ready in 37 s**, aliased `https://campusnav-v2.vercel.app`, `GET /` → **200**; live bundle verified to contain `https://campusnav-api.onrender.com` and **0 localhost references**. Vercel's own install+build now runs `npm install` → `npm run build` inside `frontend/` with `dist` output.
+- **Notes:** deploys should be triggered from the repository root (project Root Directory `frontend` now handles the monorepo layout); a spurious auto-generated root `vercel.json` (services config) created by Vercel CLI 59 during linking was **removed** — it is not part of this deployment.
 
 ### Remaining warnings (non-blocking)
 1. **Free-tier limits:** Postgres expires 2026-09-16 (30-day free DB); free web service sleeps after ~15 min idle (cold start ~30–60 s) and has no HA.

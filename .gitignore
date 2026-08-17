@@ -53,3 +53,6 @@ frontend/vite.config.d.ts
 # add real data later by symlinking or a separate git-ignored location)
 backend/seed_data/private/
 backend/seed_data/*.local.csv
+
+# Vercel local project link (machine config, not deployed)
+.vercel
