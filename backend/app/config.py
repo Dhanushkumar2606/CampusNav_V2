@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -41,6 +41,15 @@ class Settings(BaseSettings):
     @classmethod
     def _strip_cors(cls, v: str) -> str:
         return v.strip()
+
+    @model_validator(mode="after")
+    def _guard_production_sqlite(self) -> "Settings":
+        if self.is_production and self.database_url.startswith("sqlite"):
+            raise ValueError(
+                "APP_ENV=production requires DATABASE_URL to be set to a real "
+                "database; refusing to boot on the default SQLite file."
+            )
+        return self
 
     @property
     def cors_origin_list(self) -> list[str]:
