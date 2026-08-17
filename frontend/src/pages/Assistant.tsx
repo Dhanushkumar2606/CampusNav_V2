@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { RotateCcw, Send, Sparkles } from "lucide-react";
 
 import { useAuth } from "@/auth/AuthContext";
-import { assistantQuery } from "@/api/assistant";
+import { assistantQuery, SessionExpiredError } from "@/api/assistant";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useLiveLocation } from "@/features/map/useLiveLocation";
@@ -21,7 +21,7 @@ import {
 } from "@/features/assistant/chat";
 
 export function Assistant() {
-  const { getToken, status } = useAuth();
+  const { getToken, status, logout } = useAuth();
   const location = useLiveLocation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -82,18 +82,28 @@ export function Assistant() {
           },
         ]);
       } catch (err) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: nextChatMessageId(),
-            role: "assistant",
-            text:
-              err instanceof Error && err.message
-                ? `Sorry, I couldn't reach NOVA: ${err.message}`
-                : "Sorry, something went wrong.",
-            error: true,
-          },
-        ]);
+        if (err instanceof SessionExpiredError) {
+          // Session gone (expired or rejected) — clear the stale token so
+          // the UI reflects reality; gracefully ask for a fresh login.
+          logout();
+          setMessages((prev) => [
+            ...prev,
+            { id: nextChatMessageId(), role: "assistant", text: err.message, error: true },
+          ]);
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: nextChatMessageId(),
+              role: "assistant",
+              text:
+                err instanceof Error && err.message
+                  ? `Sorry, I couldn't reach NOVA: ${err.message}`
+                  : "Sorry, something went wrong.",
+              error: true,
+            },
+          ]);
+        }
       } finally {
         setSending(false);
         inputRef.current?.focus();

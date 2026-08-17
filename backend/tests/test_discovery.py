@@ -64,9 +64,12 @@ def test_search_filters_by_campus(client: TestClient) -> None:
     assert r.json(), "campus-scoped search must return results"
 
 
-def test_search_unknown_campus_falls_back_to_all(client: TestClient) -> None:
+def test_search_unknown_campus_returns_empty(client: TestClient) -> None:
+    """An unknown campus slug must NOT widen the search to the whole
+    database (cross-campus leakage guard): empty result, never unfiltered."""
     r = client.get("/search", params={"q": "library", "campus": "no-such-campus"})
-    assert r.status_code == 200  # graceful: unknown campus ignored
+    assert r.status_code == 200
+    assert r.json() == []
 
 
 def test_search_results_carry_graph_slugs(client: TestClient) -> None:

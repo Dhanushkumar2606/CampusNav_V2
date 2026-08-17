@@ -13,7 +13,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Send, Sparkles, X } from "lucide-react";
 
 import { useAuth } from "@/auth/AuthContext";
-import { assistantQuery } from "@/api/assistant";
+import { assistantQuery, SessionExpiredError } from "@/api/assistant";
 import { Button } from "@/components/ui/button";
 import { TooltipIconButton } from "@/components/ui/tooltip-icon-button";
 import { useCampusRoute } from "@/features/campus/CampusRouteContext";
@@ -84,7 +84,7 @@ function paramsFromResult(
 }
 
 export function MapAssistantPanel({ onClose }: { onClose: () => void }) {
-  const { getToken, status } = useAuth();
+  const { getToken, status, logout } = useAuth();
   const location = useLiveLocation();
   const ctx = useCampusRoute();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -174,18 +174,28 @@ export function MapAssistantPanel({ onClose }: { onClose: () => void }) {
           if (params) ctx.hydrate(params);
         }
       } catch (err) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: nextChatMessageId(),
-            role: "assistant",
-            text:
-              err instanceof Error && err.message
-                ? `Sorry, I couldn't reach NOVA: ${err.message}`
-                : "Sorry, something went wrong.",
-            error: true,
-          },
-        ]);
+        if (err instanceof SessionExpiredError) {
+          // The session is gone — drop the stale token so the UI reflects
+          // reality and stays secure; ask the user to sign in again.
+          logout();
+          setMessages((prev) => [
+            ...prev,
+            { id: nextChatMessageId(), role: "assistant", text: err.message, error: true },
+          ]);
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: nextChatMessageId(),
+              role: "assistant",
+              text:
+                err instanceof Error && err.message
+                  ? `Sorry, I couldn't reach NOVA: ${err.message}`
+                  : "Sorry, something went wrong.",
+              error: true,
+            },
+          ]);
+        }
       } finally {
         setSending(false);
         inputRef.current?.focus();

@@ -1,12 +1,30 @@
 /**
  * Typed wrappers around the assistant endpoint.
+ *
+ * Auth follows the app-wide pattern: the caller passes the JWT from
+ * `useAuth().getToken()` and it is attached as `Authorization: Bearer …`.
+ * The token is never touched by localStorage directly here and no provider
+ * key ever leaves the server.
  */
 
 import type { AssistantResponseOut } from "@/lib/navigation-types";
+import { isJwtExpired } from "@/lib/jwt";
 import { NavigationApiError } from "./navigation";
+
+/** Raised when the session is gone (expired locally or rejected server-side).
+ *  Never a fabricated credential — just an honest "sign in again". */
+export class SessionExpiredError extends Error {
+  constructor() {
+    super("Your session has expired or is no longer valid — please sign in again.");
+    this.name = "SessionExpiredError";
+  }
+}
 
 async function unwrap<T>(res: Response): Promise<T> {
   if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      throw new SessionExpiredError();
+    }
     let detail: string | null = null;
     try {
       const body = (await res.json()) as { detail?: string };
@@ -32,6 +50,10 @@ export async function assistantQuery(
   userLat?: number,
   userLng?: number,
 ): Promise<AssistantResponseOut> {
+  // Never send an already-expired token to the server: fail fast with a
+  // clear session message instead of a generic "401 Unauthorized".
+  if (isJwtExpired(token)) throw new SessionExpiredError();
+
   const body = {
     query,
     campus_slug: campusSlug,

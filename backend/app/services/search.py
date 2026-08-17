@@ -270,6 +270,10 @@ def search(
         campus = session.execute(
             select(Campus).where(Campus.slug == campus_slug)
         ).scalar_one_or_none()
+        # A requested campus that doesn't exist must NEVER silently widen
+        # the search to the whole database — cross-campus leakage guard.
+        if campus is None:
+            return []
 
     boost_targets = {_CATEGORY_BOOSTS[t] for t in _tokens(q) if t in _CATEGORY_BOOSTS}
     q_tokens = sorted(_tokens(q))
