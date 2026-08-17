@@ -8,7 +8,14 @@ export function webglSupported(): boolean {
   try {
     const canvas = document.createElement("canvas");
     const attrs: WebGLContextAttributes = { failIfMajorPerformanceCaveat: false };
-    return !!window.WebGL2RenderingContext && !!canvas.getContext("webgl2", attrs);
+    const ctx = canvas.getContext("webgl2", attrs);
+    if (!ctx) return false;
+    // Extra check: some drivers return a context but can't actually render.
+    // A draw call that produces zero dimensions is a dead giveaway.
+    const ext = ctx.getExtension("WEBGL_lose_context");
+    const supported = ctx.drawingBufferWidth >= 0;
+    ext?.loseContext();
+    return supported;
   } catch {
     return false;
   }

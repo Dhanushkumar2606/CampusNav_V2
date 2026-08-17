@@ -31,12 +31,43 @@ import { RouteChips } from "@/features/routing/RouteChips";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { MapAssistantPanel } from "@/features/assistant/MapAssistant";
 import { SRM_KTR_BOUNDS } from "@/features/map/mapStyle";
-import { boundsFromCenter, boundsFromNodes, isSafari } from "@/lib/geo";
+import { boundsFromCenter, boundsFromNodes, isSafari, webglSupported } from "@/lib/geo";
 
 export function MapView() {
   const ctx = useCampusRoute();
   const { graph, route, sourceId, destinationId, edgesVisible } = ctx;
-  const [useWebGL, setUseWebGL] = useState<boolean>(() => CAN_USE_WEBGL && !isSafari());
+
+  // Renderer selection: try MapLibre first, fall back to Leaflet permanently.
+  // "campusnav.renderer" in localStorage lets a working fallback persist across
+  // page loads so the blank-canvas flash never happens twice on the same device.
+  const [useWebGL, setUseWebGL] = useState<boolean>(() => {
+    if (localStorage.getItem("campusnav.renderer") === "leaflet") return false;
+    return webglSupported() && !isSafari();
+  });
+  const fallbackToLeaflet = useCallback(() => {
+    localStorage.setItem("campusnav.renderer", "leaflet");
+    setUseWebGL(false);
+  }, []);
+
+  // If MapLibre is chosen but the map hasn't painted after 2 s (silent GPU
+  // failure — canvas exists but stays visually empty), switch to Leaflet.
+  const mapWrapRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!useWebGL) return;
+    const check = () => {
+      const canvas = mapWrapRef.current?.querySelector("canvas");
+      // MapLibre paints real pixels: a rendered canvas has a non-zero
+      // drawing buffer AND the container has layout dimensions.
+      const container = mapWrapRef.current;
+      const hasLayout = container && container.offsetWidth > 0 && container.offsetHeight > 0;
+      const hasCanvas = canvas && canvas.width > 0 && canvas.height > 0;
+      if (!hasLayout || !hasCanvas) {
+        fallbackToLeaflet();
+      }
+    };
+    const timer = window.setTimeout(check, 2000);
+    return () => window.clearTimeout(timer);
+  }, [useWebGL, fallbackToLeaflet]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [plannerOpen, setPlannerOpen] = useState(false);
@@ -114,13 +145,15 @@ export function MapView() {
       {/* The map fills the whole page; every panel floats above it. */}
       {useWebGL ? (
         <MapErrorBoundary>
+          <div ref={mapWrapRef} className="absolute inset-0">
           <MapCanvas
-            onFallback={() => setUseWebGL(false)}
+            onFallback={fallbackToLeaflet}
             onRegister={register}
             onUnregister={unregister}
             edgesVisible={edgesVisible}
             initialBounds={campusBounds}
           />
+          </div>
         </MapErrorBoundary>
       ) : (
         <LeafletCanvas
