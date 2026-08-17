@@ -158,7 +158,12 @@ export function MapAssistantPanel({ onClose }: { onClose: () => void }) {
         const res: AssistantResponseOut = await assistantQuery(
           token,
           query,
-          undefined,
+          // Current campus context (validated against the loaded campus
+          // list — a stale URL-pinned slug must not widen/empty NOVA's
+          // search, which guards against unknown campus slugs server-side).
+          ctx.campusSlug && ctx.campuses.some((c) => c.slug === ctx.campusSlug)
+            ? ctx.campusSlug
+            : undefined,
           undefined,
           undefined,
           location.coords?.lat,
@@ -216,7 +221,7 @@ export function MapAssistantPanel({ onClose }: { onClose: () => void }) {
       role="dialog"
       aria-label="NOVA — Campus AI Assistant"
       aria-modal="false"
-      className="absolute bottom-4 right-3 z-40 flex w-[min(380px,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-xl border border-brand-muted bg-brand-deep/95 shadow-float backdrop-blur md:right-16 md:bottom-4 md:top-3 md:h-[calc(100dvh-4.5rem)] md:max-h-[720px] md:min-h-[420px]"
+      className="absolute bottom-4 right-3 z-40 flex max-h-[70dvh] w-[min(380px,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-xl border border-brand-muted bg-brand-deep/95 shadow-float backdrop-blur md:right-16 md:bottom-4 md:top-3 md:h-[calc(100dvh-4.5rem)] md:max-h-[720px] md:min-h-[420px]"
     >
       <div className="flex shrink-0 items-center gap-2 border-b border-brand-muted px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">

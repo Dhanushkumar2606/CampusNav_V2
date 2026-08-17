@@ -1,10 +1,11 @@
 /**
  * LeafletCanvas — WebGL-free fallback renderer for the campus map.
  * Used when MapLibre can't initialize (hardware acceleration off, VMs,
- * blocked GPU drivers, Safari blank-paint failures). Same OSM raster tiles,
- * same campus graph, route, markers and controls — nothing is faked; it's a
- * second, honest renderer. Registers a MapController so the shared floating
- * controls (MapControls) drive it like they drive MapLibre.
+ * blocked GPU drivers, Safari blank-paint failures). Same raster tiles
+ * (including the multi-provider fallback chain), same campus graph,
+ * route, markers and controls — nothing is faked; it's a second, honest
+ * renderer. Registers a MapController so the shared floating controls
+ * (MapControls) drive it like they drive MapLibre.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import L from "leaflet";
@@ -14,14 +15,11 @@ import type { GraphPayload, Route } from "@/lib/navigation-types";
 import { boundsFromNodes, webglSupported } from "@/lib/geo";
 import { stepCoords } from "./routeGeometry";
 import { NODE_KIND_COLORS } from "./mapStyle";
+import { TILE_PROVIDERS, TILE_PROVIDER_STORAGE_KEY, storedProviderIndex } from "./mapStyle";
 import { nodeImmersive } from "@/lib/immersive";
 import type { MapController } from "@/features/campus/CampusRouteContext";
 import { LeafletContext } from "./LeafletContext";
 import type { LeafletMapValue } from "./LeafletContext";
-
-const OSM_TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const TILE_ATTRIB =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 /** Kinds that fade out on the Leaflet map below this zoom (infrastructure
  *  dots, not places — they slim down like the MapLibre zoom tiers). */
@@ -87,12 +85,21 @@ export function LeafletCanvas({
   const tileOkRef = useRef(false);
   const tileErrorCount = useRef(0);
   const tilesRef = useRef<L.TileLayer | null>(null);
+  // Active tile provider, reflected into a ref so the tileerror handler
+  // (registered per layer) always advances from the current one.
+  const providerIdxRef = useRef(storedProviderIndex());
   const handlersRef = useRef({ onRegister, onUnregister });
   handlersRef.current = { onRegister, onUnregister };
   const map = mapRef.current;
 
-  const makeTiles = () => {
-    const tl = L.tileLayer(OSM_TILES, { attribution: TILE_ATTRIB, maxZoom: 19 });
+  const makeTiles = (idx: number) => {
+    const p = TILE_PROVIDERS[idx];
+    const opts: L.TileLayerOptions = {
+      attribution: p.attribution,
+      maxZoom: p.maxZoom,
+    };
+    if (p.subdomains) opts.subdomains = p.subdomains;
+    const tl = L.tileLayer(p.tiles[0], opts);
     tl.on("tileload", () => {
       tileOkRef.current = true;
       tileErrorCount.current = 0;
@@ -100,7 +107,28 @@ export function LeafletCanvas({
     });
     tl.on("tileerror", () => {
       tileErrorCount.current += 1;
-      if (!tileOkRef.current && tileErrorCount.current >= 10) {
+      if (tileOkRef.current) return;
+      if (tileErrorCount.current < 10) return;
+      // Persistent failure on this provider (no tile ever loaded) — rotate
+      // through the fallback chain instead of giving up on the map.
+      if (providerIdxRef.current + 1 < TILE_PROVIDERS.length) {
+        const next = providerIdxRef.current + 1;
+        providerIdxRef.current = next;
+        tileErrorCount.current = 0;
+        try {
+          localStorage.setItem(TILE_PROVIDER_STORAGE_KEY, String(next));
+        } catch {
+          // storage unavailable — still valid for this session.
+        }
+        if (import.meta.env.DEV) {
+          console.info(`[CampusNav map] tile provider fallback -> ${TILE_PROVIDERS[next].label}`);
+        }
+        const m = mapRef.current;
+        if (!m) return;
+        const nextLayer = makeTiles(next);
+        tilesRef.current?.remove();
+        tilesRef.current = nextLayer.addTo(m);
+      } else {
         setTileFailure(true);
       }
     });
@@ -126,7 +154,8 @@ export function LeafletCanvas({
     });
     mapRef.current = m;
 
-    tilesRef.current = makeTiles().addTo(m);
+    // Start on the provider this device settled on (or the primary one).
+    tilesRef.current = makeTiles(providerIdxRef.current).addTo(m);
 
     m.on("click", () => onSelectNode(null));
 
@@ -479,7 +508,7 @@ export function LeafletCanvas({
     // Remove the failed layer instead of stacking a second one on top —
     // the old layer would keep erroring while the banner stays dismissed.
     tilesRef.current?.remove();
-    tilesRef.current = makeTiles().addTo(m);
+    tilesRef.current = makeTiles(providerIdxRef.current).addTo(m);
   }, []);
 
   return (
@@ -492,7 +521,7 @@ export function LeafletCanvas({
             <div className="max-w-sm rounded-xl border border-brand-muted bg-brand-navy/90 p-6 text-center">
               <h2 className="text-base font-semibold text-brand-text">Map tiles could not be loaded</h2>
               <p className="mt-2 text-sm text-brand-subtle">
-                The free OpenStreetMap tile service didn't respond. Routing and search still work from the panel.
+                The free map tile services didn't respond. Routing and search still work from the panel.
               </p>
               <button
                 type="button"

@@ -10,7 +10,7 @@
 import type { AssistantResponseOut } from "@/lib/navigation-types";
 import { isJwtExpired } from "@/lib/jwt";
 import { NavigationApiError } from "./navigation";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, fetchWithTimeout } from "@/lib/apiBase";
 
 /** Raised when the session is gone (expired locally or rejected server-side).
  *  Never a fabricated credential — just an honest "sign in again". */
@@ -64,7 +64,7 @@ export async function assistantQuery(
     user_lng: userLng,
   };
   return unwrap<AssistantResponseOut>(
-    await fetch(`${API_BASE}/api/assistant/query`, {
+    await fetchWithTimeout(`${API_BASE}/api/assistant/query`, {
       method: "POST",
       headers: authHeaders(token),
       body: JSON.stringify(body),

@@ -14,7 +14,8 @@ export interface BottomSheetProps {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
-  /** Height class for the sheet body (default: 60vh). */
+  /** Height class for the sheet body (default: 60dvh — dvh so the sheet
+   *  respects the mobile URL-bar, which 100vh-based sizing doesn't). */
   className?: string;
   /** Render inside the app container instead of a portal (e.g. map overlays). */
   portal?: boolean;
@@ -131,7 +132,7 @@ export function BottomSheet({
         }
         className={cn(
           "absolute inset-x-0 bottom-0 flex flex-col rounded-t-2xl border border-b-0 border-brand-muted bg-brand-deep shadow-float",
-          className ?? "h-[60vh]",
+          className ?? "h-[60dvh]",
         )}
       >
       {/* Drag handle — the grab area is the drag surface */}

@@ -82,6 +82,8 @@ function Harness() {
       <span data-testid="route-status">{ctx.routeStatus}</span>
       <span data-testid="has-route">{ctx.route ? "yes" : "no"}</span>
       <span data-testid="graph-ready">{ctx.graph ? "yes" : "no"}</span>
+      <span data-testid="from">{ctx.sourceId ?? "empty"}</span>
+      <span data-testid="to">{ctx.destinationId ?? "empty"}</span>
       <span data-testid="nearest">{ctx.nearestNode ? ctx.nearestNode.label : ""}</span>
       <button type="button" data-testid="find" onClick={() => void ctx.findRoute()}>
         find
@@ -415,7 +417,11 @@ describe("navigation lifecycle", () => {
     // IDLE_NAV sentinel phase (same convention as cancelNavigation).
     expect(text("phase")).toBe("navigating");
 
-    // Cancelling keeps the From/To endpoints: a fresh route works after.
+    // Cancelling is a FULL reset (route + From + To + pins): the planner
+    // returns to a clean slate, so a fresh route needs re-picking endpoints.
+    expect(text("from")).toBe("empty");
+    expect(text("to")).toBe("empty");
+    clickByTestId("endpoints");
     clickByTestId("find");
     await waitFor(() => expect(text("route-status")).toBe("ok"));
     expect(text("has-route")).toBe("yes");

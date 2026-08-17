@@ -2,15 +2,17 @@
  * Assistant page — NOVA, the CampusNav AI assistant. Rule-based intents
  * answered by the backend; renders shared chat UI from features/assistant.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RotateCcw, Send, Sparkles } from "lucide-react";
 
 import { useAuth } from "@/auth/AuthContext";
 import { assistantQuery, SessionExpiredError } from "@/api/assistant";
+import { listCampuses } from "@/api/navigation";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useLiveLocation } from "@/features/map/useLiveLocation";
 import type { AssistantResponseOut } from "@/lib/navigation-types";
+import { LAST_CAMPUS_KEY } from "@/features/campus/CampusRouteContext";
 import {
   ChatMessage,
   MAX_PROMPT_LENGTH,
@@ -44,6 +46,36 @@ export function Assistant() {
     if (location.status === "idle") location.locate();
   }, []);
 
+  // Campus context for NOVA: mirror the map's selection — the last-used
+  // campus when it still exists in the catalog, otherwise the featured (or
+  // first) campus. Whatever the map used, NOVA resolves places on the same
+  // campus. A stale slug is never sent (the backend refuses unknown slugs).
+  const [campuses, setCampuses] = useState<{ slug: string; featured: boolean }[] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    listCampuses()
+      .then((cs) => {
+        if (!cancelled) setCampuses(cs);
+      })
+      .catch(() => {
+        // Soft default — NOVA still answers without a campus context.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const campusSlug = useMemo(() => {
+    if (!campuses || campuses.length === 0) return undefined;
+    try {
+      const stored = localStorage.getItem(LAST_CAMPUS_KEY);
+      if (stored && campuses.some((c) => c.slug === stored)) return stored;
+    } catch {
+      // ignore storage errors
+    }
+    const featured = campuses.find((c) => c.featured);
+    return featured?.slug ?? campuses[0].slug;
+  }, [campuses]);
+
   const send = useCallback(
     async (raw: string) => {
       const query = raw.trim();
@@ -65,7 +97,7 @@ export function Assistant() {
         const res: AssistantResponseOut = await assistantQuery(
           token,
           query,
-          undefined,
+          campusSlug,
           undefined,
           undefined,
           location.coords?.lat,
@@ -109,7 +141,7 @@ export function Assistant() {
         inputRef.current?.focus();
       }
     },
-    [getToken, sending, location.coords?.lat, location.coords?.lng],
+    [getToken, sending, campusSlug, location.coords?.lat, location.coords?.lng],
   );
 
   const handleSubmit = (e: React.FormEvent) => {

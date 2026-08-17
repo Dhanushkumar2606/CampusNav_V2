@@ -5,12 +5,15 @@
  *
  * If WebGL is unavailable the map fails honestly: a fallback panel is
  * rendered instead of the canvas (previously an uncaught error unmounted
- * the whole tree). If the OSM raster tiles error out (transient network
+ * the whole tree). If the raster tiles error out (transient network
  * blips, 5xx from the tile server), the raster source is re-created —
  * maplibre marks failed tiles `errored` and won't re-request them until
  * the source is rebuilt, so this is the only public way to nudge them.
- * Retries are coalesced, bounded (2 auto-passes), and after that a small
- * banner appears with a manual retry so a dead connection isn't hammered.
+ * Retries are coalesced and bounded; after repeated failures on one
+ * provider the map rotates through the fallback tile chain (OSM -> CARTO
+ * -> Esri) and persists the working one per device, so a rate-limited or
+ * blocked tile server can never blank the map. Only when the whole chain
+ * has failed does a small banner appear with a manual retry.
  */
 import { useEffect, useRef, useState } from "react";
 import maplibregl, { Map as MlMap } from "maplibre-gl";
@@ -21,13 +24,19 @@ import type { MapController } from "@/features/campus/CampusRouteContext";
 import { MapContext } from "./MapContext";
 import { MapUnavailable } from "./MapUnavailable";
 import { setGraphLayersVisible } from "./useGraphSources";
-import { OSM_RASTER_STYLE, SRM_KTR_BOUNDS } from "./mapStyle";
+import {
+  OSM_RASTER_STYLE,
+  SRM_KTR_BOUNDS,
+  TILE_PROVIDERS,
+  TILE_PROVIDER_STORAGE_KEY,
+  rasterSourceSpec,
+  storedProviderIndex,
+} from "./mapStyle";
 
 /** Coalesce bursts of failed tiles into a single reload pass. */
 const RETRY_COALESCE_MS = 1500;
 const MAX_AUTO_RETRIES = 2;
 const RASTER_SOURCE_ID = "osm-raster";
-const RASTER_SOURCE_SPEC = OSM_RASTER_STYLE.sources[RASTER_SOURCE_ID];
 const ACCURACY_SOURCE_ID = "user-accuracy";
 const ACCURACY_LAYER_ID = "user-accuracy-halo";
 
@@ -78,6 +87,11 @@ export function MapCanvas({
   const [tileBanner, setTileBanner] = useState(false);
   const failCountRef = useRef(0);
   const retryTimerRef = useRef<number | undefined>(undefined);
+  // Mirrored index of the active tile provider (read inside the mount effect,
+  // which runs once); the setter keeps the value persisted + renderable for
+  // future UI, the ref keeps all event closures reading the current value.
+  const [, setProviderIdx] = useState(0);
+  const providerIdxRef = useRef(0);
   const reloadRef = useRef<(() => void) | null>(null);
   const onFallbackRef = useRef(onFallback);
   onFallbackRef.current = onFallback;
@@ -120,6 +134,27 @@ export function MapCanvas({
       fitBoundsOptions: { padding: 64 },
       attributionControl: { compact: true },
     });
+
+    // If this device already settled on a fallback tile provider, skip the
+    // primary one on startup (swap in as soon as the style is loadable so the
+    // map never paints OSM tiles it is about to replace).
+    const storedIdx = storedProviderIndex();
+    const applyStoredProvider = () => {
+      if (storedIdx <= 0) return;
+      try {
+        if (m.getSource(RASTER_SOURCE_ID)) {
+          m.removeSource(RASTER_SOURCE_ID);
+          m.addSource(RASTER_SOURCE_ID, rasterSourceSpec(TILE_PROVIDERS[storedIdx]) as Parameters<MlMap["addSource"]>[1]);
+        }
+        providerIdxRef.current = storedIdx;
+        setProviderIdx(storedIdx);
+        failCountRef.current = 0;
+      } catch {
+        // Style not ready; the next tile error re-enters the path.
+      }
+    };
+    if (storedIdx > 0 && m.isStyleLoaded()) applyStoredProvider();
+    else if (storedIdx > 0) m.once("style.load", applyStoredProvider);
 
     // ---- container-size reconciliation ----------------------------------
     // MapLibre reads the container size once at construction and afterwards
@@ -168,13 +203,44 @@ export function MapCanvas({
       try {
         if (m.getSource(RASTER_SOURCE_ID)) {
           m.removeSource(RASTER_SOURCE_ID);
-          m.addSource(RASTER_SOURCE_ID, RASTER_SOURCE_SPEC as Parameters<MlMap["addSource"]>[1]);
+          m.addSource(RASTER_SOURCE_ID, rasterSourceSpec(TILE_PROVIDERS[providerIdxRef.current]) as Parameters<MlMap["addSource"]>[1]);
         }
       } catch {
         // Style may be mid-swap; the next tile error will re-enter the path.
       }
     };
     reloadRef.current = reloadRasterSource;
+
+    /** Move to the next tile provider in the fallback chain; when the chain
+     *  is exhausted the honest banner takes over (a dead connection isn't
+     *  hammered — the user's Retry re-enters the current provider). */
+    const escalateProvider = () => {
+      const next = providerIdxRef.current + 1;
+      if (next < TILE_PROVIDERS.length) {
+        providerIdxRef.current = next;
+        setProviderIdx(next);
+        try {
+          localStorage.setItem(TILE_PROVIDER_STORAGE_KEY, String(next));
+        } catch {
+          // storage unavailable — still valid for this session.
+        }
+        failCountRef.current = 0;
+        window.clearTimeout(retryTimerRef.current);
+        try {
+          if (m.getSource(RASTER_SOURCE_ID)) {
+            m.removeSource(RASTER_SOURCE_ID);
+            m.addSource(RASTER_SOURCE_ID, rasterSourceSpec(TILE_PROVIDERS[next]) as Parameters<MlMap["addSource"]>[1]);
+          }
+        } catch {
+          // style mid-swap — the next tile error will re-enter the path
+        }
+        if (import.meta.env.DEV) {
+          console.info(`[CampusNav map] tile provider fallback -> ${TILE_PROVIDERS[next].label}`);
+        }
+      } else {
+        setTileBanner(true);
+      }
+    };
 
     // If the context dies later (driver reset, GPU change), degrade to the
     // honest fallback instead of throwing out of the React tree. WebGL2
@@ -200,7 +266,7 @@ export function MapCanvas({
       if (!isTileError(msg)) return;
       failCountRef.current += 1;
       if (failCountRef.current > MAX_AUTO_RETRIES) {
-        setTileBanner(true);
+        escalateProvider();
         return;
       }
       window.clearTimeout(retryTimerRef.current);
@@ -386,8 +452,8 @@ export function MapCanvas({
         {tileBanner ? (
           <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-md border border-brand-muted bg-brand-deep/95 px-3 py-2 text-xs text-brand-text shadow-float backdrop-blur">
             <span>
-              Map tiles failed to load — your connection to the tile server
-              looks flaky.
+              Map tiles failed to load on every tile provider — your
+              connection looks flaky.
             </span>
             <button
               type="button"

@@ -133,7 +133,7 @@ interface CampusRouteContextValue {
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Where the user last explored; the map reopens there next time. */
-const LAST_CAMPUS_KEY = "campusnav:last-campus";
+export const LAST_CAMPUS_KEY = "campusnav:last-campus";
 const NEAR_RADIUS_M = 200_000;
 
 const CampusRouteContext = createContext<CampusRouteContextValue | undefined>(undefined);
@@ -170,7 +170,7 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
   // hydration re-sync) must not nuke a freshly calculated route.
   const sourceIdRef = useRef<string | null>(null);
   const destinationIdRef = useRef<string | null>(null);
-  const clearRoute = useCallback(() => {
+  const clearRouteState = useCallback(() => {
     setRoute(null);
     setAlternatives([]);
     setActiveAltIndex(-1);
@@ -178,27 +178,48 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
     setRouteError(null);
     setNavSession(IDLE_NAV);
   }, []);
+
+  /**
+   * Full reset: route + navigation + the from/to/place selections. This is
+   * the "Cancel route / Clear route" action (RoutingPanel + RouteChips ✕):
+   * removing the route must also remove its endpoint pins and leave the
+   * planner in a clean state. Selection changes use clearRouteState only —
+   * changing one endpoint keeps the other.
+   */
+  const clearRoute = useCallback(() => {
+    clearRouteState();
+    pendingLabelsRef.current = {};
+    if (sourceIdRef.current !== null) {
+      sourceIdRef.current = null;
+      setSourceId(null);
+    }
+    if (destinationIdRef.current !== null) {
+      destinationIdRef.current = null;
+      setDestinationId(null);
+    }
+    setPlace(null);
+  }, [clearRouteState]);
   const setSourceIdSafe = useCallback(
     (id: string | null) => {
       pendingLabelsRef.current.source = null;
       if (sourceIdRef.current !== id) {
         sourceIdRef.current = id;
-        clearRoute();
+        clearRouteState();
       }
       setSourceId(id);
     },
-    [clearRoute],
+    [clearRouteState],
   );
   const setDestinationIdSafe = useCallback(
     (id: string | null) => {
       pendingLabelsRef.current.destination = null;
       if (destinationIdRef.current !== id) {
         destinationIdRef.current = id;
-        clearRoute();
+        clearRouteState();
       }
       setDestinationId(id);
     },
-    [clearRoute],
+    [clearRouteState],
   );
   const [requireAccessible, setRequireAccessible] = useState(false);
   const [mode, setMode] = useState<RouteMode>("shortest");
@@ -405,6 +426,23 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
     if (srcId !== sourceId) setSourceId(srcId);
     if (dstId !== destinationId) setDestinationId(dstId);
     if (placeId !== place) setPlace(placeId);
+    // With the graph present, any deep-link label that STILL doesn't resolve
+    // is a stale/unknown place (re-seeded campus, typo, cross-campus link).
+    // Surface an explicit error instead of silently stranding the user on a
+    // no-op route request.
+    const unresolved: [string, string][] = [];
+    if (pending.source) unresolved.push(["source", pending.source]);
+    if (pending.destination) unresolved.push(["destination", pending.destination]);
+    if (pending.place) unresolved.push(["place", pending.place]);
+    if (graph && unresolved.length > 0) {
+      const names = unresolved.map(([, label]) => `"${label}"`).join(", ");
+      pendingLabelsRef.current = {};
+      autoRouteRef.current = false;
+      setRoute(null);
+      setRouteStatus("error");
+      setRouteError(`Place ${names} not found on this campus.`);
+      setPendingTick((t) => t + 1);
+    }
     // One-shot auto-route (deep links, chat route intents): hold the flag
     // until the campus graph is present AND both endpoints resolve — on a
     // fresh load or a campus switch the graph arrives in a later render

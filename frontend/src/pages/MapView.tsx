@@ -233,7 +233,7 @@ export function MapView() {
         open={plannerOpen}
         onClose={() => setPlannerOpen(false)}
         title="Plan a route"
-        className="h-[75vh]"
+        className="h-[75dvh]"
       >
         <RoutingPanel />
       </BottomSheet>
@@ -265,7 +265,7 @@ export function MapView() {
           ctx.setPlace(null);
         }}
         title="Place details"
-        className="h-[50vh]"
+        className="h-[50dvh]"
       >
         {selectedNode ? (
           <BuildingDetails

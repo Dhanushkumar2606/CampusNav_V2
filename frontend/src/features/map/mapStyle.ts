@@ -1,8 +1,10 @@
 /**
  * MapLibre style + paint specs. The style is a minimal style.json that
- * pulls in OSM raster tiles via the canonical `tile.openstreetmap.org`
- * endpoint (per the OSM tile usage policy). Bounds hard-coded to the
- * SRM Kattankulathur campus.
+ * pulls in raster tiles from a provider fallback chain — OSM first (per the
+ * OSM tile usage policy), then CARTO, then Esri — so a single tile server
+ * being rate-limited or blocked can never blank the whole map. Glyphs come
+ * from a stable free font server (labels degrade gracefully if it ever
+ * fails — the raster, routes and markers are unaffected).
  */
 import type { StyleSpecification, SymbolLayerSpecification } from "maplibre-gl";
 
@@ -14,24 +16,92 @@ export const SRM_KTR_BOUNDS: [[number, number], [number, number]] = [
   [80.050, 12.829], // NE
 ];
 
+export interface TileProviderSpec {
+  id: string;
+  label: string;
+  tiles: string[];
+  /** Optional host subdomains (`{s}` must appear in `tiles[0]`). Leaflet
+   *  only supports one URL template per layer, so multi-host providers use
+   *  `{s}` + subdomains instead of multiple URLs (MapLibre handles both). */
+  subdomains?: string[];
+  attribution: string;
+  maxZoom: number;
+}
+
 /**
- * Minimal MapLibre style backed by OSM raster tiles. Inline JSON keeps
- * the dev experience fast (no network round-trip for the style itself).
+ * Raster tile fallback chain. OSM is the default look; CARTO light and Esri
+ * World Street are free, keyless, HTTPS CDNs used only after repeated tile
+ * failures on a device (the working provider persists per device).
+ */
+export const TILE_PROVIDERS: TileProviderSpec[] = [
+  {
+    id: "osm",
+    label: "OpenStreetMap",
+    tiles: ["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"],
+    subdomains: ["a", "b", "c"],
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  },
+  {
+    id: "carto-light",
+    label: "CARTO",
+    tiles: ["https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"],
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    maxZoom: 20,
+  },
+  {
+    id: "esri-streets",
+    label: "Esri",
+    tiles: [
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+    ],
+    attribution: "&copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics",
+    maxZoom: 18,
+  },
+];
+
+/** localStorage key for the tile provider a device settled on. */
+export const TILE_PROVIDER_STORAGE_KEY = "campusnav.tileProvider";
+
+/** Tile provider this device settled on, persisted across sessions. */
+export function storedProviderIndex(): number {
+  try {
+    const raw = localStorage.getItem(TILE_PROVIDER_STORAGE_KEY);
+    if (raw !== null) {
+      const n = Number.parseInt(raw, 10);
+      if (Number.isInteger(n) && n >= 0 && n < TILE_PROVIDERS.length) return n;
+    }
+  } catch {
+    // storage unavailable (private mode etc.) — start on the default chain.
+  }
+  return 0;
+}
+
+/** Build a MapLibre raster source spec for one provider. */
+export function rasterSourceSpec(p: TileProviderSpec) {
+  return {
+    type: "raster" as const,
+    tiles: p.tiles,
+    tileSize: 256,
+    attribution: p.attribution,
+    maxzoom: p.maxZoom,
+  };
+}
+
+/**
+ * Minimal MapLibre style backed by the primary raster provider. Inline JSON
+ * keeps the dev experience fast (no network round-trip for the style itself).
  */
 export const OSM_RASTER_STYLE: StyleSpecification = {
   version: 8,
-  glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+  glyphs: "https://fonts.openmaptiles.org/font/{fontstack}/{range}.pbf",
   sources: {
     "osm-raster": {
       type: "raster",
-      tiles: [
-        "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      ],
+      tiles: TILE_PROVIDERS[0].tiles,
       tileSize: 256,
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxzoom: 19,
+      attribution: TILE_PROVIDERS[0].attribution,
+      maxzoom: TILE_PROVIDERS[0].maxZoom,
     },
   },
   layers: [
