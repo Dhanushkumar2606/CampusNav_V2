@@ -2,7 +2,7 @@
  * Login page. Posts to /api/auth/login via the typed api wrapper,
  * stores the token, and lets RequireAuth take it from there.
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogIn, AlertTriangle, CheckCircle2, Loader2, Mail } from "lucide-react";
 
@@ -51,10 +51,11 @@ export function Login() {
     }
   }
 
-  if (status === "authenticated") {
+  useEffect(() => {
     // Bounce away if someone navigates to /login while signed in.
-    navigate(from, { replace: true });
-  }
+    if (status === "authenticated") navigate(from, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-brand-deep text-brand-text">

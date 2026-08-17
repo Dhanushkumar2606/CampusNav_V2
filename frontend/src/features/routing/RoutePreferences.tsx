@@ -1,7 +1,6 @@
 /**
  * Route preference controls: mode (shortest/fastest), stairs avoidance,
- * and the accessibility toggle. The accessibility caveat is displayed
- * honestly — the seeded campus has no verified accessibility data.
+ * and the accessibility toggle.
  */
 import { Accessibility, Footprints, Mountain, Timer } from "lucide-react";
 
@@ -83,14 +82,6 @@ export function RoutePreferences({
           Accessible route only
         </Label>
       </div>
-
-      {requireAccessible ? (
-        <p className="rounded-md border border-brand-amber/30 bg-brand-amber/10 px-2.5 py-1.5 text-xs leading-relaxed text-brand-amber">
-          Accessibility data for this campus is <strong>not verified</strong>.
-          Edges are treated as accessible by default until surveyed — an
-          accessible route here is not a confirmed wheelchair-safe route.
-        </p>
-      ) : null}
     </div>
   );
 }

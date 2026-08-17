@@ -85,19 +85,91 @@ export const ROUTE_LINE_PAINT = {
   ] as unknown as number[],
 };
 
-/** Node dot circle paint spec (radius depends on `isBuilding`). Subtle by
- *  design: the dots are click targets + orientation, not the main show. */
+/** Kind -> accent color for node dots. Buildings stay neutral (their labels
+ *  are the show); junctions/transitions are intentionally recessive — they
+ *  are navigation infrastructure, not places. */
+export const NODE_KIND_COLORS: Record<string, string> = {
+  building: brand.text,
+  entrance: brand.cyan,
+  landmark: brand.amber,
+  transit: brand.green,
+  poi: brand.text,
+  junction: brand.subtle,
+  transition: brand.subtle,
+};
+
+/** Base dot radius by kind; junctions shrink with zoom so the map stays
+ *  readable from afar. */
+export function nodeRadius(kind: string, isBuilding: boolean): number {
+  if (isBuilding) return 5;
+  if (kind === "junction" || kind === "transition") return 2.8;
+  return 3.8;
+}
+
+/** Node dot circle paint spec — fully data-driven (radius/color carried in
+ *  the feature properties by useGraphSources). Subtle by design: dots are
+ *  click targets + orientation, not the main show. */
 export const NODE_CIRCLE_PAINT = {
-  "circle-radius": [
-    "case",
-    ["==", ["get", "isBuilding"], true],
-    4.5,
-    2.5,
-  ] as unknown as number,
-  "circle-color": brand.text,
+  "circle-radius": ["get", "radius"] as unknown as number,
+  "circle-color": ["get", "color"] as unknown as string,
   "circle-stroke-color": brand.navy,
   "circle-stroke-width": 1,
-  "circle-opacity": 0.6,
+  "circle-opacity": [
+    "case",
+    ["==", ["get", "isBuilding"], true],
+    0.85,
+    ["interpolate", ["linear"], ["zoom"], 13, 0.35, 16, 0.6],
+  ] as unknown as number,
+};
+
+/** Halo ring behind 360°-enabled places — discovery badge, independent of
+ *  the graph-debug toggle so 360° content is always findable. */
+export const NODE_360_RING_PAINT = {
+  "circle-radius": [
+    "interpolate",
+    ["linear"],
+    ["zoom"],
+    14,
+    6,
+    16,
+    9,
+  ] as unknown as number,
+  "circle-color": "rgba(45, 212, 191, 0)",
+  "circle-stroke-color": brand.cyan,
+  "circle-stroke-width": 1.5,
+  "circle-stroke-opacity": ["interpolate", ["linear"], ["zoom"], 14, 0.45, 16, 0.9] as unknown as number,
+};
+
+export const NODE_360_LABEL_PAINT = {
+  "text-color": brand.cyan,
+  "text-halo-color": brand.deep,
+  "text-halo-width": 1.5,
+};
+
+export const NODE_360_LABEL_LAYOUT: SymbolLayerSpecification["layout"] = {
+  "text-field": "360°",
+  "text-size": 10,
+  "text-offset": [0, -2.1],
+  "text-anchor": "bottom",
+  "text-allow-overlap": false,
+  "text-font": ["Noto Sans Regular"],
+};
+
+/** Secondary labels for POI-ish kinds (entrances, landmarks, transit stops)
+ *  that are not buildings — they appear when zoomed in. */
+export const NODE_KIND_LABEL_PAINT = {
+  "text-color": ["get", "color"] as unknown as string,
+  "text-halo-color": brand.deep,
+  "text-halo-width": 1.2,
+};
+
+export const NODE_KIND_LABEL_LAYOUT: SymbolLayerSpecification["layout"] = {
+  "text-field": ["get", "label"],
+  "text-size": 10.5,
+  "text-offset": [0, 1.1],
+  "text-anchor": "top",
+  "text-allow-overlap": false,
+  "text-font": ["Noto Sans Regular"],
 };
 
 /** Invisible click target — slightly larger than the visible dot. */

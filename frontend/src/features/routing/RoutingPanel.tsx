@@ -19,7 +19,6 @@ import { formatDistance, formatMinutes } from "@/lib/format";
 import { useCampusRoute } from "@/features/campus/CampusRouteContext";
 
 import { CampusPicker } from "./CampusPicker";
-import { EstimatedBanner } from "./EstimatedBanner";
 import { LocationPicker } from "./LocationPicker";
 import { NavigationSteps } from "./NavigationSteps";
 import { RoutePreferences } from "./RoutePreferences";
@@ -86,8 +85,6 @@ export function RoutingPanel() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <EstimatedBanner />
-
       {/* Campus picker */}
       <Card className="border-brand-muted bg-brand-navy">
         <CardHeader className="pb-3">

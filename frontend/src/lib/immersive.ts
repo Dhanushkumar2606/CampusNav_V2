@@ -61,7 +61,39 @@ export function nodeImmersive(node: PathNode): ImmersiveScene | null {
     label: scene.label ?? node.label,
     available: true,
     mediaId: scene.mediaId ?? null,
+    // Landing orientation flows through so a scene can open looking at its
+    // subject (yaw 0 = front face) instead of a generic straight-ahead.
+    initialHeading: scene.initialHeading,
+    initialPitch: scene.initialPitch,
+    initialFov: scene.initialFov,
+    // Location linkage — lets the 360 action reuse the existing routing
+    // workflow ("Navigate here") and feeds map discovery.
+    nodeId: node.id,
+    lat: node.lat,
+    lng: node.lng,
   };
+}
+
+/**
+ * Every immersive scene on a campus, in node order, with its resolved
+ * scene — powers scene-to-scene browsing (prev/next in the viewer) and
+ * 360 discovery on the map.
+ */
+export interface ImmersiveBlock {
+  nodeId: string;
+  label: string;
+  scene: ImmersiveScene;
+}
+
+export function campusImmersiveBlocks(graph: GraphPayload | null | undefined): ImmersiveBlock[] {
+  if (!graph) return [];
+  const out: ImmersiveBlock[] = [];
+  for (const node of graph.nodes) {
+    const scene = nodeImmersive(node);
+    if (!scene) continue;
+    out.push({ nodeId: node.id, label: scene.label ?? node.label, scene });
+  }
+  return out;
 }
 
 /**

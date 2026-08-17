@@ -42,7 +42,7 @@ export interface MapController {
   supportsBearing: boolean;
   resetBearing: () => void;
   setBearing: (deg: number) => void;
-  setUserMarker: (lat: number, lng: number) => void;
+  setUserMarker: (lat: number, lng: number, headingDeg?: number) => void;
   clearUserMarker: () => void;
   /** GPS accuracy halo in meters around (lat, lng); null hides it. */
   setUserAccuracy: (lat: number, lng: number, radiusM: number | null) => void;

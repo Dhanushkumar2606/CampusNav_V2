@@ -17,6 +17,12 @@ const Explore = lazyNamed(() => import("@/pages/Explore"), "Explore");
 const Assistant = lazyNamed(() => import("@/pages/Assistant"), "Assistant");
 const Saved = lazyNamed(() => import("@/pages/Saved"), "Saved");
 const Profile = lazyNamed(() => import("@/pages/Profile"), "Profile");
+// Development-only diagnostic harness for the 360° cube renderer — never
+// registered (or even fetched) in production builds.
+const DEV = import.meta.env.DEV;
+const Debug360 = DEV
+  ? lazyNamed(() => import("@/pages/Debug360"), "Debug360")
+  : null;
 
 export default function App() {
   return (
@@ -41,6 +47,7 @@ export default function App() {
                 <Route path="/saved" element={<Saved />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
+              {Debug360 ? <Route path="/dev/360-test" element={<Debug360 />} /> : null}
               <Route path="*" element={<Landing />} />
             </Routes>
           </Suspense>

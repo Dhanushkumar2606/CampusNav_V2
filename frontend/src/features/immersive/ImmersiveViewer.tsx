@@ -35,11 +35,25 @@ export interface ImmersiveViewerProps {
    *  to this place (the caller decides what that means — set destination,
    *  start routing, etc.). Omit to hide the button. */
   onNavigateHere?: () => void;
+  /** Scene-rail position — "3 of 7". Pass along with onPrev/onNextScene to
+   *  let users browse the campus's other 360° viewpoints. */
+  scenePosition?: { index: number; total: number } | null;
+  onPrevScene?: () => void;
+  onNextScene?: () => void;
 }
 
 type EmbedState = "loading" | "ready" | "error";
 
-export function ImmersiveViewer({ open, scene, placeLabel, onClose, onNavigateHere }: ImmersiveViewerProps) {
+export function ImmersiveViewer({
+  open,
+  scene,
+  placeLabel,
+  onClose,
+  onNavigateHere,
+  scenePosition,
+  onPrevScene,
+  onNextScene,
+}: ImmersiveViewerProps) {
   const reduceMotion = useReducedMotion();
   const [state, setState] = useState<EmbedState>("idle" as EmbedState);
   const [attempt, setAttempt] = useState(0);
@@ -50,6 +64,12 @@ export function ImmersiveViewer({ open, scene, placeLabel, onClose, onNavigateHe
   const embedAllowed = provider.embed === "iframe" && !!scene?.url;
   const isCubeScene = provider.embed === "tiles" && !!scene?.mediaId;
   const [cubeUnavailable, setCubeUnavailable] = useState(false);
+  // Remounting the cube (fresh texture pipeline) powers "Try again".
+  const [cubeKey, setCubeKey] = useState(0);
+  const retryCube = useCallback(() => {
+    setCubeKey((k) => k + 1);
+    setCubeUnavailable(false);
+  }, []);
 
   // Watchdog: if the provider never signals a successful load (blocked,
   // offline, slow), fail over to the external action instead of showing a
@@ -77,6 +97,17 @@ export function ImmersiveViewer({ open, scene, placeLabel, onClose, onNavigateHe
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
+  // Any state left over from a previous session (error panel, retry) must
+  // not leak into a fresh open or a different scene. Kept above the
+  // early return: hook order must be identical whether or not open.
+  useEffect(() => {
+    if (open) {
+      setCubeUnavailable(false);
+      setCubeKey((k) => k + 1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, scene?.mediaId, attempt]);
 
   if (!open) return null;
 
@@ -112,12 +143,26 @@ export function ImmersiveViewer({ open, scene, placeLabel, onClose, onNavigateHe
               <p className="text-sm text-brand-subtle">
                 The scene's imagery could not be loaded right now.
               </p>
-              <Button variant="ghost" onClick={onClose}>
-                Close
-              </Button>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Button variant="outline" onClick={retryCube}>
+                  <RotateCcw className="size-4" aria-hidden />
+                  Try again
+                </Button>
+                <Button variant="ghost" onClick={onClose}>
+                  Close
+                </Button>
+              </div>
             </div>
           ) : (
-            <CubePanorama scene={scene!} onUnavailable={() => setCubeUnavailable(true)} />
+            <CubePanorama
+              key={cubeKey}
+              scene={scene!}
+              placeLabel={placeLabel}
+              onUnavailable={() => setCubeUnavailable(true)}
+              scenePosition={scenePosition}
+              onPrevScene={onPrevScene}
+              onNextScene={onNextScene}
+            />
           )
         ) : embedAllowed ? (
           <>

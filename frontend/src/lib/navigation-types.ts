@@ -31,6 +31,12 @@ export interface ImmersiveScene {
   initialPitch?: number;
   /** Initial vertical field of view — degrees, clamped to 35–105. */
   initialFov?: number;
+  /** Graph node id of the place this scene belongs to (when resolved from
+   *  a node) — lets the viewer reuse the existing routing workflow. */
+  nodeId?: string | null;
+  /** Place coordinates (node lat/lng), when known. */
+  lat?: number | null;
+  lng?: number | null;
 }
 
 /**

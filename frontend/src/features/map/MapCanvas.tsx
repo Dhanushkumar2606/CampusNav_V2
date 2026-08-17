@@ -71,16 +71,22 @@ export function MapCanvas({
   edgesVisibleRef.current = !!edgesVisible;
   const userMarkerRef = useRef<maplibregl.Marker | null>(null);
   const accuracyCleanupRef = useRef<(() => void) | null>(null);
-  const [userMarkerEl] = useState(() => {
-    const el = document.createElement("div");
-    el.style.width = "16px";
-    el.style.height = "16px";
-    el.style.borderRadius = "999px";
-    el.style.backgroundColor = brand.cyan;
-    el.style.border = `3px solid ${brand.deep}`;
-    el.style.boxShadow = "0 0 0 4px rgba(45,212,191,0.3), 0 2px 6px rgba(0,0,0,0.5)";
-    return el;
-  });
+  // The marker element is created once and re-skinned on every fix: the
+  // teal dot (rounded, brand border) plus a heading cone that rotates
+  // around the dot when the device reports a course.
+  const [userMarkerEl] = useState(() => document.createElement("div"));
+
+  const skinUserMarker = (headingDeg?: number) => {
+    const el = userMarkerEl;
+    el.style.width = "24px";
+    el.style.height = "24px";
+    const cone = headingDeg === undefined || Number.isNaN(headingDeg)
+      ? ""
+      : `<div style="position:absolute;left:5px;top:-22px;width:14px;height:24px;transform:rotate(${headingDeg}deg);transform-origin:50% 100%;clip-path:polygon(50% 100%,0 0,100% 0);background:linear-gradient(to bottom,rgba(45,212,191,0.9),rgba(45,212,191,0.35));"></div>`;
+    el.innerHTML =
+      `<div style="position:absolute;inset:0;border-radius:999px;background:${brand.cyan};border:3px solid ${brand.deep};box-shadow:0 0 0 4px rgba(45,212,191,0.3),0 2px 6px rgba(0,0,0,0.5);"></div>` +
+      cone;
+  };
 
   useEffect(() => {
     if (!ref.current || unavailable) return;
@@ -192,8 +198,9 @@ export function MapCanvas({
       supportsBearing: true,
       resetBearing: () => m.easeTo({ bearing: 0, pitch: 0, duration: 500 }),
       setBearing: (deg) => m.easeTo({ bearing: deg, duration: 700 }),
-      setUserMarker: (lat, lng) => {
+      setUserMarker: (lat, lng, headingDeg) => {
         userMarkerRef.current?.remove();
+        skinUserMarker(headingDeg);
         userMarkerRef.current = new maplibregl.Marker({ element: userMarkerEl })
           .setLngLat([lng, lat])
           .setPopup(new maplibregl.Popup({ offset: 14 }).setText("You are here"))

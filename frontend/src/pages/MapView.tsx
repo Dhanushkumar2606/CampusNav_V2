@@ -30,7 +30,6 @@ import { RoutingPanel } from "@/features/routing/RoutingPanel";
 import { RouteChips } from "@/features/routing/RouteChips";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { MapAssistantPanel } from "@/features/assistant/MapAssistant";
-import { SimulatorPanel } from "@/sim/SimulatorPanel";
 import { SRM_KTR_BOUNDS } from "@/features/map/mapStyle";
 import { boundsFromCenter, boundsFromNodes, isSafari } from "@/lib/geo";
 
@@ -154,9 +153,6 @@ export function MapView() {
       {/* Live turn-by-turn status while navigation is running. */}
       <NavStatusBar />
 
-      {/* Dev-only deterministic GPS simulator (VITE_SIMULATED_GPS=true). */}
-      <SimulatorPanel />
-
       {/* Idle hint — desktop only. */}
       {showHint ? (
         <div className="pointer-events-none absolute right-3 top-3 z-20 hidden max-w-xs rounded-md border border-brand-muted/60 bg-brand-navy px-3 py-2 text-xs text-brand-subtle md:block">
@@ -219,6 +215,7 @@ export function MapView() {
             graph={graph!}
             onSetOrigin={() => ctx.setSourceId(selectedNode.id)}
             onSetDestination={() => ctx.setDestinationId(selectedNode.id)}
+            onNavigateToNode={(id) => ctx.setDestinationId(id)}
             onClose={() => {
               setSelectedNodeId(null);
               ctx.setPlace(null);
@@ -245,6 +242,7 @@ export function MapView() {
             variant="full"
             onSetOrigin={() => ctx.setSourceId(selectedNode.id)}
             onSetDestination={() => ctx.setDestinationId(selectedNode.id)}
+            onNavigateToNode={(id) => ctx.setDestinationId(id)}
             onClose={() => {
               setSelectedNodeId(null);
               ctx.setPlace(null);

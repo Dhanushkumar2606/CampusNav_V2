@@ -13,6 +13,8 @@ import { brand, prettyLabel } from "@/lib/brand";
 import type { GraphPayload, Route } from "@/lib/navigation-types";
 import { boundsFromNodes, webglSupported } from "@/lib/geo";
 import { stepCoords } from "./routeGeometry";
+import { NODE_KIND_COLORS } from "./mapStyle";
+import { nodeImmersive } from "@/lib/immersive";
 import type { MapController } from "@/features/campus/CampusRouteContext";
 import { LeafletContext } from "./LeafletContext";
 import type { LeafletMapValue } from "./LeafletContext";
@@ -20,6 +22,11 @@ import type { LeafletMapValue } from "./LeafletContext";
 const OSM_TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 const TILE_ATTRIB =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+/** Kinds that fade out on the Leaflet map below this zoom (infrastructure
+ *  dots, not places — they slim down like the MapLibre zoom tiers). */
+const MINOR_KINDS = ["junction", "transition"];
+const MINOR_KIND_ZOOM = 15;
 
 interface Props {
   graph: GraphPayload | null;
@@ -37,10 +44,14 @@ interface Props {
   children?: React.ReactNode;
 }
 
-function nodeIconHtml(isBuilding: boolean): string {
-  const size = isBuilding ? 10 : 6.5;
+function nodeIconHtml(kind: string, isBuilding: boolean, has360: boolean): string {
+  const size = isBuilding ? 10 : MINOR_KINDS.includes(kind) ? 5.5 : 7;
   const offset = isBuilding ? 13 : 9;
-  return `<div style="width:${size}px;height:${size}px;border-radius:999px;background:${brand.text};border:1px solid ${brand.navy};opacity:.7;transform:translate(-50%,-50%)"></div><div style="position:absolute;left:0;top:${offset}px;white-space:nowrap;font-size:10px;color:${brand.text};text-shadow:0 1px 2px ${brand.deep};transform:translateX(-50%)"></div>`;
+  const color = NODE_KIND_COLORS[kind] ?? NODE_KIND_COLORS.poi;
+  const ring = has360
+    ? `<div style="position:absolute;inset:-5px;border-radius:999px;border:1.5px solid ${brand.cyan};opacity:.85"></div>`
+    : "";
+  return `<div style="position:relative;width:${size}px;height:${size}px;border-radius:999px;background:${color};border:1px solid ${brand.navy};opacity:.75;transform:translate(-50%,-50%)">${ring}</div><div style="position:absolute;left:0;top:${offset}px;white-space:nowrap;font-size:10px;color:${brand.text};text-shadow:0 1px 2px ${brand.deep};transform:translateX(-50%)"></div>`;
 }
 
 /** Teardrop map pin (start = cyan, destination = green) with a dark core,
@@ -166,13 +177,17 @@ export function LeafletCanvas({
       supportsBearing: false,
       resetBearing: () => undefined,
       setBearing: () => undefined,
-      setUserMarker: (lat, lng) => {
+      setUserMarker: (lat, lng, headingDeg) => {
         userMarkerRef.current?.remove();
+        const cone =
+          headingDeg === undefined || Number.isNaN(headingDeg)
+            ? ""
+            : `<div style="position:absolute;left:5px;top:-22px;width:14px;height:24px;transform:rotate(${headingDeg}deg);transform-origin:50% 100%;clip-path:polygon(50% 100%,0 0,100% 0);background:linear-gradient(to bottom,rgba(45,212,191,0.9),rgba(45,212,191,0.35));"></div>`;
         const el = L.divIcon({
           className: "cn-user-icon",
-          html: `<div style="width:16px;height:16px;border-radius:999px;background:${brand.cyan};border:3px solid ${brand.deep};box-shadow:0 0 0 4px rgba(45,212,191,.3),0 2px 6px rgba(0,0,0,.5)"></div>`,
-          iconSize: [16, 16],
-          iconAnchor: [8, 8],
+          html: `<div style="position:relative;width:24px;height:24px;transform:translate(-50%,-50%)">${cone}<div style="position:absolute;inset:0;border-radius:999px;background:${brand.cyan};border:3px solid ${brand.deep};box-shadow:0 0 0 4px rgba(45,212,191,.3),0 2px 6px rgba(0,0,0,.5)"></div></div>`,
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
         });
         userMarkerRef.current = L.marker([lat, lng], { icon: el })
           .bindTooltip("You are here")
@@ -259,15 +274,17 @@ export function LeafletCanvas({
   }, [graph, edgesVisible]);
 
   // ---------- nodes ----------
+  const nodeKindsRef = useRef<Map<L.Marker, string> | null>(null);
   useEffect(() => {
     const m = mapRef.current;
     if (!m || !graph) return;
     nodesGroupRef.current?.remove();
     const group = L.layerGroup().addTo(m);
+    const kinds = new Map<L.Marker, string>();
     for (const n of graph.nodes) {
       const icon = L.divIcon({
         className: "cn-node-icon",
-        html: nodeIconHtml(!!n.building_id),
+        html: nodeIconHtml(n.type, !!n.building_id, Boolean(nodeImmersive(n))),
         iconSize: [0, 0],
         iconAnchor: [0, 0],
       });
@@ -278,8 +295,10 @@ export function LeafletCanvas({
         onSelectNode(n.id);
       });
       marker.addTo(group);
+      kinds.set(marker, n.type);
     }
     nodesGroupRef.current = group;
+    nodeKindsRef.current = kinds;
   }, [graph, onSelectNode]);
 
   // ---------- origin / destination markers ----------
@@ -324,6 +343,8 @@ export function LeafletCanvas({
   // ---------- route polyline ----------
   // One polyline per step so the active step can be highlighted and the
   // traveled part dimmed while navigating (navStep drives the styles).
+  // While navigating, the current step's endpoint also gets a pulsing amber
+  // ring — "turn here next" emphasis mirroring the MapLibre renderer.
   useEffect(() => {
     const m = mapRef.current;
     if (!m) return;
@@ -332,7 +353,7 @@ export function LeafletCanvas({
     if (!route || !graph) return;
 
     const navigating = navStep >= 0;
-    const polylines: L.Polyline[] = [];
+    const polylines: L.Path[] = [];
     const allLatLngs: [number, number][] = [];
 
     route.steps.forEach((step, i) => {
@@ -367,6 +388,31 @@ export function LeafletCanvas({
     });
     if (polylines.length === 0) return;
 
+    // Next-junction emphasis: pulsing amber ring at the current step's end.
+    let pulseCircle: L.CircleMarker | null = null;
+    let pulseTimer: number | null = null;
+    if (navigating) {
+      const step = route.steps[navStep];
+      const coordsRaw = stepCoords(step, graph);
+      const end = coordsRaw && coordsRaw.length > 0 ? coordsRaw[coordsRaw.length - 1] : null;
+      if (end) {
+        pulseCircle = L.circleMarker([end[1], end[0]], {
+          radius: 9,
+          color: brand.amber,
+          weight: 2,
+          fillColor: brand.amber,
+          fillOpacity: 0.3,
+          interactive: false,
+        });
+        polylines.push(pulseCircle);
+        let on = false;
+        pulseTimer = window.setInterval(() => {
+          on = !on;
+          pulseCircle?.setStyle({ fillOpacity: on ? 0.45 : 0.12 });
+        }, 900);
+      }
+    }
+
     routePolylineRef.current = L.layerGroup(polylines).addTo(m);
     // Draw-in for the idle route; navigation styling applies directly.
     if (!navigating) {
@@ -383,6 +429,10 @@ export function LeafletCanvas({
     if (allLatLngs.length > 1) {
       m.fitBounds(L.latLngBounds(allLatLngs), { padding: [70, 70], maxZoom: 17 });
     }
+    return () => {
+      if (pulseTimer !== null) window.clearInterval(pulseTimer);
+      pulseCircle = null;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route, graph, navStep]);
 
@@ -397,15 +447,28 @@ export function LeafletCanvas({
 
   // ---------- node visibility (raw graph hidden for normal users) ----------
   // Markers stay mounted — they double as click targets — but the icon
-  // element fades out while the debug toggle is off.
+  // element fades out while the debug toggle is off, and minor kinds
+  // (junctions/transitions) slim to a whisper below the "places" zoom.
   useEffect(() => {
-    nodesGroupRef.current?.eachLayer((layer) => {
-      if (layer instanceof L.Marker) {
+    const m = mapRef.current;
+    if (!m || !graph) return;
+    const refresh = () => {
+      const z = m.getZoom();
+      nodesGroupRef.current?.eachLayer((layer) => {
+        if (!(layer instanceof L.Marker)) return;
         const el = layer.getElement();
-        if (el) el.style.opacity = edgesVisible ? "1" : "0";
-      }
-    });
-  }, [edgesVisible]);
+        if (!el) return;
+        const kind = nodeKindsRef.current?.get(layer) ?? "";
+        const minor = MINOR_KINDS.includes(kind) && z < MINOR_KIND_ZOOM;
+        el.style.opacity = edgesVisible && !minor ? "1" : minor ? "0.15" : "0";
+      });
+    };
+    refresh();
+    m.on("zoomend", refresh);
+    return () => {
+      m.off("zoomend", refresh);
+    };
+  }, [graph, edgesVisible]);
 
   const retryTiles = useCallback(() => {
     const m = mapRef.current;

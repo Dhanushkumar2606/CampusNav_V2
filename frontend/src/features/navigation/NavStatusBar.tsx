@@ -262,10 +262,20 @@ export function NavStatusBar() {
             </>
           ) : (
             <>
-              <p className="truncate text-sm font-semibold text-brand-text">
-                {current?.instruction ?? "Getting ready…"}
+              <p className="flex items-center gap-1.5 truncate text-sm font-semibold text-brand-text">
+                {hasFix ? (
+                  <span
+                    aria-hidden
+                    className="size-1.5 shrink-0 rounded-full bg-brand-green shadow-glow"
+                  />
+                ) : null}
+                <span className="truncate">{current?.instruction ?? "Getting ready…"}</span>
               </p>
               <p className="mt-0.5 text-xs text-brand-subtle">
+                {hasFix ? (
+                  <span className="font-medium text-brand-green">Live</span>
+                ) : null}
+                {hasFix && navSession.offRoute ? " · " : null}
                 {navSession.offRoute
                   ? "Off the route — re-routing from your position…"
                   : total - idx > 1

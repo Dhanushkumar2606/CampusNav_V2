@@ -12,13 +12,21 @@ import { useEffect, useRef } from "react";
 import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 
 import type { GraphPayload } from "@/lib/navigation-types";
+import { nodeImmersive } from "@/lib/immersive";
 import { useMap } from "./MapContext";
 import {
   ESTIMATED_LINE_PAINT,
+  NODE_360_LABEL_LAYOUT,
+  NODE_360_LABEL_PAINT,
+  NODE_360_RING_PAINT,
   NODE_CIRCLE_PAINT,
   NODE_HIT_PAINT,
+  NODE_KIND_COLORS,
+  NODE_KIND_LABEL_LAYOUT,
+  NODE_KIND_LABEL_PAINT,
   NODE_LABEL_LAYOUT,
   NODE_LABEL_PAINT,
+  nodeRadius,
   SURVEYED_LINE_PAINT,
 } from "./mapStyle";
 
@@ -30,6 +38,15 @@ const LYR_EDGES_SUR = "edges-surveyed";
 const LYR_NODES_HIT = "nodes-hit";
 const LYR_NODES_DOT = "nodes-dot";
 const LYR_NODES_LABEL = "nodes-label";
+const LYR_NODES_KIND_LABEL = "nodes-kind-label";
+// 360° discovery layers — deliberately NOT in LYR_GRAPH_VISIBLE: they stay
+// mounted (and visible) regardless of the debug-graph toggle, so 360°
+// content is always findable on the map.
+const LYR_NODES_360 = "nodes-360";
+const LYR_NODES_360_LABEL = "nodes-360-label";
+
+/** Kinds that earn a zoomed-in secondary label (non-building POIs). */
+const LABELED_KINDS = ["entrance", "landmark", "transit"];
 
 // The layers a normal user actually SEES. `nodes-hit` is deliberately not
 // in this set: it stays mounted (invisible paint) so node clicks keep
@@ -39,6 +56,7 @@ const LYR_GRAPH_VISIBLE = [
   LYR_EDGES_SUR,
   LYR_NODES_DOT,
   LYR_NODES_LABEL,
+  LYR_NODES_KIND_LABEL,
 ] as const;
 
 /** Flip layout-visibility on every visible graph layer. */
@@ -56,17 +74,24 @@ function nodesToFeatureCollection(graph: GraphPayload): FeatureCollection<Point>
   return {
     type: "FeatureCollection",
     features: graph.nodes.map(
-      (n): Feature<Point> => ({
-        type: "Feature",
-        id: n.id,
-        geometry: { type: "Point", coordinates: [n.lng, n.lat] },
-        properties: {
+      (n): Feature<Point> => {
+        const isBuilding = !!n.building_id;
+        return {
+          type: "Feature",
           id: n.id,
-          label: n.label,
-          kind: n.type,
-          isBuilding: !!n.building_id,
-        },
-      }),
+          geometry: { type: "Point", coordinates: [n.lng, n.lat] },
+          properties: {
+            id: n.id,
+            label: n.label,
+            kind: n.type,
+            isBuilding,
+            color: NODE_KIND_COLORS[n.type] ?? NODE_KIND_COLORS.poi,
+            radius: nodeRadius(n.type, isBuilding),
+            has360: Boolean(nodeImmersive(n)),
+            labelKind: LABELED_KINDS.includes(n.type),
+          },
+        };
+      },
     ),
   };
 }
@@ -125,7 +150,16 @@ export function useGraphSources(graph: GraphPayload | null, edgesVisible: boolea
       if (cancelled || !map.isStyleLoaded()) return;
 
       // Remove existing layers/sources first (idempotency).
-      for (const id of [LYR_NODES_LABEL, LYR_NODES_DOT, LYR_NODES_HIT, LYR_EDGES_SUR, LYR_EDGES_EST]) {
+      for (const id of [
+        LYR_NODES_360_LABEL,
+        LYR_NODES_360,
+        LYR_NODES_KIND_LABEL,
+        LYR_NODES_LABEL,
+        LYR_NODES_DOT,
+        LYR_NODES_HIT,
+        LYR_EDGES_SUR,
+        LYR_EDGES_EST,
+      ]) {
         removeIfExists(map, "layer", id);
       }
       for (const id of [SRC_NODES, SRC_EDGES]) {
@@ -159,12 +193,31 @@ export function useGraphSources(graph: GraphPayload | null, edgesVisible: boolea
         source: SRC_NODES,
         paint: NODE_HIT_PAINT,
       });
-      // Visible dots.
+      // Visible dots (data-driven: kind color/radius/opacity).
       map.addLayer({
         id: LYR_NODES_DOT,
         type: "circle",
         source: SRC_NODES,
         paint: NODE_CIRCLE_PAINT,
+      });
+      // 360° discovery: cyan halo + badge above places with immersive
+      // content. Always-on, appears when zoomed in past the noise floor.
+      map.addLayer({
+        id: LYR_NODES_360,
+        type: "circle",
+        source: SRC_NODES,
+        filter: ["==", ["get", "has360"], true],
+        minzoom: 14,
+        paint: NODE_360_RING_PAINT,
+      });
+      map.addLayer({
+        id: LYR_NODES_360_LABEL,
+        type: "symbol",
+        source: SRC_NODES,
+        filter: ["==", ["get", "has360"], true],
+        minzoom: 15,
+        layout: NODE_360_LABEL_LAYOUT,
+        paint: NODE_360_LABEL_PAINT,
       });
       // Labels for building nodes only.
       map.addLayer({
@@ -174,6 +227,17 @@ export function useGraphSources(graph: GraphPayload | null, edgesVisible: boolea
         filter: ["==", ["get", "isBuilding"], true],
         layout: NODE_LABEL_LAYOUT,
         paint: NODE_LABEL_PAINT,
+      });
+      // Zoomed-in labels for non-building POIs (entrances, landmarks,
+      // transit stops) — hidden with the rest of the raw graph.
+      map.addLayer({
+        id: LYR_NODES_KIND_LABEL,
+        type: "symbol",
+        source: SRC_NODES,
+        filter: ["==", ["get", "labelKind"], true],
+        minzoom: 16,
+        layout: NODE_KIND_LABEL_LAYOUT,
+        paint: NODE_KIND_LABEL_PAINT,
       });
 
       // Newly added layers inherit the CURRENT toggle state, so the raw

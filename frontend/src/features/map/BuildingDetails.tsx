@@ -27,10 +27,16 @@ import { useAuth } from "@/auth/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { addFavorite, getBuildingDetail, listFavorites, removeFavorite } from "@/api/search";
-import type { Building, BuildingDetailOut, GraphPayload, PathNode } from "@/lib/navigation-types";
+import type {
+  Building,
+  BuildingDetailOut,
+  GraphPayload,
+  ImmersiveScene,
+  PathNode,
+} from "@/lib/navigation-types";
 import { prettyLabel } from "@/lib/brand";
 import { cn } from "@/lib/utils";
-import { nodeImmersive } from "@/lib/immersive";
+import { nodeImmersive, campusImmersiveBlocks } from "@/lib/immersive";
 import { ImmersiveViewer } from "@/features/immersive/ImmersiveViewer";
 
 export interface BuildingDetailsProps {
@@ -39,6 +45,9 @@ export interface BuildingDetailsProps {
   graph: GraphPayload;
   onSetOrigin: () => void;
   onSetDestination: () => void;
+  /** Route the user to an arbitrary node (used when the 360° scene rail
+   *  switches the viewer to another place). Omit to disable that action. */
+  onNavigateToNode?: (nodeId: string) => void;
   onClose?: () => void;
   /** compact: inline card; full: sheet layout with header row */
   variant?: "compact" | "full";
@@ -70,6 +79,7 @@ export function BuildingDetails({
   graph,
   onSetOrigin,
   onSetDestination,
+  onNavigateToNode,
   onClose,
   variant = "compact",
 }: BuildingDetailsProps) {
@@ -81,6 +91,26 @@ export function BuildingDetails({
   // ---- Optional 360° experience (scene-linked; purely additive) ----
   const immersive = useMemo(() => nodeImmersive(node), [node]);
   const [viewerOpen, setViewerOpen] = useState(false);
+  // The scene currently in the viewer — starts as this place's scene, but
+  // the rail can switch to any other immersive node on campus.
+  const [viewerScene, setViewerScene] = useState<ImmersiveScene | null>(immersive);
+  useEffect(() => {
+    setViewerScene(immersive);
+  }, [immersive]);
+  // Scene rail: every immersive place on campus, in node order.
+  const railScenes = useMemo(() => campusImmersiveBlocks(graph), [graph]);
+  const railIndex = useMemo(
+    () => railScenes.findIndex((b) => b.nodeId === viewerScene?.nodeId),
+    [railScenes, viewerScene?.nodeId],
+  );
+  const moveRail = useCallback(
+    (dir: 1 | -1) => {
+      if (railScenes.length < 2 || railIndex < 0) return;
+      const next = railScenes[(railIndex + dir + railScenes.length) % railScenes.length];
+      setViewerScene(next.scene);
+    },
+    [railScenes, railIndex],
+  );
 
   // ---- Phase G: full building record (entrances, floors, rooms) ----------
   const [detail, setDetail] = useState<BuildingDetailOut | null>(null);
@@ -315,12 +345,25 @@ export function BuildingDetails({
       {/* 360° viewer (portal; mounted only while open). */}
       <ImmersiveViewer
         open={viewerOpen}
-        scene={immersive}
-        placeLabel={prettyLabel(node.label)}
+        scene={viewerScene}
+        placeLabel={viewerScene ? prettyLabel(viewerScene.label ?? node.label) : undefined}
         onClose={() => setViewerOpen(false)}
+        scenePosition={
+          railScenes.length > 1
+            ? { index: railIndex < 0 ? 0 : railIndex, total: railScenes.length }
+            : null
+        }
+        onPrevScene={() => moveRail(-1)}
+        onNextScene={() => moveRail(1)}
         onNavigateHere={() => {
           setViewerOpen(false);
-          onSetDestination();
+          if (viewerScene?.nodeId && viewerScene.nodeId !== node.id) {
+            setViewerScene(immersive);
+            onNavigateToNode?.(viewerScene.nodeId);
+          } else {
+            setViewerScene(immersive);
+            onSetDestination();
+          }
         }}
       />
     </div>

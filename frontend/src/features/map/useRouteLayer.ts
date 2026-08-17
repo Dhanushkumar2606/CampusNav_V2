@@ -9,10 +9,11 @@
  * data-driven paint expressions.
  */
 import { useEffect, useMemo, useRef } from "react";
-import type { Feature, FeatureCollection, LineString } from "geojson";
+import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 
 import type { GraphPayload, Route } from "@/lib/navigation-types";
 import type { NavSession } from "@/features/campus/CampusRouteContext";
+import { brand } from "@/lib/brand";
 import { polylineBounds, routePolyline, stepCoords } from "./routeGeometry";
 import { useMap } from "./MapContext";
 import { ROUTE_CASING_PAINT, ROUTE_LINE_PAINT } from "./mapStyle";
@@ -20,6 +21,10 @@ import { ROUTE_CASING_PAINT, ROUTE_LINE_PAINT } from "./mapStyle";
 const SRC_ROUTE = "route-line";
 const LYR_ROUTE_CASING = "route-line-casing";
 const LYR_ROUTE = "route-line";
+// Next-junction emphasis during navigation: a pulsing amber ring on the
+// endpoint of the current step — "turn here next".
+const SRC_NEXT = "route-next";
+const LYR_NEXT = "route-next-pulse";
 
 function buildRouteGeoJson(route: Route, graph: GraphPayload): FeatureCollection<LineString> {
   const features: Feature<LineString>[] = [];
@@ -43,6 +48,7 @@ export function useRouteLayer(
 ) {
   const map = useMap();
   const navStep = navSession?.active ? navSession.stepIndex : -1;
+  const pulseRef = useRef(false);
 
   const fc = useMemo<FeatureCollection<LineString> | null>(() => {
     if (!route || !graph) return null;
@@ -130,12 +136,19 @@ export function useRouteLayer(
     };
   }, [map, fc]);
 
-  // Navigation styling: highlight the current step, dim the traveled part.
-  // Data-driven expressions compare each feature's stepIndex against the
-  // live nav step, so no geometry rebuilds while walking. The casing stays
-  // constant; only the main line animates.
+  // Navigation styling: highlight the current step, dim the traveled part,
+  // and pulse a marker on the current step's endpoint (the next junction to
+  // reach). Data-driven expressions compare each feature's stepIndex against
+  // the live nav step, so no geometry rebuilds while walking.
   useEffect(() => {
-    if (!map || !fc) return;
+    if (!map || !fc || !route || !graph) return;
+
+    const step = navStep >= 0 ? route.steps[navStep] : null;
+    const stepCoordsArr = step ? stepCoords(step, graph) : null;
+    const endpoint = stepCoordsArr && stepCoordsArr.length > 0
+      ? stepCoordsArr[stepCoordsArr.length - 1]
+      : null;
+
     const styleNavStep = () => {
       if (!map.isStyleLoaded()) return;
       const main = map.getLayer(LYR_ROUTE);
@@ -163,10 +176,74 @@ export function useRouteLayer(
             ],
       );
       map.setPaintProperty(LYR_ROUTE_CASING, "line-opacity", navStep < 0 ? 0.95 : 0.6);
+
+      // Next-junction pulse marker: halo + core, amber.
+      const nextFc: FeatureCollection<Point> | null = endpoint
+        ? {
+            type: "FeatureCollection",
+            features: [
+              {
+                type: "Feature",
+                id: "halo",
+                geometry: { type: "Point", coordinates: endpoint },
+                properties: { core: false },
+              },
+              {
+                type: "Feature",
+                id: "core",
+                geometry: { type: "Point", coordinates: endpoint },
+                properties: { core: true },
+              },
+            ],
+          }
+        : null;
+
+      if (nextFc) {
+        const existing = map.getSource(SRC_NEXT) as import("maplibre-gl").GeoJSONSource | undefined;
+        if (existing && "setData" in existing) {
+          existing.setData(nextFc);
+        } else {
+          if (map.getSource(SRC_NEXT)) map.removeSource(SRC_NEXT);
+          map.addSource(SRC_NEXT, { type: "geojson", data: nextFc });
+          const before = map.getLayer("nodes-dot") ? "nodes-dot" : undefined;
+          map.addLayer(
+            {
+              id: LYR_NEXT,
+              type: "circle",
+              source: SRC_NEXT,
+              paint: {
+                "circle-radius": ["case", ["get", "core"], 4.5, 11],
+                "circle-color": ["case", ["get", "core"], brand.amber, "rgba(245,158,11,0.22)"],
+                "circle-stroke-color": brand.amber,
+                "circle-stroke-width": ["case", ["get", "core"], 0, 2],
+                "circle-stroke-opacity": ["case", ["feature-state", "pulse"], 0.3, 0.95],
+              },
+            },
+            before,
+          );
+        }
+      } else {
+        if (map.getLayer(LYR_NEXT)) map.removeLayer(LYR_NEXT);
+        if (map.getSource(SRC_NEXT)) map.removeSource(SRC_NEXT);
+      }
     };
+
+    // Gentle pulse on the halo ring (~1 Hz amber blink, hardware-toggled).
+    const pulseTimer = window.setInterval(() => {
+      if (!map.isStyleLoaded() || !map.getLayer(LYR_NEXT)) return;
+      pulseRef.current = !pulseRef.current;
+      map.setFeatureState({ source: SRC_NEXT, id: "halo" }, { pulse: pulseRef.current });
+    }, 900);
+
     if (map.isStyleLoaded()) styleNavStep();
     else map.once("load", styleNavStep);
-  }, [map, fc, navStep]);
+
+    return () => {
+      window.clearInterval(pulseTimer);
+      if (map.getLayer(LYR_NEXT)) map.removeLayer(LYR_NEXT);
+      if (map.getSource(SRC_NEXT)) map.removeSource(SRC_NEXT);
+    };
+  }, [map, fc, navStep, route, graph]);
 
   // Fit the camera to a NEW route only — keyed on the route reference so a
   // campus switch doesn't yank the camera around while the route is intact.
