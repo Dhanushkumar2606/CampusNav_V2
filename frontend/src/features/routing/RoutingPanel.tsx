@@ -6,7 +6,7 @@
  * find-route action and the result card with alternatives + steps.
  */
 import { useMemo } from "react";
-import { Loader2, Navigation as NavigationIcon, Route as RouteIcon, AlertTriangle } from "lucide-react";
+import { Loader2, Navigation as NavigationIcon, Route as RouteIcon, AlertTriangle, X } from "lucide-react";
 
 import type { Route } from "@/lib/navigation-types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -51,6 +51,7 @@ export function RoutingPanel() {
     routeStatus,
     routeError,
     findRoute,
+    clearRoute,
     startNavigation,
     navSession,
   } = useCampusRoute();
@@ -254,6 +255,21 @@ export function RoutingPanel() {
               >
                 <NavigationIcon className="size-4" />
                 {navSession.active ? "Navigating…" : "Start navigation"}
+              </Button>
+              {/* Cancel/Stop: clearing the route also terminates any active
+                  navigation session (clearRoute resets navSession). Subtle,
+                  secondary action next to the primary Start button. */}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={clearRoute}
+                aria-label={navSession.active ? "Stop navigation" : "Cancel route"}
+                title={navSession.active ? "Stop navigation" : "Cancel route"}
+                className="shrink-0"
+              >
+                <X className="size-4" aria-hidden />
+                {navSession.active ? "Stop navigation" : "Cancel route"}
               </Button>
             </div>
             <NavigationSteps

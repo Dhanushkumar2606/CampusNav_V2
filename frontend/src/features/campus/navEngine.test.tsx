@@ -80,6 +80,7 @@ function Harness() {
       <span data-testid="offroute">{String(ctx.navSession.offRoute)}</span>
       <span data-testid="locate-status">{ctx.locate.status}</span>
       <span data-testid="route-status">{ctx.routeStatus}</span>
+      <span data-testid="has-route">{ctx.route ? "yes" : "no"}</span>
       <span data-testid="graph-ready">{ctx.graph ? "yes" : "no"}</span>
       <span data-testid="nearest">{ctx.nearestNode ? ctx.nearestNode.label : ""}</span>
       <button type="button" data-testid="find" onClick={() => void ctx.findRoute()}>
@@ -90,6 +91,9 @@ function Harness() {
       </button>
       <button type="button" data-testid="cancel" onClick={() => ctx.cancelNavigation()}>
         cancel
+      </button>
+      <button type="button" data-testid="clear" onClick={() => ctx.clearRoute()}>
+        clear
       </button>
       <button type="button" data-testid="endpoints" onClick={() => {
         ctx.setSourceId(SRC_ID);
@@ -392,5 +396,40 @@ describe("navigation lifecycle", () => {
     clickByTestId("start");
     await drive(0);
     expect(text("locate-status")).toBe("ok");
+  });
+
+  it("clearRoute cancels a planned route and an active navigation session", async () => {
+    renderEngine();
+
+    // STATE A — route calculated, navigation NOT started.
+    await waitFor(() => expect(text("graph-ready")).toBe("yes"));
+    clickByTestId("endpoints");
+    clickByTestId("find");
+    await waitFor(() => expect(text("route-status")).toBe("ok"));
+    expect(text("has-route")).toBe("yes");
+
+    clickByTestId("clear");
+    expect(text("has-route")).toBe("no");
+    expect(text("route-status")).toBe("idle");
+    expect(text("active")).toBe("false");
+    // IDLE_NAV sentinel phase (same convention as cancelNavigation).
+    expect(text("phase")).toBe("navigating");
+
+    // Cancelling keeps the From/To endpoints: a fresh route works after.
+    clickByTestId("find");
+    await waitFor(() => expect(text("route-status")).toBe("ok"));
+    expect(text("has-route")).toBe("yes");
+
+    // STATE B — navigation active, then cleared: session terminates cleanly
+    // and the route is removed together with it.
+    clickByTestId("start");
+    await waitFor(() => expect(text("active")).toBe("true"));
+    expect(text("phase")).toBe("navigating");
+
+    clickByTestId("clear");
+    expect(text("active")).toBe("false");
+    expect(text("phase")).toBe("navigating");
+    expect(text("has-route")).toBe("no");
+    expect(text("route-status")).toBe("idle");
   });
 });
