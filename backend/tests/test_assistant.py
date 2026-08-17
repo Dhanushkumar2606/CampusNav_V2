@@ -200,6 +200,100 @@ def test_prefixed_route_to_phrasing(client: TestClient) -> None:
     assert res2["data"]["mode"] == "fastest"
 
 
+# ---- multi-campus: campuses without a surveyed Main Gate ----------------
+# VIT Chennai's graph has NO gate node. NOVA's assumed-origin fallback must
+# not dead-end with "unknown source" — it explains the problem and points
+# to GPS or an explicit origin instead. (Regression for the production
+# finding: "find an accessible route to the library" on VIT errored.)
+
+def _seed_vit(db_session) -> tuple[str, object]:
+    from pathlib import Path
+
+    from app.seed.csv_loader import (
+        _read_payload,
+        load_buildings_and_nodes,
+        load_campus,
+        load_edges,
+    )
+
+    payload = _read_payload(Path(__file__).parent.parent / "seed_data" / "vit_chennai.json")
+    campus = load_campus(db_session, payload)
+    node_ids = load_buildings_and_nodes(db_session, payload, campus)
+    load_edges(db_session, payload, campus, node_ids)
+    db_session.commit()
+    return campus.slug, campus.id
+
+
+def _vit_headers(db_session) -> dict[str, str]:
+    import uuid
+
+    from app.models.user import Role, User
+    from app.security import create_access_token
+
+    user = User(
+        id=uuid.uuid4(),
+        email="vit-nova@test.dev",
+        password_hash="x",  # never used — the JWT is signed directly below
+        full_name="Vit Nova",
+        role=Role.STUDENT,
+    )
+    db_session.add(user)
+    db_session.commit()
+    return {"Authorization": f"Bearer {create_access_token(subject=str(user.id))}"}
+
+
+def _query_vit(
+    client: TestClient,
+    db_session,
+    query: str,
+    lat: float | None = None,
+    lng: float | None = None,
+) -> dict:
+    slug, _ = _seed_vit(db_session)
+    body = {"query": query, "campus_slug": slug}
+    if lat is not None and lng is not None:
+        body["user_lat"] = lat
+        body["user_lng"] = lng
+    r = client.post("/assistant/query", json=body, headers=_vit_headers(db_session))
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def test_vit_route_without_origin_explains_missing_gate(client: TestClient, db_session) -> None:
+    """No origin, no GPS: no Main Gate exists on VIT — NOVA must guide the
+    user instead of dead-ending on 'unknown source'."""
+    res = _query_vit(client, db_session, "find an accessible route to the library")
+    assert res["kind"] == "search", res
+    assert "Main Gate" in res["text"]
+    assert "location" in res["text"]
+
+
+def test_vit_navigate_without_origin_explains_missing_gate(client: TestClient, db_session) -> None:
+    res = _query_vit(client, db_session, "navigate to the library")
+    assert res["kind"] == "search", res
+    assert "Main Gate" in res["text"]
+    assert "location" in res["text"]
+
+
+def test_vit_route_with_gps_origin_routes_from_location(client: TestClient, db_session) -> None:
+    """A live fix near a real VIT node becomes the origin — the route must
+    succeed and say it starts from the user's location."""
+    from app.models.graph import PathNode
+
+    _, campus_id = _seed_vit(db_session)
+    node = db_session.query(PathNode).filter(PathNode.campus_id == campus_id).first()
+    assert node is not None
+    # location is WKT "POINT(lng lat)".
+    lng, lat = (float(p) for p in node.location.replace("POINT(", "").replace(")", "").split())
+    res = _query_vit(
+        client, db_session, "find an accessible route to the library", lat=lat, lng=lng
+    )
+    assert res["kind"] == "route", res
+    assert res["data"]["origin"]["id"] == str(node.id)
+    assert "location" in res["text"]
+    assert res["data"]["require_accessible"] is True
+
+
 # ---- AUTH-NOVA: Nova endpoint authentication contract -------------------
 
 def test_nova_accepts_valid_existing_jwt(client: TestClient) -> None:
