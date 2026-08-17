@@ -13,6 +13,8 @@
 
 import * as THREE from "three";
 
+import { API_BASE } from "@/lib/apiBase";
+
 export type FaceName = "r" | "l" | "u" | "d" | "f" | "b";
 
 export interface FaceConfig {
@@ -72,8 +74,8 @@ export class CubemapTileLoader {
   constructor(
     /** Provider mediaId for the scene's panorama. */
     private mediaId: string,
-    /** Renderer API base (the backend tile relay, same-origin). */
-    private base = "/api/panorama/tile",
+    /** Renderer API base (the backend tile relay, same-origin by default). */
+    private base = `${API_BASE}/api/panorama/tile`,
   ) {}
 
   private tileUrl(face: FaceName, level: number, row: number, col: number): string {

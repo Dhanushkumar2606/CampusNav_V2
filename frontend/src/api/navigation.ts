@@ -5,6 +5,7 @@
  * Vite dev proxy (`/api/*` -> `http://localhost:8000`) strips the `/api`
  * prefix, so the backend sees `/navigation/...` and `/auth/...` directly.
  */
+import { API_BASE } from "@/lib/apiBase";
 import type {
   Building,
   Campus,
@@ -49,13 +50,13 @@ async function unwrap<T>(res: Response): Promise<T> {
 /* ----- Navigation ----- */
 
 export async function listCampuses(): Promise<Campus[]> {
-  return unwrap<Campus[]>(await fetch("/api/navigation/campuses"));
+  return unwrap<Campus[]>(await fetch(`${API_BASE}/api/navigation/campuses`));
 }
 
 /** Cheap catalog counts for one campus (Explore hub cards). */
 export async function getCampusStats(slug: string): Promise<CampusStats> {
   return unwrap<CampusStats>(
-    await fetch(`/api/navigation/campuses/${encodeURIComponent(slug)}/stats`),
+    await fetch(`${API_BASE}/api/navigation/campuses/${encodeURIComponent(slug)}/stats`),
   );
 }
 
@@ -69,20 +70,20 @@ export async function getCampusesNear(
   const radius = options?.radiusM ?? 200_000;
   return unwrap<CampusNear[]>(
     await fetch(
-      `/api/navigation/campuses/near?lat=${lat}&lng=${lng}&limit=${limit}&radius_m=${radius}`,
+      `${API_BASE}/api/navigation/campuses/near?lat=${lat}&lng=${lng}&limit=${limit}&radius_m=${radius}`,
     ),
   );
 }
 
 export async function getGraph(slug: string): Promise<GraphPayload> {
   return unwrap<GraphPayload>(
-    await fetch(`/api/navigation/campuses/${encodeURIComponent(slug)}/graph`),
+    await fetch(`${API_BASE}/api/navigation/campuses/${encodeURIComponent(slug)}/graph`),
   );
 }
 
 export async function listBuildings(slug: string): Promise<Building[]> {
   return unwrap<Building[]>(
-    await fetch(`/api/navigation/campuses/${encodeURIComponent(slug)}/buildings`),
+    await fetch(`${API_BASE}/api/navigation/campuses/${encodeURIComponent(slug)}/buildings`),
   );
 }
 
@@ -103,7 +104,7 @@ export async function nearestNode(
 ): Promise<NearestNodeOut> {
   return unwrap<NearestNodeOut>(
     await fetch(
-      `/api/navigation/campuses/${encodeURIComponent(slug)}/nearest-node?lat=${lat}&lng=${lng}`,
+      `${API_BASE}/api/navigation/campuses/${encodeURIComponent(slug)}/nearest-node?lat=${lat}&lng=${lng}`,
     ),
   );
 }
@@ -112,7 +113,7 @@ export async function postRoute(
   slug: string,
   req: RouteRequest,
 ): Promise<RouteResponse> {
-  const res = await fetch(`/api/navigation/campuses/${encodeURIComponent(slug)}/route`, {
+  const res = await fetch(`${API_BASE}/api/navigation/campuses/${encodeURIComponent(slug)}/route`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(req),
@@ -131,7 +132,7 @@ export async function login(email: string, password: string): Promise<TokenRespo
     username: email.trim().toLowerCase(),
     password,
   });
-  const res = await fetch("/api/auth/login", {
+  const res = await fetch(`${API_BASE}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body,
@@ -145,7 +146,7 @@ export async function register(args: {
   full_name: string;
 }): Promise<User> {
   return unwrap<User>(
-    await fetch("/api/auth/register", {
+    await fetch(`${API_BASE}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(args),
@@ -154,7 +155,7 @@ export async function register(args: {
 }
 
 export async function me(token: string): Promise<User> {
-  const res = await fetch("/api/auth/me", {
+  const res = await fetch(`${API_BASE}/api/auth/me`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return unwrap<User>(res);

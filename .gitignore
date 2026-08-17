@@ -26,7 +26,6 @@ dist/
 
 # uv
 backend/.venv/
-backend/uv.lock
 
 # Node / Vite
 frontend/node_modules/

@@ -5,7 +5,7 @@
  * geolocation state lives in CampusRouteContext — one instance serves
  * both renderer branches.
  */
-import { useEffect, useRef, useState } from "react";
+import { lazy, useEffect, useRef, useState } from "react";
 import { Compass, Focus, Loader2, LocateFixed, LocateOff, Maximize2, Minimize2, Route as RouteIcon } from "lucide-react";
 
 import { useToast } from "@/components/ui/toast";
@@ -14,8 +14,18 @@ import type { Bounds2D } from "@/features/campus/CampusRouteContext";
 import { useCampusRoute } from "@/features/campus/CampusRouteContext";
 import { MapAssistantNotch } from "@/features/assistant/MapAssistant";
 import { TooltipIconButton } from "@/components/ui/tooltip-icon-button";
-import { NavigationDiagnostics } from "@/sim/NavigationDiagnostics";
 import type { LocateStatus } from "./useLiveLocation";
+
+// DEV-only engineering panel. Lazy + gated so the simulation fixtures never
+// enter a production bundle: in prod builds import.meta.env.DEV is statically
+// false and Rollup drops this entire branch (including the sim module).
+const NavigationDiagnostics = import.meta.env.DEV
+  ? lazy(() =>
+      import("@/sim/NavigationDiagnostics").then((m) => ({
+        default: m.NavigationDiagnostics,
+      })),
+    )
+  : null;
 
 /** Toast the locate failure once the state machine settles (not per click). */
 function useLocateFailureToast(locateStatus: LocateStatus, error: string | null) {
@@ -303,7 +313,7 @@ export function MapControls({
         {/* Dev-only diagnostics (real-GPS status card + simulated-GPS
             controls). Never rendered in production builds — import.meta.env.DEV
             is statically false after Rollup's production pass. */}
-        {import.meta.env.DEV ? <NavigationDiagnostics /> : null}
+        {import.meta.env.DEV && NavigationDiagnostics ? <NavigationDiagnostics /> : null}
         {/* NOVA chat — the round notch at the bottom of the map controls. */}
         <MapAssistantNotch open={assistantOpen} onToggle={onToggleAssistant} />
       </div>

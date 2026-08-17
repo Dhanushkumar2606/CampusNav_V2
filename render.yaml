@@ -1,0 +1,45 @@
+# Render Blueprint — CampusNav V2 production backend + managed Postgres.
+#
+# API service: FastAPI under uvicorn. Migrations + seed run idempotently on
+# every boot (see backend/scripts/prod_bootstrap.py) — safe for existing
+# databases; nothing is wiped.
+#
+# Deploy: connect this repo in the Render dashboard (Blueprint), set
+# CORS_ORIGINS to the real frontend origin(s), and JWT_SECRET will be
+# generated automatically.
+
+services:
+  - type: web
+    name: campusnav-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install uv && uv sync --no-dev
+    startCommand: >
+      uv run python -m scripts.prod_bootstrap &&
+      uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_EXPIRES_MINUTES
+        value: "60"
+      - key: CORS_ORIGINS
+        # Replace with the real frontend origin(s), comma-separated:
+        #   https://campusnav-v2-<user>.vercel.app,https://campusnav.example.com
+        value: https://campusnav-v2.vercel.app
+      - key: PREMIUM
+        value: "true"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: campusnav-db
+          property: connectionString
+
+databases:
+  - name: campusnav-db
+    plan: free
+    postgresMajorVersion: 16
