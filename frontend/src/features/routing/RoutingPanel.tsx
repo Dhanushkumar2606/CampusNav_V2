@@ -40,8 +40,6 @@ export function RoutingPanel() {
     setDestinationId,
     requireAccessible,
     setRequireAccessible,
-    mode,
-    setMode,
     avoidStairs,
     setAvoidStairs,
     route,
@@ -160,8 +158,6 @@ export function RoutingPanel() {
           <Separator className="bg-brand-muted" />
 
           <RoutePreferences
-            mode={mode}
-            onModeChange={setMode}
             avoidStairs={avoidStairs}
             onAvoidStairsChange={setAvoidStairs}
             requireAccessible={requireAccessible}

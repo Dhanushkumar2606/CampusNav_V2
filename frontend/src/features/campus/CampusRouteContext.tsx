@@ -800,8 +800,6 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
       }
     }
       if (params.get("accessible") === "true") setRequireAccessible(true);
-      const m = params.get("mode");
-      if (m === "shortest" || m === "fastest") setMode(m);
       if (params.get("avoid_stairs") === "true") setAvoidStairs(true);
     },
     [],

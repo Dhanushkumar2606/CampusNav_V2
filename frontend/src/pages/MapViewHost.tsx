@@ -65,7 +65,6 @@ function MapRouteSync() {
     getPreferences(token)
       .then((p) => {
         if (cancelled) return;
-        if (!searchParams.get("mode")) ctx.setMode(p.default_mode);
         if (!searchParams.get("avoid_stairs")) ctx.setAvoidStairs(p.default_avoid_stairs);
         if (!searchParams.get("accessible")) ctx.setRequireAccessible(p.default_require_accessible);
       })
@@ -85,7 +84,6 @@ function MapRouteSync() {
     if (ctx.destinationId) next.set("destination", idToLabel.get(ctx.destinationId) ?? ctx.destinationId);
     if (ctx.place) next.set("place", idToLabel.get(ctx.place) ?? ctx.place);
     if (ctx.requireAccessible) next.set("accessible", "true");
-    if (ctx.mode && ctx.mode !== "shortest") next.set("mode", ctx.mode);
     if (ctx.avoidStairs) next.set("avoid_stairs", "true");
     if (next.toString() !== searchParams.toString()) {
       setSearchParams(next, { replace: true });
@@ -96,7 +94,6 @@ function MapRouteSync() {
     ctx.destinationId,
     ctx.place,
     ctx.requireAccessible,
-    ctx.mode,
     ctx.avoidStairs,
     idToLabel,
     searchParams,
