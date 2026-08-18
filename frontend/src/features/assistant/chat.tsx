@@ -269,7 +269,7 @@ export function AssistantResultCards({ message }: { message: ChatMessage }) {
 
 export function TypingIndicator() {
   return (
-    <div className="flex gap-2.5" aria-label="NOVA is thinking">
+    <div className="flex gap-2.5" aria-label="SPIDY is thinking">
       <NovaAvatar />
       <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm border border-brand-muted bg-brand-surface/80 px-4 py-3">
         {[0, 1, 2].map((i) => (

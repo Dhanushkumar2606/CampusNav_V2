@@ -120,9 +120,9 @@ def test_assistant_requires_auth(client: TestClient) -> None:
 
 
 def test_greeting_intent(client: TestClient) -> None:
-    res = _query(client, "Hello Nova")
+    res = _query(client, "Hello Spidy")
     assert res["kind"] == "info", res
-    assert "NOVA" in res["text"]
+    assert "SPIDY" in res["text"]
 
 
 def test_capabilities_intent(client: TestClient) -> None:

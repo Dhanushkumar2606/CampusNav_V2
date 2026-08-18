@@ -130,7 +130,7 @@ export function Assistant() {
               role: "assistant",
               text:
                 err instanceof Error && err.message
-                  ? `Sorry, I couldn't reach NOVA: ${err.message}`
+                  ? `Sorry, I couldn't reach SPIDY: ${err.message}`
                   : "Sorry, something went wrong.",
               error: true,
             },
@@ -160,7 +160,7 @@ export function Assistant() {
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex items-center gap-2 border-b border-brand-muted px-4 py-3 md:px-6">
         <div className="min-w-0">
-          <h1 className="text-lg font-semibold leading-tight text-brand-text">NOVA</h1>
+          <h1 className="text-lg font-semibold leading-tight text-brand-text">SPIDY</h1>
           <p className="text-xs text-brand-subtle">Campus AI Assistant</p>
         </div>
         <span
@@ -191,7 +191,7 @@ export function Assistant() {
           <div className="flex h-full flex-col items-center justify-center gap-6">
             <EmptyState
               icon={Sparkles}
-              title="Hi, I'm NOVA — your CampusNav AI assistant."
+              title="Hi, I'm SPIDY — your CampusNav AI assistant."
               description="I can help you find buildings, plan routes, discover campus facilities, and answer campus-related questions."
             />
             <div className="flex max-w-xl flex-wrap justify-center gap-2" aria-label="Suggested prompts">
@@ -220,7 +220,7 @@ export function Assistant() {
       <form onSubmit={handleSubmit} className="shrink-0 border-t border-brand-muted p-4 md:px-6">
         <div className="mx-auto flex max-w-2xl items-center gap-2">
           <label htmlFor="assistant-input" className="sr-only">
-            Ask NOVA
+            Ask SPIDY
           </label>
           <input
             ref={inputRef}
@@ -234,7 +234,7 @@ export function Assistant() {
             className="h-11 flex-1 rounded-lg border border-brand-muted bg-brand-deep/70 px-3.5 text-sm text-brand-text placeholder:text-brand-subtle focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
           />
           <span className="sr-only" role="status">
-            {sending ? "NOVA is responding" : ""}
+            {sending ? "SPIDY is responding" : ""}
           </span>
           <Button type="submit" size="lg" disabled={!input.trim() || sending} aria-label="Send message">
             {sending ? (
@@ -252,7 +252,7 @@ export function Assistant() {
         </div>
         {status !== "authenticated" ? null : (
           <p className="mx-auto mt-2 max-w-2xl text-[11px] text-brand-subtle">
-            NOVA is CampusNav's rule-based assistant — it answers from real campus data without an LLM.
+            SPIDY is CampusNav's rule-based assistant — it answers from real campus data without an LLM.
           </p>
         )}
       </form>

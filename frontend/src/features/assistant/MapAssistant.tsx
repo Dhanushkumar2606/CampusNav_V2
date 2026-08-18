@@ -41,7 +41,7 @@ export function MapAssistantNotch({
 }) {
   return (
     <TooltipIconButton
-      label={open ? "Close NOVA assistant" : "Open NOVA assistant"}
+      label={open ? "Close SPIDY assistant" : "Open SPIDY assistant"}
       onClick={onToggle}
       pressed={open}
       className={
@@ -195,7 +195,7 @@ export function MapAssistantPanel({ onClose }: { onClose: () => void }) {
               role: "assistant",
               text:
                 err instanceof Error && err.message
-                  ? `Sorry, I couldn't reach NOVA: ${err.message}`
+                  ? `Sorry, I couldn't reach SPIDY: ${err.message}`
                   : "Sorry, something went wrong.",
               error: true,
             },
@@ -219,7 +219,7 @@ export function MapAssistantPanel({ onClose }: { onClose: () => void }) {
   return (
     <div
       role="dialog"
-      aria-label="NOVA — Campus AI Assistant"
+      aria-label="SPIDY — Campus AI Assistant"
       aria-modal="false"
       className="absolute bottom-4 right-3 z-40 flex max-h-[70dvh] w-[min(380px,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-xl border border-brand-muted bg-brand-deep/95 shadow-float backdrop-blur md:right-16 md:bottom-4 md:top-3 md:h-[calc(100dvh-4.5rem)] md:max-h-[720px] md:min-h-[420px]"
     >
@@ -227,7 +227,7 @@ export function MapAssistantPanel({ onClose }: { onClose: () => void }) {
         <div className="flex min-w-0 items-center gap-2">
           <Sparkles className="size-4 shrink-0 text-brand-cyan" aria-hidden />
           <div className="min-w-0">
-            <p className="text-sm font-semibold leading-tight text-brand-text">NOVA</p>
+            <p className="text-sm font-semibold leading-tight text-brand-text">SPIDY</p>
             <p className="text-[11px] text-brand-subtle">Campus AI Assistant</p>
           </div>
         </div>
@@ -245,7 +245,7 @@ export function MapAssistantPanel({ onClose }: { onClose: () => void }) {
           size="sm"
           onClick={onClose}
           className="ml-auto h-8 w-8 px-0"
-          aria-label="Close NOVA assistant"
+          aria-label="Close SPIDY assistant"
         >
           <X className="size-4" aria-hidden />
         </Button>
@@ -262,7 +262,7 @@ export function MapAssistantPanel({ onClose }: { onClose: () => void }) {
           <div className="flex h-full flex-col justify-center gap-4">
             <div>
               <p className="text-sm font-medium text-brand-text">
-                Hi, I'm NOVA — your CampusNav AI assistant.
+                Hi, I'm SPIDY — your CampusNav AI assistant.
               </p>
               <p className="mt-1 text-xs leading-relaxed text-brand-subtle">
                 Ask me for a route — for example “from main block to the library” — and I'll show
@@ -295,7 +295,7 @@ export function MapAssistantPanel({ onClose }: { onClose: () => void }) {
       <form onSubmit={handleSubmit} className="shrink-0 border-t border-brand-muted p-3">
         <div className="flex items-center gap-2">
           <label htmlFor="map-assistant-input" className="sr-only">
-            Ask NOVA
+            Ask SPIDY
           </label>
           <input
             ref={inputRef}
@@ -309,7 +309,7 @@ export function MapAssistantPanel({ onClose }: { onClose: () => void }) {
             className="h-10 min-w-0 flex-1 rounded-lg border border-brand-muted bg-brand-surface/60 px-3 text-sm text-brand-text placeholder:text-brand-subtle focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
           />
           <span className="sr-only" role="status">
-            {sending ? "NOVA is responding" : ""}
+            {sending ? "SPIDY is responding" : ""}
           </span>
           <Button type="submit" size="icon" disabled={!input.trim() || sending} aria-label="Send message">
             {sending ? (
@@ -321,7 +321,7 @@ export function MapAssistantPanel({ onClose }: { onClose: () => void }) {
         </div>
         {status !== "authenticated" ? null : (
           <p className="mt-2 text-[10px] text-brand-subtle">
-            NOVA answers from real campus data — routes appear on the map automatically.
+            SPIDY answers from real campus data — routes appear on the map automatically.
           </p>
         )}
       </form>

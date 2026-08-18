@@ -20,11 +20,11 @@ from app.services.tools import (
 )
 
 INTENT_PATTERNS = [
-    # "Hello Nova" / "Hey" — full-string greetings only, so "hi, I have a
-    # class at 2pm" keeps its class intent.
+    # "Hello Nova" / "Hello Spidy" / "Hey" — full-string greetings only, so
+    # "hi, I have a class at 2pm" keeps its class intent.
     (
         re.compile(
-            r"^\s*(?:hi|hello|hey|yo|namaste|greetings|good\s+(?:morning|afternoon|evening))\b(?:\s+nova\b)?[\s,.!?]*$",
+            r"^\s*(?:hi|hello|hey|yo|namaste|greetings|good\s+(?:morning|afternoon|evening))\b(?:\s+(?:nova|spidy)\b)?[\s,.!?]*$",
             re.IGNORECASE,
         ),
         "greeting",
@@ -686,7 +686,7 @@ def assistant_query(
         return AssistantResponse(
             kind="info",
             text=(
-                "Hello! I'm NOVA, your campus navigation guide. Try “Take me to the library”, "
+                "Hello! I'm SPIDY, your campus navigation guide. Try “Take me to the library”, "
                 "“Find the fastest route from the Main Gate to the Tech Park avoiding stairs”, "
                 "or “What can you help me with?”"
             ),
