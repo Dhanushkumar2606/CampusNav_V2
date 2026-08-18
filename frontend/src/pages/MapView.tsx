@@ -24,6 +24,8 @@ import { useNodeMarkers } from "@/features/map/useNodeMarkers";
 import { useRouteLayer } from "@/features/map/useRouteLayer";
 import { useNodeClick } from "@/features/map/useNodeClick";
 import { MapControls } from "@/features/map/MapControls";
+import type { GraphPayload, Route } from "@/lib/navigation-types";
+import type { NavSession } from "@/features/campus/CampusRouteContext";
 import { NavStatusBar } from "@/features/navigation/NavStatusBar";
 import { BuildingDetails } from "@/features/map/BuildingDetails";
 import { RoutingPanel } from "@/features/routing/RoutingPanel";
@@ -77,12 +79,6 @@ export function MapView() {
   useEffect(() => {
     if (ctx.place) setSelectedNodeId(ctx.place);
   }, [ctx.place]);
-
-  // ---- map wiring (MapLibre branch only; Leaflet draws its own layers) ---
-  useGraphSources(graph, edgesVisible);
-  useRouteLayer(route, graph, ctx.navSession);
-  useNodeMarkers(graph, sourceId, destinationId);
-  useNodeClick(setSelectedNodeId);
 
   const register = useCallback(
     (c: MapController) => {
@@ -161,7 +157,21 @@ export function MapView() {
             onUnregister={unregister}
             edgesVisible={edgesVisible}
             initialBounds={campusBounds}
-          />
+          >
+            {/* MapLibre wiring must live INSIDE MapCanvas: the feature hooks
+                read the live map instance from MapContext, which MapCanvas
+                provides only to its own children. Rendered only once the
+                map is ready. Leaflet draws its own layers instead. */}
+            <MapWiring
+              graph={graph}
+              edgesVisible={edgesVisible}
+              route={route}
+              navSession={ctx.navSession}
+              sourceId={sourceId}
+              destinationId={destinationId}
+              onSelectNode={setSelectedNodeId}
+            />
+          </MapCanvas>
           </div>
         </MapErrorBoundary>
       ) : (
@@ -294,4 +304,34 @@ export function MapView() {
       </BottomSheet>
     </div>
   );
+}
+
+/**
+ * MapWiring — the MapLibre feature hooks (graph sources, route layer,
+ * endpoint pins, node click/hover). Must render inside MapCanvas's
+ * MapContext.Provider; the hooks read the live map instance via useMap().
+ * Renders nothing itself.
+ */
+function MapWiring({
+  graph,
+  edgesVisible,
+  route,
+  navSession,
+  sourceId,
+  destinationId,
+  onSelectNode,
+}: {
+  graph: GraphPayload | null;
+  edgesVisible: boolean;
+  route: Route | null;
+  navSession: NavSession;
+  sourceId: string | null;
+  destinationId: string | null;
+  onSelectNode: (nodeId: string | null) => void;
+}) {
+  useGraphSources(graph, edgesVisible);
+  useRouteLayer(route, graph, navSession);
+  useNodeMarkers(graph, sourceId, destinationId);
+  useNodeClick(onSelectNode);
+  return null;
 }
