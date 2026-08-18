@@ -140,6 +140,15 @@ export function MapView() {
 
   const openPlanner = () => setPlannerOpen(true);
 
+  // You-are-here marker on by default: the map page starts live tracking
+  // on mount (the first permission prompt appears right here, on the page
+  // the user actually wants a fix on). Only fires from the idle state — a
+  // denial stops it for the session, and the locate button stays as the
+  // explicit re-arm for everyone who dismissed the prompt.
+  useEffect(() => {
+    if (ctx.locate.status === "idle") ctx.locate.locate();
+  }, [ctx.locate.status, ctx.locate]);
+
   return (
     <div className="relative h-full min-h-0 w-full overflow-hidden bg-brand-deep text-brand-text">
       {/* The map fills the whole page; every panel floats above it. */}
