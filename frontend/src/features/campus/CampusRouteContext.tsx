@@ -14,7 +14,6 @@ import type { ReactNode } from "react";
 
 import {
   getGraph,
-  getCampusesNear,
   listBuildings,
   listCampuses,
   postRoute,
@@ -25,7 +24,6 @@ import type { Building, Campus, GraphPayload, Route, RouteMode } from "@/lib/nav
 import { nearestNode, type NearestNodeOut } from "@/api/navigation";
 import { boundsFromNodes } from "@/lib/geo";
 import { useLiveLocation, type LocateResult } from "@/features/map/useLiveLocation";
-import { getLocationSource } from "@/lib/locationSource";
 import { buildRouteGeometryModel, projectOnRoute } from "@/features/navigation/routeProgress";
 
 export type Bounds2D = [[number, number], [number, number]];
@@ -134,7 +132,6 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 /** Where the user last explored; the map reopens there next time. */
 export const LAST_CAMPUS_KEY = "campusnav:last-campus";
-const NEAR_RADIUS_M = 200_000;
 
 const CampusRouteContext = createContext<CampusRouteContextValue | undefined>(undefined);
 
@@ -280,10 +277,13 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
 
   // ---- load campuses once -------------------------------------------------
   // Default campus selection: URL param (set by hydrate) wins; otherwise the
-  // last campus from localStorage; otherwise a geolocation auto-detect; the
-  // featured campus is the fallback. Only the fallback is applied before the
-  // geo lookup resolves, so the map paints instantly and re-targets when the
-  // fix arrives.
+  // last campus from localStorage; the featured campus is the fallback.
+  // The permission prompt is deliberately NOT fired at boot: a geo
+  // auto-detect without a user gesture grabs the browser's location
+  // permission on first load, and a user who denies that prompt can no
+  // longer be tracked for the whole session — live location starts only
+  // from an explicit action (the locate button, "My location" in the From
+  // picker, or starting navigation).
   useEffect(() => {
     let cancelled = false;
     listCampuses()
@@ -315,43 +315,6 @@ export function CampusRouteProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  // Auto-detect (one-shot at boot): when no campus was pinned — no URL
-  // param (hydrate has already run) and nothing stored — ask for a GPS fix
-  // and hop to the nearest catalog centroid. Runs strictly before the
-  // campuses load resolves, so it can't be cancelled by that state change.
-  useEffect(() => {
-    if (campusSlug || explicitCampusRef.current) return;
-    const source = getLocationSource();
-    if (!source) return;
-    try {
-      if (localStorage.getItem(LAST_CAMPUS_KEY)) return;
-    } catch {
-      // ignore storage errors
-    }
-    let cancelled = false;
-    source.getCurrentPosition(
-      (pos) => {
-        if (cancelled) return;
-        getCampusesNear(pos.coords.latitude, pos.coords.longitude, { radiusM: NEAR_RADIUS_M })
-          .then((near) => {
-            if (cancelled || near.length === 0 || lastCampusRef.current) return;
-            selectCampus(near[0].slug);
-          })
-          .catch(() => {
-            // cold fallback stays selected
-          });
-      },
-      () => {
-        // permission denied / no fix — the fallback campus stays
-      },
-      { timeout: 8000, maximumAge: 300_000 },
-    );
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ---- fetch graph on campus change ---------------------------------------

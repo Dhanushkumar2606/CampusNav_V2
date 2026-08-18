@@ -177,7 +177,8 @@ export function MapControls({
       case "unavailable":
         return locate.retrying ? "Searching\nGPS…" : "Location\nunavailable";
       default:
-        return "Use my\nlocation";
+        // Idle — the button is icon-only; the tooltip explains the action.
+        return "";
     }
   })();
   const locateLabel = (() => {
@@ -191,7 +192,7 @@ export function MapControls({
       case "unavailable":
         return locate.retrying ? "Searching for GPS... retrying" : locate.error ?? "Location unavailable";
       default:
-        return "Use my location";
+        return "Locate me";
     }
   })();
 
